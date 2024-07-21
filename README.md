@@ -34,6 +34,10 @@
   - `month`
   - `year`
  
+## Sort Files
+
+- You can sort the files by double clicking on the table header and also by using the dropdown select.
+ 
 ## Display Results
 
 - You can selected 4 types of layouts to display the search results:
