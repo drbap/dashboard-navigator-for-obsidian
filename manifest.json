@@ -1,11 +1,10 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "dashboard-navigator",
+	"name": "Dashboard navigator",
 	"version": "1.0.0",
-	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"minAppVersion": "1.1.0",
+	"description": "Vault dashboard and navigator. Show recent files by type, files per day, week, month, search files by name, date, tags and more.",
+	"author": "Bernardo Pires",
+	"authorUrl": "https://github.com/drbap",
 	"isDesktopOnly": false
 }
