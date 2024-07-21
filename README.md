@@ -6,7 +6,7 @@
 
 ## Features
 
-![Dashboard navigator for Obsidian](images/dn_dashboard_01.png)
+![Dashboard navigator for Obsidian - dashboard](images/dn_dashboard_01.png)
 
 - **Vault stats and graph**: Gain insightful statistics about your vault, including:
   - Number of notes, images, audios, videos, PDF and other file formats.
@@ -17,14 +17,14 @@
   
 - **Recent files by type**: Easily access your most frequently used files, categorized for quick reference. Save time searching and keep important notes readily available.
 
-![Dashboard navigator for Obsidian](images/dn_navigator_01.png)
+![Dashboard navigator for Obsidian - search](images/dn_navigator_01.png)
 
 - **Advanced file search**: Find your files quickly with powerful **search** and **sort** functionalities. Search and sort files by **name**, **path** (location within your vault), **size** and **date created** and **date modified**. You can also search notes by **tag**.
   - You can search using some knowledge of regular expressions, for example you can search for notes with **tags** `#work` and `#pending` typing `#work|#pending`.
 
 ## Filter Notes and Files by Day, Week, Month and Year
 
-![Dashboard navigator for Obsidian](images/dn_navigator_day_week_month_year.png)
+![Dashboard navigator for Obsidian - filter](images/dn_navigator_day_week_month_year.png)
 
 - Enter `@` + the keywords below to quickly filter the results:
   - `day` (or today)
@@ -35,6 +35,8 @@
   - `year`
  
 ## Sort Files
+
+![Dashboard navigator for Obsidian - sort](images/dn_navigator_sort.png)
 
 - You can sort the files by double clicking on the table header and also by using the dropdown select.
  
@@ -48,20 +50,20 @@
  
 ## Context Menu
 
-![Dashboard navigator for Obsidian](images/dn_navigator_context_menu.png)
+![Dashboard navigator for Obsidian - context menu](images/dn_navigator_context_menu.png)
 
-![Dashboard navigator for Obsidian](images/dn_navigator_context_menu_02.png)
+![Dashboard navigator for Obsidian - context menu 2](images/dn_navigator_context_menu_02.png)
 
 - Right-click the mouse button on the desired file link or table result to open the context menu. You can open the note in various ways (same tab, new tab, new window and also show its properties). You can also open the note by **double clicking** on the desired result.
 
 # File Properties
 
-![Dashboard navigator for Obsidian](images/dn_navigator_file_properties.png)
+![Dashboard navigator for Obsidian - file properties](images/dn_navigator_file_properties.png)
 
  
 ## Plugin Settings
 
-![Dashboard navigator for Obsidian](images/dn_navigator_settings.png)
+![Dashboard navigator for Obsidian - settings](images/dn_navigator_settings.png)
 
 ## Manually installing the plugin
 
