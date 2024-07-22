@@ -79,4 +79,4 @@ Dashboard navigator plugin for Obsidian
 
 MIT License ⓒ Bernardo Pires
 
-The Dashboard navigator icon (ribbon icon) is from [Lucide](https://lucide.dev/) Icons used by Obsidian. The Lucide icon library is licensed under the [ISC License](https://lucide.dev/license).
+The Dashboard navigator icon (ribbon icon) and file icons are from [Lucide](https://lucide.dev/) Icons used by Obsidian. The Lucide icon library is licensed under the [ISC License](https://lucide.dev/license).
