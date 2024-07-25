@@ -42,7 +42,7 @@ export default class DNPlugin extends Plugin {
 
 
 		this.addCommand({
-			id: 'dn-activate',
+			id: 'activate',
 			name: 'Open',
 			callback: () => {
 				this._DN_MODAL.open();
