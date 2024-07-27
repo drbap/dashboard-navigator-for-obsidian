@@ -1,4 +1,4 @@
-import { App, DropdownComponent, PluginSettingTab, Setting } from 'obsidian';
+import { App, DropdownComponent, PluginSettingTab, Setting, SliderComponent } from 'obsidian';
 import DNPlugin from './main';
 import { DEFAULT_SETTINGS } from './main';
 
@@ -10,6 +10,7 @@ export class DNSettingTab extends PluginSettingTab {
     dropdownDefaultView: DropdownComponent;
     dropdownTableLayout: DropdownComponent;
     dropdownRecentFiles: DropdownComponent;
+    sliderFontSize: SliderComponent;
 
     constructor(app: App, plugin: DNPlugin) {
         super(app, plugin);
@@ -117,6 +118,38 @@ export class DNSettingTab extends PluginSettingTab {
                     this.dropdownDateFormat.setValue(DEFAULT_SETTINGS.date_format.toString());
                     this.plugin.settings.date_format = DEFAULT_SETTINGS.date_format;
                     this.plugin._DN_MODAL.date_format = this.plugin.settings.date_format;
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // Font size
+        new Setting(containerEl)
+            .setName('Font size')
+            .setDesc('Select font size in pixels for results and links')
+            .addSlider((sli) => {
+                this.sliderFontSize = sli;
+                let slider_val: number;
+                if (this.plugin.settings.font_size) {
+                    slider_val = this.plugin.settings.font_size;
+                } else {
+                    slider_val = DEFAULT_SETTINGS.font_size;
+                }
+                sli.setDynamicTooltip();
+                sli.setLimits(12, 24, 1);
+                sli.setValue(slider_val);
+                sli.onChange((val: number) => {
+
+                    this.plugin.settings.font_size = val;
+                    this.plugin.dnSetFontSize(val);
+                    this.plugin.saveSettings();
+                })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.sliderFontSize.setValue(DEFAULT_SETTINGS.font_size);
+                    this.plugin.settings.font_size = DEFAULT_SETTINGS.font_size;
+                    this.plugin.dnSetFontSize(this.plugin.settings.font_size);
                     this.plugin.saveSettings();
                 });
             });

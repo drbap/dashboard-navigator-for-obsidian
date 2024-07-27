@@ -343,10 +343,16 @@ export class DNModal extends Modal {
 
 
 	dnCreateInputSearch(el: HTMLElement): void {
-		this._INPUT_SEARCH = el.createEl('input', { type: 'search', placeholder: 'Search...' });
+		const searchContainer = el.createEl('div', { cls: 'dn-search-input-container' });
+		this._INPUT_SEARCH = searchContainer.createEl('input', { type: 'search', placeholder: 'Search...' });
 		this._INPUT_SEARCH.setAttribute('id', 'dn-input-filter');
 		this._INPUT_SEARCH.spellcheck = false;
 		this._INPUT_SEARCH.focus();
+		const clearInputSearch = searchContainer.createEl('div', { cls: 'search-input-clear-button' }).onClickEvent((evt: MouseEvent) => {
+			this._INPUT_SEARCH.value = '';
+			this._INPUT_SEARCH.focus();
+			this.dnSearchVault(this._INPUT_SEARCH.value);
+		});
 		// Keyup event listener with debounce
 		this._INPUT_SEARCH.addEventListener('keyup', debounce(() => this.dnSearchVault(this._INPUT_SEARCH.value), 300, true));
 	}
@@ -550,7 +556,13 @@ export class DNModal extends Modal {
 
 				let fSize = formatFileSize(file.stat.size);
 				let fMTime = moment(file.stat.mtime).format(this.date_format);
-				let td2 = tr.createEl('td', { text: getFolderStructure(file.path), title: file.path });
+				let td2 = tr.createEl('td');
+				let folder_path = getFolderStructure(file.path);
+				let td2_path = td2.createEl('a', { cls: 'dn-folder-path', text: folder_path, title: file.path }).onClickEvent((evt: MouseEvent) => {
+					this._INPUT_SEARCH.value = folder_path;
+					this.dnSearchVault(this._INPUT_SEARCH.value + '$');
+				});
+
 				let td3 = tr.createEl('td', { text: fSize, title: fSize + ' bytes' });
 				let td4 = tr.createEl('td', { text: fMTime, title: fMTime });
 				let tags_per_file = this.dnGetTagsPerFile(file);
