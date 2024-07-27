@@ -6,6 +6,7 @@ body {
 	--dn-foreground-color: var(--text-normal);
 	--dn-border-color: var(--background-modifier-border);
 	--dn-file-property-color: #828282;
+	--dn-font-size: 16px;
 }
 
 .theme-dark {
@@ -139,6 +140,7 @@ body {
 .dn-container a {
 	text-decoration: none;
 	color: var(--link-color);
+	font-size: var(--dn-font-size);
 }
 
 .dn-container a:hover {
@@ -240,6 +242,15 @@ body {
 	display: none;
 }
 
+a.dn-folder-path {
+	color: var(--text-muted);
+}
+
+a.dn-folder-path:hover {
+	background-color: var(--tag-background);
+	color: var(--link-color);
+}
+
 div.dn-div-table {
 	width: 100%;
 }
@@ -261,6 +272,7 @@ table#dn-table td {
 	padding: var(--size-4-1) var(--size-4-2);
 	min-width: 50px;
 	width: clamp(50px, auto, unset);
+	font-size: var(--dn-font-size);
 }
 
 table#dn-table th {
@@ -307,16 +319,26 @@ table#dn-table tr:hover td {
 	background-color: var(--nav-item-background-hover);
 }
 
-#dn-input-filter {
+.dn-search-input-container {
 	position: sticky;
 	top: 0;
 	left: 0;
 	z-index: 9900;
+	width: 50%;
+	height: var(--input-height);
+}
+
+.dn-search-input-container .search-input-clear-button {
+	top: calc(var(--input-height) / 4);
+	z-index: 9901;
+}
+
+#dn-input-filter {
 	background-image: var(--dn-search-icon);
 	background-color: var(--dn-search-background-color);
 	background-position: 8px 6px;
 	background-repeat: no-repeat;
-	width: 50%;
+	width: 100%;
 	height: var(--input-height);
 	font-size: var(--font-size);
 	padding: 8px 18px 6px 32px;
@@ -507,7 +529,7 @@ table#dn-table.dn-tbl-default td {
 		width: 100%;
 	}
 
-	#dn-input-filter {
+	.dn-search-input-container {
 		width: 100%;
 	}
 
@@ -538,7 +560,7 @@ table#dn-table.dn-tbl-default td {
 		width: 100%;
 	}
 
-	#dn-input-filter {
+	.dn-search-input-container {
 		width: 100%;
 	}
 
