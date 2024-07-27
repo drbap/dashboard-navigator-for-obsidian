@@ -311,6 +311,11 @@ table#dn-table th:nth-child(4) {
 	resize: horizontal;
 }
 
+table#dn-table td:nth-child(3) {
+	text-align: right;
+	padding-right: 1em;
+}
+
 table#dn-table th:nth-child(5) {
 	cursor: default;
 }

@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.1.1] - 2024-07-27
+- Navigator Size column adjustments (align right and padding).
+
 ## [1.1.0] - 2024-07-27
 - New clear input search button.
 - Click on path (navigator).
