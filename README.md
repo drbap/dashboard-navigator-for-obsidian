@@ -56,7 +56,7 @@
 
 - Right-click the mouse button on the desired file link or table result to open the context menu. You can open the note in various ways (same tab, new tab, new window and also show its properties). You can also open the note by **double clicking** on the desired result.
 
-# File Properties
+## File Properties
 
 ![Dashboard navigator for Obsidian - file properties](images/dn_navigator_file_properties.png)
 
@@ -64,6 +64,15 @@
 ## Plugin Settings
 
 ![Dashboard navigator for Obsidian - settings](images/dn_navigator_settings.png)
+
+## Installation
+
+1. Open **Obsidian Settings**.
+2. In the side menu, select **Community plugins**.
+3. Select **Browse** (button).
+4. Search for **Dashboard navigator**.
+5. Select it and choose **Install**.
+6. **Enable** Dashboard navigator after installation.
 
 ## Manually installing the plugin
 
