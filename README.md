@@ -42,7 +42,7 @@
  
 ## Display Results
 
-- You can selected 4 types of layouts to display the search results:
+- You can select 4 types of layouts to display the search results:
   - Default
   - Row striped
   - Column striped
