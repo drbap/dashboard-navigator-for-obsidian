@@ -88,7 +88,7 @@
 
 ## Select Custom Colors
 
-![Dashboard navigator for Obsidian - context menu 2](images/dn_navigator_context_menu_02.png)
+![Dashboard navigator for Obsidian - settings 2 colored files](images/dn_navigator_settings2.png)
 
 - Open **plugin settings** and select custom colors for notes, images and other file categories (piechart and files).
 
