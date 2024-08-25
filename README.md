@@ -1,3 +1,4 @@
+
 # Dashboard navigator plugin for Obsidian
 
 ![Dashboard navigator for Obsidian](images/dashboard_navigator_plugin_intro.png)
@@ -60,10 +61,36 @@
 
 ![Dashboard navigator for Obsidian - file properties](images/dn_navigator_file_properties.png)
 
- 
+## Excluded File Extensions
+
+- Open **plugin settings** and select the file extensions that you don't want to display (extensions separated by commas).
+
+- Enter file extensions: In the provided text field, list the file extensions you want to exclude, separated by commas. For example: `txt, docx, js`.
+
+
+## Excluded Folders
+
+- Open **plugin settings** and select the file extensions that you don't want to display (folder paths separated by commas).
+
+- Enter folder paths: In the provided space, list the folder names or paths to the folders(subfolders) you want to exclude, separating them with commas. For example: `folder1/subfolder, source_files, folder2`.
+
+## Colored Files
+
+![Dashboard navigator for Obsidian - colored files](images/dashboard_navigator.gif)
+
+- Select custom colors for files in the dashboard and navigator views. These colors will be reflected in the piechart graph, making it easier to identify and track different file types. To activate this feature, go to **plugin settings** and **toggle colored files**.
+
 ## Plugin Settings
 
 ![Dashboard navigator for Obsidian - settings](images/dn_navigator_settings.png)
+
+![Dashboard navigator for Obsidian - settings 2 colored files](images/dn_navigator_settings2.png)
+
+## Select Custom Colors
+
+![Dashboard navigator for Obsidian - context menu 2](images/dn_navigator_context_menu_02.png)
+
+- Open **plugin settings** and select custom colors for notes, images and other file categories (piechart and files).
 
 ## Installation
 
