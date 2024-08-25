@@ -43,6 +43,18 @@ export class DNModal extends Modal {
 	files_per_page: number = 20;
 	date_format: string = 'YYYY-MM-DD HH:mm';
 	default_view: number = 1;
+	excluded_extensions: string[] = [];
+	excluded_folders: string[] = [];
+	// File colors
+	color_notes: string = '#bf48ff';
+	color_images: string = '#007fff';
+	color_canvas: string = '#ff7f28';
+	color_videos: string = '#d34848';
+	color_audios: string = '#bfbf00';
+	color_pdf: string = '#00a300';
+	color_other: string = '#828282';
+	colored_files: boolean = false;
+
 	labelLayout: HTMLSpanElement;
 	labelSort: HTMLSpanElement;
 	private readonly intersectionObserver: IntersectionObserver;
@@ -68,12 +80,10 @@ export class DNModal extends Modal {
 		this._pdf = [];
 		this._other = [];
 
-
 		const leaf = this.app.workspace?.getMostRecentLeaf();
 		if (leaf !== null) {
 			this._leaf = leaf;
 		}
-
 
 		const dnFilesAndFolders: TAbstractFile[] = this.app.vault.getAllLoadedFiles();
 		for (const absF of dnFilesAndFolders) {
@@ -84,23 +94,52 @@ export class DNModal extends Modal {
 			}
 		}
 
-		this._filtered_files = this._files;
+		this._filtered_files = this._files.filter(
+			(file) => {
+				return !this.excluded_extensions.includes(file.extension.toLowerCase())
+					&& !this.excluded_folders.some(folder => file.path.startsWith(folder));
+			}
+		);
 
-		this.dnOrganizeFiles({ arr: this._files });
+		this._files = this._filtered_files;
 
-		this._recent = await this.dnGetRecentFiles(this._files);
+		await this.dnOrganizeFiles({ arr: this._filtered_files });
+
+		this._recent = await this.dnGetRecentFiles(this._filtered_files);
 
 		this.dnCreateMainUI(contentEl);
 
 		this.dnSetView(this.default_view);
 		this.dnSetSelectLayoutValue(this.selected_table_layout);
 		this.dnSetSelectSortValue(this.selected_sort_value);
+
+		this.dnToggleColoredFiles();
+	}
+
+	dnSetCustomColors(): void {
+		document.body.style.setProperty('--dn-notes-color', this.color_notes);
+		document.body.style.setProperty('--dn-images-color', this.color_images);
+		document.body.style.setProperty('--dn-canvas-color', this.color_canvas);
+		document.body.style.setProperty('--dn-videos-color', this.color_videos);
+		document.body.style.setProperty('--dn-audios-color', this.color_audios);
+		document.body.style.setProperty('--dn-pdfs-color', this.color_pdf);
+		document.body.style.setProperty('--dn-other-color', this.color_other);
+	}
+
+	dnToggleColoredFiles(): void {
+		const dnMainContainer = document.getElementById("dn-container");
+		if (this.colored_files) {
+			dnMainContainer?.classList.add('dn-colored-files');
+		} else {
+			dnMainContainer?.classList.remove('dn-colored-files');
+		}
+		this.dnSetCustomColors();
 	}
 
 	async dnCreateMainUI(el: HTMLElement) {
 
 		const mainContainer = el.createEl('div', { cls: 'dn-container' });
-
+		mainContainer.setAttribute('id', 'dn-container');
 		// Top Navigation
 		this.dnCreateInputSearch(mainContainer);
 
@@ -169,7 +208,7 @@ export class DNModal extends Modal {
 
 		this._divSearchResults = this._VIEW_NAVIGATOR.createEl('div', { cls: 'dn-div-table' });
 
-		this.dnShowSearchResults({ f: this._files, el: this._divSearchResults, leaf: this._leaf })
+		this.dnShowSearchResults({ f: this._filtered_files, el: this._divSearchResults, leaf: this._leaf })
 
 		// Vault Stats container
 		const divVaultStats = this._VIEW_DASHBOARD.createEl('div');
@@ -264,19 +303,19 @@ export class DNModal extends Modal {
 
 		const pieChart1 = new DNPieChart(canvasPieChart1, 10, 12, 50, labelColor);
 
-		pieChart1.addData(this._notes.length, '#bf48ff', 'Notes');
-		pieChart1.addData(this._images.length, '#007fff', 'Images');
-		pieChart1.addData(this._canvas.length, '#ff7f28', 'Canvas');
-		pieChart1.addData(this._videos.length, '#d34848', 'Videos');
-		pieChart1.addData(this._audios.length, '#bfbf00', 'Audios');
-		pieChart1.addData(this._pdf.length, '#00a300', 'PDF');
-		pieChart1.addData(this._other.length, '#828282', 'Other');
+		pieChart1.addData(this._notes.length, this.color_notes, 'Notes');
+		pieChart1.addData(this._images.length, this.color_images, 'Images');
+		pieChart1.addData(this._canvas.length, this.color_canvas, 'Canvas');
+		pieChart1.addData(this._videos.length, this.color_videos, 'Videos');
+		pieChart1.addData(this._audios.length, this.color_audios, 'Audios');
+		pieChart1.addData(this._pdf.length, this.color_pdf, 'PDF');
+		pieChart1.addData(this._other.length, this.color_other, 'Other');
 		pieChart1.draw();
 
 		// Total files
 		const divStatsFrame = divVaultGraph.createEl('div', { cls: 'dn-stats-files-folders' });
 
-		divStatsFrame.createEl('div', { cls: 'dn-stats-files', text: 'Files: ' + this._files.length });
+		divStatsFrame.createEl('div', { cls: 'dn-stats-files', text: 'Files: ' + this._filtered_files.length });
 
 		// Total folders
 
@@ -354,7 +393,7 @@ export class DNModal extends Modal {
 			this.dnSearchVault(this._INPUT_SEARCH.value);
 		});
 		// Keyup event listener with debounce
-		this._INPUT_SEARCH.addEventListener('keyup', debounce(() => this.dnSearchVault(this._INPUT_SEARCH.value), 300, true));
+		this._INPUT_SEARCH.addEventListener('input', debounce(() => this.dnSearchVault(this._INPUT_SEARCH.value), 300, true));
 	}
 
 	async dnSearchVault(val: string) {
@@ -796,7 +835,7 @@ export class DNModal extends Modal {
 		return arrRecentFiles.sort((a, b) => b.stat.mtime - a.stat.mtime).slice(0, this.num_recent_files);
 	}
 
-	async dnOrganizeFiles({ arr }: { arr: TFile[]; }): Promise<void> {
+	async dnOrganizeFiles({ arr }: { arr: TFile[] }): Promise<void> {
 		const arrNotes: TFile[] = [];
 		const arrImages: TFile[] = [];
 		const arrAudios: TFile[] = [];
@@ -844,7 +883,6 @@ export class DNModal extends Modal {
 		this._pdf = arrPDFs;
 		this._canvas = arrCanvas;
 		this._other = arrOther;
-
 	}
 
 	dnSetFileIconClass(ext: string) {
@@ -1145,7 +1183,7 @@ export class DNModal extends Modal {
 		contentEl.empty();
 
 		if (this._INPUT_SEARCH && this._INPUT_SEARCH.removeEventListener) {
-			this._INPUT_SEARCH.removeEventListener('keyup', debounce(() => this.dnSearchVault(this._INPUT_SEARCH.value), 300, true));
+			this._INPUT_SEARCH.removeEventListener('input', debounce(() => this.dnSearchVault(this._INPUT_SEARCH.value), 300, true));
 		}
 		this._th1.removeEventListener('dblclick', () => this.dnAlternateSortColumn('name'));
 		this._th2.removeEventListener('dblclick', () => this.dnAlternateSortColumn('path'));

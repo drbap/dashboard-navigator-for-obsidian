@@ -1,4 +1,4 @@
-import { App, DropdownComponent, PluginSettingTab, Setting, SliderComponent } from 'obsidian';
+import { App, ColorComponent, DropdownComponent, PluginSettingTab, Setting, SliderComponent, TextComponent, ToggleComponent } from 'obsidian';
 import DNPlugin from './main';
 import { DEFAULT_SETTINGS } from './main';
 
@@ -11,6 +11,16 @@ export class DNSettingTab extends PluginSettingTab {
     dropdownTableLayout: DropdownComponent;
     dropdownRecentFiles: DropdownComponent;
     sliderFontSize: SliderComponent;
+    textExcludedExtensions: TextComponent;
+    textExcludedFolders: TextComponent;
+    colorCompNotes: ColorComponent;
+    colorCompCanvas: ColorComponent;
+    colorCompImages: ColorComponent;
+    colorCompVideos: ColorComponent;
+    colorCompAudios: ColorComponent;
+    colorCompPdf: ColorComponent;
+    colorCompOther: ColorComponent;
+    toggleColoredFiles: ToggleComponent;
 
     constructor(app: App, plugin: DNPlugin) {
         super(app, plugin);
@@ -211,6 +221,276 @@ export class DNSettingTab extends PluginSettingTab {
                     this.dropdownRecentFiles.setValue(DEFAULT_SETTINGS.num_recent_files.toString());
                     this.plugin.settings.num_recent_files = DEFAULT_SETTINGS.num_recent_files;
                     this.plugin._DN_MODAL.num_recent_files = this.plugin.settings.num_recent_files;
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // Excluded file extensions
+        new Setting(containerEl)
+            .setName('Excluded file extensions')
+            .setDesc('File extensions to exclude, separated by commas')
+            .addText((text) => {
+                this.textExcludedExtensions = text;
+                text
+                    .setPlaceholder("File extensions to exclude")
+                    .setValue(this.plugin.settings.excluded_ext)
+                    .onChange(async (val) => {
+                        this.plugin.settings.excluded_ext = val;
+                        this.plugin._DN_MODAL.excluded_extensions = this.plugin.dnGetExcludedExtensions(val);
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.textExcludedExtensions.setValue('');
+                    this.plugin.settings.excluded_ext = '';
+                    this.plugin._DN_MODAL.excluded_extensions = [];
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // Excluded folders
+        new Setting(containerEl)
+            .setName('Excluded folders')
+            .setDesc('List of folder paths to exclude, separated by commas')
+            .addText((text) => {
+                this.textExcludedFolders = text;
+                text
+                    .setPlaceholder("Folder paths to exclude")
+                    .setValue(this.plugin.settings.excluded_path)
+                    .onChange(async (val) => {
+                        this.plugin.settings.excluded_path = val;
+                        this.plugin._DN_MODAL.excluded_folders = this.plugin.dnGetExcludedFolders(val);
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.textExcludedFolders.setValue('');
+                    this.plugin.settings.excluded_path = '';
+                    this.plugin._DN_MODAL.excluded_folders = [];
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // Toggle colored files
+        new Setting(containerEl)
+            .setName('Toggle colored files')
+            .setDesc('Turn on/off colored files')
+            .addToggle((toggle) => {
+                this.toggleColoredFiles = toggle;
+                toggle
+                    .setValue(this.plugin.settings.colored_files)
+                    .onChange(async (val) => {
+                        this.plugin.settings.colored_files = val;
+                        this.plugin._DN_MODAL.colored_files = val;
+                        this.plugin._DN_MODAL.dnToggleColoredFiles();
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.toggleColoredFiles.setValue(DEFAULT_SETTINGS.colored_files);
+                    this.plugin.settings.colored_files = DEFAULT_SETTINGS.colored_files;
+                    this.plugin._DN_MODAL.colored_files = DEFAULT_SETTINGS.colored_files;
+                    this.plugin._DN_MODAL.dnToggleColoredFiles();
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // 1 Color -> Notes
+        new Setting(containerEl)
+            .setName('Color: Notes')
+            .setDesc('Color of notes')
+            .addColorPicker((color) => {
+                this.colorCompNotes = color;
+                color
+                    .setValue(this.plugin.settings.color_notes)
+                    .onChange(async (val) => {
+                        this.plugin.settings.color_notes = val;
+                        this.plugin._DN_MODAL.color_notes = val;
+                        this.plugin._DN_MODAL.dnSetCustomColors();
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.colorCompNotes.setValue(DEFAULT_SETTINGS.color_notes);
+                    this.plugin.settings.color_notes = DEFAULT_SETTINGS.color_notes;
+                    this.plugin._DN_MODAL.color_notes = DEFAULT_SETTINGS.color_notes;
+                    this.plugin._DN_MODAL.dnSetCustomColors();
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // 2 Color -> Canvas
+        new Setting(containerEl)
+            .setName('Color: Canvas')
+            .setDesc('Color of canvas')
+            .addColorPicker((color) => {
+                this.colorCompCanvas = color;
+                color
+                    .setValue(this.plugin.settings.color_canvas)
+                    .onChange(async (val) => {
+                        this.plugin.settings.color_canvas = val;
+                        this.plugin._DN_MODAL.color_canvas = val;
+                        this.plugin._DN_MODAL.dnSetCustomColors();
+
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.colorCompCanvas.setValue(DEFAULT_SETTINGS.color_canvas);
+                    this.plugin.settings.color_canvas = DEFAULT_SETTINGS.color_canvas;
+                    this.plugin._DN_MODAL.color_canvas = DEFAULT_SETTINGS.color_canvas;
+                    this.plugin._DN_MODAL.dnSetCustomColors();
+
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // 3 Color -> Images
+        new Setting(containerEl)
+            .setName('Color: Images')
+            .setDesc('Color of images')
+            .addColorPicker((color) => {
+                this.colorCompImages = color;
+                color
+                    .setValue(this.plugin.settings.color_images)
+                    .onChange(async (val) => {
+                        this.plugin.settings.color_images = val;
+                        this.plugin._DN_MODAL.color_images = val;
+                        this.plugin._DN_MODAL.dnSetCustomColors();
+
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.colorCompImages.setValue(DEFAULT_SETTINGS.color_images);
+                    this.plugin.settings.color_images = DEFAULT_SETTINGS.color_images;
+                    this.plugin._DN_MODAL.color_images = DEFAULT_SETTINGS.color_images;
+                    this.plugin._DN_MODAL.dnSetCustomColors();
+
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // 4 Color -> Videos
+        new Setting(containerEl)
+            .setName('Color: Videos')
+            .setDesc('Color of videos')
+            .addColorPicker((color) => {
+                this.colorCompVideos = color;
+                color
+                    .setValue(this.plugin.settings.color_videos)
+                    .onChange(async (val) => {
+                        this.plugin.settings.color_videos = val;
+                        this.plugin._DN_MODAL.color_videos = val;
+                        this.plugin._DN_MODAL.dnSetCustomColors();
+
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.colorCompVideos.setValue(DEFAULT_SETTINGS.color_videos);
+                    this.plugin.settings.color_videos = DEFAULT_SETTINGS.color_videos;
+                    this.plugin._DN_MODAL.color_videos = DEFAULT_SETTINGS.color_videos;
+                    this.plugin._DN_MODAL.dnSetCustomColors();
+
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // 5 Color -> Audios
+        new Setting(containerEl)
+            .setName('Color: Audios')
+            .setDesc('Color of audios')
+            .addColorPicker((color) => {
+                this.colorCompAudios = color;
+                color
+                    .setValue(this.plugin.settings.color_audios)
+                    .onChange(async (val) => {
+                        this.plugin.settings.color_audios = val;
+                        this.plugin._DN_MODAL.color_audios = val;
+                        this.plugin._DN_MODAL.dnSetCustomColors();
+
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.colorCompAudios.setValue(DEFAULT_SETTINGS.color_audios);
+                    this.plugin.settings.color_audios = DEFAULT_SETTINGS.color_audios;
+                    this.plugin._DN_MODAL.color_audios = DEFAULT_SETTINGS.color_audios;
+                    this.plugin._DN_MODAL.dnSetCustomColors();
+
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // 6 Color -> PDF
+        new Setting(containerEl)
+            .setName('Color: PDF')
+            .setDesc('Color of PDF files')
+            .addColorPicker((color) => {
+                this.colorCompPdf = color;
+                color
+                    .setValue(this.plugin.settings.color_pdf)
+                    .onChange(async (val) => {
+                        this.plugin.settings.color_pdf = val;
+                        this.plugin._DN_MODAL.color_pdf = val;
+                        this.plugin._DN_MODAL.dnSetCustomColors();
+
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.colorCompPdf.setValue(DEFAULT_SETTINGS.color_pdf);
+                    this.plugin.settings.color_pdf = DEFAULT_SETTINGS.color_pdf;
+                    this.plugin._DN_MODAL.color_pdf = DEFAULT_SETTINGS.color_pdf;
+                    this.plugin._DN_MODAL.dnSetCustomColors();
+
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // 7 Color -> Other files
+        new Setting(containerEl)
+            .setName('Color: Other files')
+            .setDesc('Color of other files')
+            .addColorPicker((color) => {
+                this.colorCompOther = color;
+                color
+                    .setValue(this.plugin.settings.color_other)
+                    .onChange(async (val) => {
+                        this.plugin.settings.color_other = val;
+                        this.plugin._DN_MODAL.color_other = val;
+                        this.plugin._DN_MODAL.dnSetCustomColors();
+
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.colorCompOther.setValue(DEFAULT_SETTINGS.color_other);
+                    this.plugin.settings.color_other = DEFAULT_SETTINGS.color_other;
+                    this.plugin._DN_MODAL.color_other = DEFAULT_SETTINGS.color_other;
+                    this.plugin._DN_MODAL.dnSetCustomColors();
+
                     this.plugin.saveSettings();
                 });
             });
