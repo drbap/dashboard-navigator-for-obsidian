@@ -84,9 +84,7 @@
 
 ![Dashboard navigator for Obsidian - settings](images/dn_navigator_settings.png)
 
-![Dashboard navigator for Obsidian - settings 2 colored files](images/dn_navigator_settings2.png)
-
-## Select Custom Colors
+### Select Custom Colors
 
 ![Dashboard navigator for Obsidian - settings 2 colored files](images/dn_navigator_settings2.png)
 
