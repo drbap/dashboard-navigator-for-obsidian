@@ -13,7 +13,6 @@ Your ideas and suggestions are invaluable to me. While I'm currently unable to a
 * **Propose solutions:** Suggest potential solutions or approaches.
 
 ### Other Contributions
-* **Spread the word:** Share the project on social media or with your friends.
 * **Star the repository:** This is a free and open-source project. Show your support and recognition for the hard work put into this project by starring this repository. It really helps and it would be greatly appreciated. Thanks!
 
 I hope this project proves useful to you and the community. Your contributions will help make it better and its continued development.
