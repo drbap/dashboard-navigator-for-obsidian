@@ -7,7 +7,6 @@ Your ideas and suggestions are invaluable to me. While I'm currently unable to a
 ## Reporting Issues
 * **Clear and concise:** Provide detailed descriptions of bugs, including steps to reproduce and expected behavior.
 * **Search first:** Check if the issue has already been reported. This helps avoid duplicates.
-* For issues that don't require code changes, please use the "help wanted" or "discussion" label.
 
 ## Suggesting Features
 * **Explain the problem:** Clearly articulate the issue you're trying to solve.
