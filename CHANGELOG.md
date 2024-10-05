@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.1.0] - 2024-10-04
+- Added image file extensions -> category of images: jpeg, svg, avif.
+- Added audio file extensions -> category of audios: aac, flac, aiff, m4a.
+- Added video file extensions -> category of videos: mov, mkv.
+
 ## [2.0.0] - 2024-08-24
 - Hotkeys open dashboard and open navigator.
 - Excluded file extensions functionality.
