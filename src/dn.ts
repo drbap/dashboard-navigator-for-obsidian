@@ -847,21 +847,36 @@ export class DNModal extends Modal {
 		// formats
 		const extensions: Record<string, TFile[]> = {
 			'md': arrNotes,
-			'png': arrImages,
-			'jpg': arrImages,
-			'webp': arrImages,
-			'ico': arrImages,
+			// Images
+			'avif': arrImages,
 			'bmp': arrImages,
 			'gif': arrImages,
+			'ico': arrImages,
+			'jpeg': arrImages,
+			'jpg': arrImages,
+			'png': arrImages,
+			'raw': arrImages,
+			'svg': arrImages,
 			'tif': arrImages,
 			'tiff': arrImages,
-			'raw': arrImages,
+			'webp': arrImages,
+			// Audios
+			'aac': arrAudios,
+			'aif': arrAudios,
+			'aifc': arrAudios,
+			'aiff': arrAudios,
+			'flac': arrAudios,
+			'm4a': arrAudios,
 			'mp3': arrAudios,
-			'wav': arrAudios,
 			'ogg': arrAudios,
+			'wav': arrAudios,
 			'webm': arrAudios,
-			'mp4': arrVideos,
+			// Videos
 			'avi': arrVideos,
+			'mov': arrVideos,
+			'mkv': arrVideos,
+			'mp4': arrVideos,
+			// PDF and other formats
 			'pdf': arrPDFs,
 			'canvas': arrCanvas
 		};
@@ -890,21 +905,36 @@ export class DNModal extends Modal {
 
 		const extensions: Record<string, string> = {
 			'md': 'note',
-			'png': 'image',
-			'jpg': 'image',
-			'webp': 'image',
-			'ico': 'image',
+			// Images
+			'avif': 'image',
 			'bmp': 'image',
 			'gif': 'image',
+			'ico': 'image',
+			'jpeg': 'image',
+			'jpg': 'image',
+			'png': 'image',
+			'raw': 'image',
+			'svg': 'image',
 			'tif': 'image',
 			'tiff': 'image',
-			'raw': 'image',
+			'webp': 'image',
+			// Audios
+			'aac': 'audio',
+			'aif': 'audio',
+			'aifc': 'audio',
+			'aiff': 'audio',
+			'flac': 'audio',
+			'm4a': 'audio',
 			'mp3': 'audio',
-			'wav': 'audio',
 			'ogg': 'audio',
+			'wav': 'audio',
 			'webm': 'audio',
-			'mp4': 'video',
+			// Videos
 			'avi': 'video',
+			'mov': 'video',
+			'mkv': 'video',
+			'mp4': 'video',
+			// PDF and other formats
 			'pdf': 'pdf',
 			'canvas': 'canvas'
 		};
