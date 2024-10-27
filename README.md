@@ -23,18 +23,74 @@
 - **Advanced file search**: Find your files quickly with powerful **search** and **sort** functionalities. Search and sort files by **name**, **path** (location within your vault), **size** and **date**. You can also search notes by **tag**.
   - You can search using some knowledge of regular expressions, for example you can search for notes with **tags** `#work` or `#pending` typing `#work|#pending`.
 
-## Filter Notes and Files by Day, Week, Month and Year
+## Intuitive Advanced Search
 
-![Dashboard navigator for Obsidian - filter](images/dn_navigator_day_week_month_year.png)
+The Dashboard navigator search allows you to quickly access and filter specific files within your vault. Quickly find notes, images, canvases, audios, videos, PDFs, and more with simple commands.
+
+
+### Basic Commands
+
+- `@notes`: Lists all notes.
+- `@images:` Lists all images.
+- `@canvas` or `@canvases:` Lists all canvases.
+- `@audios:` Lists all audio files.
+- `@videos:` Lists all video files.
+- `@pdf` or `@pdfs:` Lists all PDF files.
+- `@other:` Lists all other file types.
+
+### Advanced Filtering with Search Terms
+
+You can combine the basic commands with search terms to narrow down your results:
+
+* `@notes #tag1`: Lists **notes** with the tag `#tag1`.
+* `@notes desired_word #tag2`: Lists **notes** with `desired_word` and `#tag2`.
+
+### Date-Based Filtering
+
+You can also filter content based on specific dates:
 
 - Enter `@` + the keywords below to quickly filter the results:
-  - `day` (or today)
-  - `day-1` (yesterday)
-  - `day-2` to `day-7`
-  - `week`
-  - `month`
-  - `year`
- 
+  - `@day` (or today)
+  - `@day-1` (yesterday)
+  - `@day-2` to `@day-7`
+  - `@week`
+  - `@month`
+  - `@year`
+
+### Combining Search Terms, File Types and Date Filters
+
+You can combine search terms, file types (one per search) and date filters for more precise results:
+
+- `@notes #tag1 @month`: Lists **notes** with the tag `tag1` created/modified this month.
+- `@images @week`: Lists **images** added this week.
+
+
+### Additional Tips
+
+* **Case Sensitivity:** Search terms are **case-insensitive**.
+
+* **Multiple Commands:** You can use **multiple commands in a single query**, separated by spaces.
+
+* Feel free to experiment with different combinations of commands and filters to find the best way to access your content. For example: `@month @notes` and `@notes @month` (same effect -> list created/modified notes on the month). You can even expand this search with `@month @notes title_of_the_note` (or part of the title of the note, or tag).
+
+### Excluding Results
+
+To exclude specific content from your search results, you can use the `!` exclamation point followed by the text, tag or folder you want to exclude. This will remove any items that match the exclusion term.
+
+**Example:**
+
+- `@notes #work #pending !#urgent`: This will list **all notes** tagged with `#work` and `#pending` except those tagged with `#urgent`.
+
+### Combining Exclusions with Other Filters
+
+You can combine exclusions with other filters, such as tags and date, to further refine your search:
+
+- `@notes #meeting !#international @month`: This will list all notes tagged with `#meeting` that were created or modified this month, **excluding** those tagged with `#international`.
+
+- To find all notes tagged "meeting" created/modified this month: `@notes #meeting @month`
+
+By effectively using exclusions, you can tailor your searches to your specific needs and quickly find the information you're looking for.
+
 ## Sort Files
 
 ![Dashboard navigator for Obsidian - sort](images/dn_navigator_sort.png)
@@ -61,6 +117,16 @@
 
 ![Dashboard navigator for Obsidian - file properties](images/dn_navigator_file_properties.png)
 
+## Navigator View: Hide Columns
+
+The column-hiding feature gives you the flexibility to customize the **navigator view** to suit your specific preferences and workflow. By **hiding unnecessary columns**, you can create a cleaner, more focused view that highlights the information most relevant to you.
+
+You can hide the following columns:
+- **Path**: Shows the location of the file within your vault structure.
+- **Size**: Displays the file size of the file.
+- **Date**: Indicates the modification date of the file.
+- **Tags**: Lists the tags associated with the note, making it easier to categorize and search for notes.
+
 ## Excluded File Extensions
 
 - Open **plugin settings** and select the file extensions that you don't want to display (extensions separated by commas).
@@ -84,9 +150,11 @@
 
 ![Dashboard navigator for Obsidian - settings](images/dn_navigator_settings.png)
 
-### Select Custom Colors
-
 ![Dashboard navigator for Obsidian - settings 2 colored files](images/dn_navigator_settings2.png)
+
+## Select Custom Colors
+
+![Dashboard navigator for Obsidian - context menu 2](images/dn_navigator_context_menu_02.png)
 
 - Open **plugin settings** and select custom colors for notes, images and other file categories (piechart and files).
 

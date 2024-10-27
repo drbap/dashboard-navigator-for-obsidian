@@ -330,7 +330,7 @@ table#dn-table th:nth-child(5) {
 }
 
 table#dn-table tr:hover td {
-	background-color: var(--nav-item-background-hover);
+	background-color: var(--nav-item-background-hover) !important;
 }
 
 .dn-search-input-container {
@@ -553,8 +553,8 @@ table#dn-table.dn-tbl-row tbody tr:nth-child(even) {
 	background-color: var(--dn-even-background-color);
 }
 
-table#dn-table.dn-tbl-column th:nth-child(even),
-table#dn-table.dn-tbl-column td:nth-child(even) {
+table#dn-table.dn-tbl-column th:nth-child(even of :not(.dn-hidden)),
+table#dn-table.dn-tbl-column td:nth-child(even of :not(.dn-hidden)) {
 	background-color: var(--dn-even-background-color);
 }
 
@@ -598,7 +598,9 @@ table#dn-table.dn-tbl-default td {
 	width: 30%;
 }
 
-
+.dn-hidden {
+	display: none;
+}
 
 @media screen and (max-width: 1024px) {
 	.dn-flex {
