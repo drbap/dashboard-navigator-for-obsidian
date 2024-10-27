@@ -20,8 +20,7 @@
 
 ![Dashboard navigator for Obsidian - search](images/dn_navigator_01.png)
 
-- **Advanced file search**: Find your files quickly with powerful **search** and **sort** functionalities. Search and sort files by **name**, **path** (location within your vault), **size** and **date**. You can also search notes by **tag**.
-  - You can search using some knowledge of regular expressions, for example you can search for notes with **tags** `#work` or `#pending` typing `#work|#pending`.
+- **Advanced file search**: Find your files quickly with powerful **search** and **sort** functionalities. More information below.
 
 ## Intuitive Advanced Search
 
