@@ -1,4 +1,19 @@
 # Changelog
+## [3.0.0] - 2024-10-27
+- **Improved user-friendly search with special filters** (advanced search).
+
+- **Navigator**: Select columns to hide (settings -> toggle).
+  - **Path** column
+  - **Size** column
+  - **Date** column
+  - **Tags** column
+
+- **Navigator**: **file hover fix** when *column striped layout* selected.
+
+- **Navigator**: **Date column** hover -> tooltip shows `Created` and `Modified` date of the file.
+
+Removed: 
+- `Dashboard navigator: Open` command palette/shortcut. You can open **dashboard** or **navigator** views using their respective commands on command palette.
 
 ## [2.1.0] - 2024-10-04
 - Added image file extensions -> category of images: jpeg, svg, avif.
