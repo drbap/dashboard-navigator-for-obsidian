@@ -1,62 +1,80 @@
 import { App, debounce, Menu, Modal, TAbstractFile, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
 import { formatFileSize, getFolderStructure } from './utils/format';
-import { DNPieChart } from './utils/piechart';
+import { getTagsPerFile } from './utils/tags';
+import { DNPieChart } from './utils/dnpiechart';
+import { DNTableManager } from './utils/dntablemanager';
 import { moment } from 'obsidian';
 
 export class DNModal extends Modal {
+
 	private _files: TFile[];
 	private _folders: TFolder[];
-	private _notes: TFile[];
 	private _recent: TFile[];
+	//Categories
+	private _notes: TFile[];
 	private _images: TFile[];
 	private _canvas: TFile[];
 	private _audios: TFile[];
 	private _videos: TFile[];
 	private _pdf: TFile[];
 	private _other: TFile[];
+
 	private _BTN_DASHBOARD: HTMLButtonElement;
 	private _BTN_NAVIGATOR: HTMLButtonElement;
+
 	private _VIEW_DASHBOARD: HTMLElement;
 	private _VIEW_NAVIGATOR: HTMLElement;
+
 	private _INPUT_SEARCH: HTMLInputElement;
 	private _divSearchResults: HTMLDivElement;
+
 	private _leaf: WorkspaceLeaf;
-	private _filtered_files: TFile[];
-	private _sort_order: string = 'desc';
-	private _sort_column: string = 'modified';
+
+	private _files_excluded_filters: TFile[];
+	private _files_results: TFile[];
+
+	private _sort_order = 'desc';
+	private _sort_column = 'modified';
+
 	private _th1: HTMLTableCellElement;
 	private _th2: HTMLTableCellElement;
 	private _th3: HTMLTableCellElement;
 	private _th4: HTMLTableCellElement;
 	private _th5: HTMLTableCellElement;
+
 	private _total_pages: number;
 
 	private _SELECT_SORT: HTMLSelectElement;
 	private _SELECT_TABLE_LAYOUT: HTMLSelectElement;
 
-	private _selected_category: string = '';
+	private _selected_category = '';
 	private _TABLE_LAYOUTS: string[] = ['dn-tbl-default', 'dn-tbl-row', 'dn-tbl-column', 'dn-tbl-bordered'];
-	selected_table_layout: string = 'dn-tbl-default';
-	selected_sort_value: string = 'modified-desc';
 
-	num_recent_files: number = 5;
-	files_per_page: number = 20;
-	date_format: string = 'YYYY-MM-DD HH:mm';
-	default_view: number = 1;
+	selected_table_layout = 'dn-tbl-default';
+	selected_sort_value = 'modified-desc';
+
+	num_recent_files = 5;
+	files_per_page = 20;
+	date_format = 'YYYY-MM-DD HH:mm';
+	default_view = 1;
 	excluded_extensions: string[] = [];
 	excluded_folders: string[] = [];
 	// File colors
-	color_notes: string = '#bf48ff';
-	color_images: string = '#007fff';
-	color_canvas: string = '#ff7f28';
-	color_videos: string = '#d34848';
-	color_audios: string = '#bfbf00';
-	color_pdf: string = '#00a300';
-	color_other: string = '#828282';
-	colored_files: boolean = false;
+	color_notes = '#bf48ff';
+	color_images = '#007fff';
+	color_canvas = '#ff7f28';
+	color_videos = '#d34848';
+	color_audios = '#bfbf00';
+	color_pdf = '#00a300';
+	color_other = '#828282';
+	colored_files = false;
+
+	// Hide columns
+	hide_columns: string[] = [];
 
 	labelLayout: HTMLSpanElement;
 	labelSort: HTMLSpanElement;
+
 	private readonly intersectionObserver: IntersectionObserver;
 	private _DN_CTX_MENU: Menu;
 
@@ -71,8 +89,8 @@ export class DNModal extends Modal {
 
 		this._files = [];
 		this._folders = [];
-		this._notes = [];
 		this._recent = [];
+		this._notes = [];
 		this._images = [];
 		this._canvas = [];
 		this._audios = [];
@@ -94,46 +112,26 @@ export class DNModal extends Modal {
 			}
 		}
 
-		this._filtered_files = this._files.filter(
+		this._files_excluded_filters = this._files.filter(
 			(file) => {
 				return !this.excluded_extensions.includes(file.extension.toLowerCase())
 					&& !this.excluded_folders.some(folder => file.path.startsWith(folder));
 			}
 		);
 
-		this._files = this._filtered_files;
+		this._files_results = this._files_excluded_filters;
 
-		await this.dnOrganizeFiles({ arr: this._filtered_files });
+		await this.dnOrganizeFiles({ arr: this._files_excluded_filters });
 
-		this._recent = await this.dnGetRecentFiles(this._filtered_files);
+		this._recent = await this.dnGetRecentFiles(this._files_excluded_filters);
 
 		this.dnCreateMainUI(contentEl);
-
 		this.dnSetView(this.default_view);
+
 		this.dnSetSelectLayoutValue(this.selected_table_layout);
 		this.dnSetSelectSortValue(this.selected_sort_value);
 
 		this.dnToggleColoredFiles();
-	}
-
-	dnSetCustomColors(): void {
-		document.body.style.setProperty('--dn-notes-color', this.color_notes);
-		document.body.style.setProperty('--dn-images-color', this.color_images);
-		document.body.style.setProperty('--dn-canvas-color', this.color_canvas);
-		document.body.style.setProperty('--dn-videos-color', this.color_videos);
-		document.body.style.setProperty('--dn-audios-color', this.color_audios);
-		document.body.style.setProperty('--dn-pdfs-color', this.color_pdf);
-		document.body.style.setProperty('--dn-other-color', this.color_other);
-	}
-
-	dnToggleColoredFiles(): void {
-		const dnMainContainer = document.getElementById("dn-container");
-		if (this.colored_files) {
-			dnMainContainer?.classList.add('dn-colored-files');
-		} else {
-			dnMainContainer?.classList.remove('dn-colored-files');
-		}
-		this.dnSetCustomColors();
 	}
 
 	async dnCreateMainUI(el: HTMLElement) {
@@ -155,12 +153,11 @@ export class DNModal extends Modal {
 
 		this._BTN_NAVIGATOR = leftTopNav.createEl('button', { text: 'Navigator' });
 		this._BTN_NAVIGATOR.onClickEvent((evt: MouseEvent) => {
-			this.dnSearchVault(this._INPUT_SEARCH.value);
+			this.dnModalSearchVault(this._INPUT_SEARCH.value);
 			this.dnSetView(2);
 		});
 
 		// Select table layout
-
 		this.labelLayout = rightTopNav.createEl('span', {
 			text: 'Layout:', cls: 'dn-tbl-label'
 		});
@@ -177,7 +174,6 @@ export class DNModal extends Modal {
 		this._SELECT_TABLE_LAYOUT.addEventListener('change', () => { this.dnSelectTableLayout(); });
 
 		// Select sort
-
 		this.labelSort = rightTopNav.createEl('span', {
 			text: 'Sort by:', cls: 'dn-tbl-label'
 		});
@@ -191,24 +187,23 @@ export class DNModal extends Modal {
 
 		this._SELECT_SORT.addEventListener('change', () => { this.dnSortColumnWithSelect(); });
 
-		const option1 = this._SELECT_SORT.createEl('option', { text: 'File name (A to Z)', value: 'name-asc' });
-		const option2 = this._SELECT_SORT.createEl('option', { text: 'File name (Z to A)', value: 'name-desc' });
-		const option3 = this._SELECT_SORT.createEl('option', { text: 'Path (A to Z)', value: 'path-asc' });
-		const option4 = this._SELECT_SORT.createEl('option', { text: 'Path (Z to A)', value: 'path-desc' });
-		const option5 = this._SELECT_SORT.createEl('option', { text: 'File size (smallest to largest)', value: 'size-asc' });
-		const option6 = this._SELECT_SORT.createEl('option', { text: 'File size (largest to smallest)', value: 'size-desc' });
-		const option7 = this._SELECT_SORT.createEl('option', { text: 'Date/time (oldest to newest)', value: 'modified-asc' });
-		const option8 = this._SELECT_SORT.createEl('option', { text: 'Date/time (newest to oldest)', value: 'modified-desc' });
-
+		// Select sort options
+		this._SELECT_SORT.createEl('option', { text: 'File name (A to Z)', value: 'name-asc' });
+		this._SELECT_SORT.createEl('option', { text: 'File name (Z to A)', value: 'name-desc' });
+		this._SELECT_SORT.createEl('option', { text: 'Path (A to Z)', value: 'path-asc' });
+		this._SELECT_SORT.createEl('option', { text: 'Path (Z to A)', value: 'path-desc' });
+		this._SELECT_SORT.createEl('option', { text: 'File size (smallest to largest)', value: 'size-asc' });
+		this._SELECT_SORT.createEl('option', { text: 'File size (largest to smallest)', value: 'size-desc' });
+		this._SELECT_SORT.createEl('option', { text: 'Date/time (oldest to newest)', value: 'modified-asc' });
+		this._SELECT_SORT.createEl('option', { text: 'Date/time (newest to oldest)', value: 'modified-desc' });
 
 		// Containers
 		this._VIEW_DASHBOARD = mainContainer.createEl('div', { cls: 'dn-flex' });
-
 		this._VIEW_NAVIGATOR = mainContainer.createEl('div', { cls: 'dn-display-none' });
 
 		this._divSearchResults = this._VIEW_NAVIGATOR.createEl('div', { cls: 'dn-div-table' });
 
-		this.dnShowSearchResults({ f: this._filtered_files, el: this._divSearchResults, leaf: this._leaf })
+		this.dnShowModalSearchResults({ f: this._files_results, el: this._divSearchResults, leaf: this._leaf })
 
 		// Vault Stats container
 		const divVaultStats = this._VIEW_DASHBOARD.createEl('div');
@@ -221,7 +216,7 @@ export class DNModal extends Modal {
 		divRecentFiles.setAttribute('id', 'dn-recent-files');
 
 		const divRecentNotes = this._VIEW_DASHBOARD.createEl('div');
-		divRecentNotes.setAttribute('id', 'dn-recent-notes');;
+		divRecentNotes.setAttribute('id', 'dn-recent-notes');
 
 		const divCanvas = this._VIEW_DASHBOARD.createEl('div');
 		divCanvas.setAttribute('id', 'dn-canvas');
@@ -241,52 +236,51 @@ export class DNModal extends Modal {
 		const divOther = this._VIEW_DASHBOARD.createEl('div');
 		divOther.setAttribute('id', 'dn-other');
 
-		// Vault Stats
-
-		const btnNotes = await this.dnCreateBtn(divVaultStats,
+		// Dashboard - Vault Stats
+		// Categories btns
+		await this.dnCreateBtn(divVaultStats,
 			'dn-btn-notes',
 			'Notes',
 			this._notes,
 			this._divSearchResults,
 			this._leaf);
 
-
-		const btnCanvas = await this.dnCreateBtn(divVaultStats,
+		await this.dnCreateBtn(divVaultStats,
 			'dn-btn-canvas',
-			'Canvas',
+			'Canvases',
 			this._canvas,
 			this._divSearchResults,
 			this._leaf);
 
-		const btnImages = await this.dnCreateBtn(divVaultStats,
+		await this.dnCreateBtn(divVaultStats,
 			'dn-btn-images',
 			'Images',
 			this._images,
 			this._divSearchResults,
 			this._leaf);
 
-		const btnAudios = await this.dnCreateBtn(divVaultStats,
+		await this.dnCreateBtn(divVaultStats,
 			'dn-btn-audios',
 			'Audios',
 			this._audios,
 			this._divSearchResults,
 			this._leaf);
 
-		const btnVideos = await this.dnCreateBtn(divVaultStats,
+		await this.dnCreateBtn(divVaultStats,
 			'dn-btn-videos',
 			'Videos',
 			this._videos,
 			this._divSearchResults,
 			this._leaf);
 
-		const btnPDF = await this.dnCreateBtn(divVaultStats,
+		await this.dnCreateBtn(divVaultStats,
 			'dn-btn-pdf',
-			'PDF',
+			'PDFs',
 			this._pdf,
 			this._divSearchResults,
 			this._leaf);
 
-		const btnOther = await this.dnCreateBtn(divVaultStats,
+		await this.dnCreateBtn(divVaultStats,
 			'dn-btn-other',
 			'Other',
 			this._other,
@@ -314,18 +308,15 @@ export class DNModal extends Modal {
 
 		// Total files
 		const divStatsFrame = divVaultGraph.createEl('div', { cls: 'dn-stats-files-folders' });
-
-		divStatsFrame.createEl('div', { cls: 'dn-stats-files', text: 'Files: ' + this._filtered_files.length });
+		divStatsFrame.createEl('div', { cls: 'dn-stats-files', text: 'Files: ' + this._files_excluded_filters.length });
 
 		// Total folders
-
 		divStatsFrame.createEl('div', { cls: 'dn-stats-folders', text: 'Folders: ' + this._folders.length });
 
 		// Recent files by type/category
-
 		await this.dnCreateRecentFiles('Recent files', divRecentFiles, this._recent, this.num_recent_files);
 		await this.dnCreateRecentFiles('Recent notes', divRecentNotes, this._notes, this.num_recent_files);
-		await this.dnCreateRecentFiles('Recent canvas', divCanvas, this._canvas, this.num_recent_files);
+		await this.dnCreateRecentFiles('Recent canvases', divCanvas, this._canvas, this.num_recent_files);
 		await this.dnCreateRecentFiles('Recent images', divImages, this._images, this.num_recent_files);
 		await this.dnCreateRecentFiles('Recent audios', divAudios, this._audios, this.num_recent_files);
 		await this.dnCreateRecentFiles('Recent videos', divVideos, this._videos, this.num_recent_files);
@@ -340,46 +331,22 @@ export class DNModal extends Modal {
 		displayEl: HTMLElement,
 		leaf: WorkspaceLeaf) {
 
-		let btn = elDiv.createEl('div', { cls: 'dn-btn-stats' });
+		const btn = elDiv.createEl('div', { cls: 'dn-btn-stats' });
 
 		btn.setAttribute('id', btnId)
 		btn.createEl('span', { cls: 'dn-btn-stats-label', text: btnTitle });
 		btn.createEl('span', { cls: 'dn-btn-stats-icon' });
 		btn.createEl('span', { cls: 'dn-btn-stats-number', text: btnCategoryFiles.length.toString() });
 		btn.onClickEvent((evt: MouseEvent) => {
-			this._filtered_files = btnCategoryFiles;
+			this._files_results = btnCategoryFiles;
 			this._selected_category = ' (' + btnTitle + ')';
 			this.dnSortFilteredFiles(false);
-			this.dnShowSearchResults({ f: btnCategoryFiles, el: displayEl, leaf });
+			this.dnShowModalSearchResults({ f: btnCategoryFiles, el: displayEl, leaf });
 			this.dnSetView(2);
 		});
 
 		return btn;
 	}
-
-	async dnCreateRecentFiles(title: string, divF: HTMLDivElement, files: TFile[], num_files: number) {
-		if (files.length === 0) {
-			divF.createEl('h3', { cls: 'dn-subtitles', text: title });
-			divF.createEl('p', { cls: 'dn-no-results-found', text: 'No files found.' });
-			divF.classList.add('dn-display-none');
-		} else {
-			divF.createEl('h3', { cls: 'dn-subtitles', text: title });
-			const sortedFiles = await this.dnGetRecentFiles(files);
-			sortedFiles.forEach(sfile => {
-				divF.createEl('a', { cls: this.dnSetFileIconClass(sfile.extension), text: sfile.basename, title: sfile.path }).onClickEvent((evt: MouseEvent) => {
-					if (sfile !== null) {
-						this.dnOpenFileAlt(sfile, evt);
-					}
-				});
-				if (sfile.extension !== 'md') {
-					divF.createEl('span', { cls: 'nav-file-tag', text: sfile.extension })
-				}
-
-				divF.createEl('br');
-			});
-		}
-	}
-
 
 	dnCreateInputSearch(el: HTMLElement): void {
 		const searchContainer = el.createEl('div', { cls: 'dn-search-input-container' });
@@ -387,82 +354,137 @@ export class DNModal extends Modal {
 		this._INPUT_SEARCH.setAttribute('id', 'dn-input-filter');
 		this._INPUT_SEARCH.spellcheck = false;
 		this._INPUT_SEARCH.focus();
-		const clearInputSearch = searchContainer.createEl('div', { cls: 'search-input-clear-button' }).onClickEvent((evt: MouseEvent) => {
+		// Clear search
+		searchContainer.createEl('div', { cls: 'search-input-clear-button' }).onClickEvent((evt: MouseEvent) => {
 			this._INPUT_SEARCH.value = '';
 			this._INPUT_SEARCH.focus();
-			this.dnSearchVault(this._INPUT_SEARCH.value);
+			this.dnModalSearchVault(this._INPUT_SEARCH.value);
 		});
 		// Keyup event listener with debounce
-		this._INPUT_SEARCH.addEventListener('input', debounce(() => this.dnSearchVault(this._INPUT_SEARCH.value), 300, true));
+		this._INPUT_SEARCH.addEventListener('input', debounce(() => this.dnModalSearchVault(this._INPUT_SEARCH.value), 300, true));
 	}
 
-	async dnSearchVault(val: string) {
-		let rExp;
+	async dnModalSearchVault(val: string) {
+		this.dnSetView(2);
+		const searchParams = val.toLowerCase().trim().split(/\s+/);
+
+
+		const firstParam = searchParams[0];
+		await this.searchAction(firstParam, this._files_excluded_filters);
+
+		// Advanced continuous search
+		const remainingParams = searchParams.slice(1);
+		remainingParams.every(async p => {
+			await this.searchAction(p, this._files_results);
+		});
+
+	}
+	// Search
+	async searchAction(val: string, files: TFile[]) {
+
+		let rExp: RegExp;
+
+		const isExcludeSearch = val.startsWith('!') && val.length >= 2;
+		const excludeParam = isExcludeSearch ? val.slice(1) : val;
+
 		try {
-			rExp = new RegExp(val.toLowerCase(), 'iu');
+			if (isExcludeSearch) {
+				rExp = new RegExp('', 'iu');
+			} else {
+				if (val === '!') { rExp = new RegExp('', 'iu') } else {
+
+					rExp = new RegExp(val.toLowerCase(), 'iu');
+				}
+			}
 
 		} catch (error) {
 			return;
 		}
 
-		this.dnSetView(2);
-
 		const isDateSearch = val.startsWith('@');
 
-		if (isDateSearch) {
+		if (this._INPUT_SEARCH.value.includes('@')) {
 			this._INPUT_SEARCH.classList.add('dn-input-datesearch');
 		} else {
 			this._INPUT_SEARCH.classList.remove('dn-input-datesearch');
 		}
 
-		this._filtered_files = this._files.filter(
-			file => {
-				if (isDateSearch) {
+		if (isExcludeSearch) {
+			this._files_results = files.filter(file => {
+				const isMatch = file.name.toLowerCase().includes(excludeParam) ||
+					getFolderStructure(file.path).toLowerCase().includes(excludeParam) ||
+					moment(file.stat.mtime).format(this.date_format).toLowerCase().includes(excludeParam) ||
+					getTagsPerFile(file).toLowerCase().includes(excludeParam);
 
-					let mtime = moment(file.stat.mtime);
-					const dateSearch = val.slice(1).toLowerCase().split(' ');
-
-					switch (dateSearch[0]) {
-						case 'day':
-						case 'today':
-							return mtime.isSame(moment(), 'day');
-						case 'day-1':
-						case 'yesterday':
-							return mtime.isSame(moment().subtract(1, 'days'), 'day');
-						case 'day-2':
-							return mtime.isSame(moment().subtract(2, 'days'), 'day');
-						case 'day-3':
-							return mtime.isSame(moment().subtract(3, 'days'), 'day');
-						case 'day-4':
-							return mtime.isSame(moment().subtract(4, 'days'), 'day');
-						case 'day-5':
-							return mtime.isSame(moment().subtract(5, 'days'), 'day');
-						case 'day-6':
-							return mtime.isSame(moment().subtract(6, 'days'), 'day');
-						case 'day-7':
-							return mtime.isSame(moment().subtract(7, 'days'), 'day');
-						case 'week':
-							return mtime.isBetween(moment().subtract(7, 'days'), moment(), 'day', '[]');
-						case 'month':
-							return mtime.isSame(moment(), 'month');
-						case 'year':
-							return mtime.isSame(moment(), 'year');
-						default:
-							return false;
-					}
-				} else {
-					return rExp.test(file.name.toLowerCase())
-						|| rExp.test(getFolderStructure(file.path).toLowerCase())
-						|| rExp.test(moment(file.stat.mtime).format(this.date_format))
-						|| rExp.test(this.dnGetTagsPerFile(file).toLowerCase());
-				}
+				return isExcludeSearch ? !isMatch : isMatch;
 			});
+		} else {
+			this._files_results = files.filter(
+				file => {
+
+					if (isDateSearch) {
+
+						const mtime = moment(file.stat.mtime);
+						const dateSearch = val.slice(1).toLowerCase().split(' ');
+
+						switch (dateSearch[0]) {
+							case 'day':
+							case 'today':
+								return mtime.isSame(moment(), 'day');
+							case 'day-1':
+							case 'yesterday':
+								return mtime.isSame(moment().subtract(1, 'days'), 'day');
+							case 'day-2':
+								return mtime.isSame(moment().subtract(2, 'days'), 'day');
+							case 'day-3':
+								return mtime.isSame(moment().subtract(3, 'days'), 'day');
+							case 'day-4':
+								return mtime.isSame(moment().subtract(4, 'days'), 'day');
+							case 'day-5':
+								return mtime.isSame(moment().subtract(5, 'days'), 'day');
+							case 'day-6':
+								return mtime.isSame(moment().subtract(6, 'days'), 'day');
+							case 'day-7':
+								return mtime.isSame(moment().subtract(7, 'days'), 'day');
+							case 'week':
+								return mtime.isBetween(moment().subtract(7, 'days'), moment(), 'day', '[]');
+							case 'month':
+								return mtime.isSame(moment(), 'month');
+							case 'year':
+								return mtime.isSame(moment(), 'year');
+							case 'notes':
+								return this._notes.includes(file);
+							case 'canvases':
+							case 'canvas':
+								return this._canvas.includes(file);
+							case 'images':
+								return this._images.includes(file);
+							case 'audios':
+								return this._audios.includes(file);
+							case 'videos':
+								return this._videos.includes(file);
+							case 'pdf':
+							case 'pdfs':
+								return this._pdf.includes(file);
+							case 'other':
+								return this._other.includes(file);
+							default:
+								return false;
+						}
+					} else {
+						return rExp.test(file.name.toLowerCase())
+							|| rExp.test(getFolderStructure(file.path).toLowerCase())
+							|| rExp.test(moment(file.stat.mtime).format(this.date_format))
+							|| rExp.test(getTagsPerFile(file).toLowerCase());
+					}
+				});
+		}
 
 		this._selected_category = '';
 
 		this.dnSortFilteredFiles(false);
 
-		await this.dnShowSearchResults({ f: this._filtered_files, el: this._divSearchResults, leaf: this._leaf });
+		await this.dnShowModalSearchResults({ f: this._files_results, el: this._divSearchResults, leaf: this._leaf });
 
 		const tbody = document.getElementById('dn-table-results') as HTMLTableSectionElement;
 
@@ -489,6 +511,131 @@ export class DNModal extends Modal {
 					tr[i].classList.add('dn-display-none');
 				}
 			}
+		}
+	}
+
+	async dnShowModalSearchResults({ f, el, leaf, currentPage = 1 }: { f: TFile[]; el: HTMLElement; leaf: WorkspaceLeaf; currentPage?: number }): Promise<void> {
+
+		el.empty();
+
+		const paginationContainer = this._divSearchResults.createEl('div', { cls: 'dn-pagination' });
+		const table = el.createEl('table', { cls: this.selected_table_layout });
+		table.setAttribute('id', 'dn-table');
+		// Thead
+		const thead = table.createEl('thead');
+		const tr = thead.createEl('tr');
+		this._th1 = tr.createEl('th', { text: 'Name' });
+		this._th2 = tr.createEl('th', { text: 'Path' });
+		this._th3 = tr.createEl('th', { text: 'Size' });
+		this._th4 = tr.createEl('th', { text: 'Date' });
+		this._th5 = tr.createEl('th', { text: 'Tags' });
+
+		this._th1.addEventListener('dblclick', () => this.dnAlternateSortColumn('name'));
+		this._th2.addEventListener('dblclick', () => this.dnAlternateSortColumn('path'));
+		this._th3.addEventListener('dblclick', () => this.dnAlternateSortColumn('size'));
+		this._th4.addEventListener('dblclick', () => this.dnAlternateSortColumn('modified'));
+
+		// Tbody
+		const tbody = table.createEl('tbody');
+		tbody.setAttribute('id', 'dn-table-results');
+
+		if (f.length > 0) {
+
+			if (this.intersectionObserver) {
+				this.intersectionObserver.disconnect();
+			}
+			// Pagination
+			this._total_pages = Math.ceil(f.length / this.files_per_page);
+			const paginatedData = f.slice((currentPage - 1) * this.files_per_page, currentPage * this.files_per_page);
+
+			paginatedData.forEach(async file => {
+				const tr = tbody.createEl('tr');
+				// Events
+				tr.addEventListener('contextmenu', (evt: MouseEvent) => { this.dnHandleClick(evt, file) });
+				tr.addEventListener('click', (evt: MouseEvent) => { this.dnHandleClick(evt, file) });
+				tr.addEventListener('dblclick', (evt: MouseEvent) => { this.dnHandleDblClick(evt, file) });
+
+				this.intersectionObserver.observe(tr);
+
+				const td1 = tr.createEl('td');
+				td1.createEl('a', { cls: this.dnSetFileIconClass(file.extension), text: file.name }).onClickEvent((evt: MouseEvent) => {
+					if (leaf !== null && file !== null) {
+						this.dnOpenFileAlt(file, evt);
+					}
+				});
+
+				const fSize = formatFileSize(file.stat.size);
+				const fMTime = moment(file.stat.mtime).format(this.date_format);
+				const fCTime = moment(file.stat.ctime).format(this.date_format);
+				const td2 = tr.createEl('td');
+				const folder_path = getFolderStructure(file.path);
+				td2.createEl('a', { cls: 'dn-folder-path', text: folder_path, title: file.path }).onClickEvent((evt: MouseEvent) => {
+					this._INPUT_SEARCH.value = folder_path;
+					this.dnModalSearchVault(this._INPUT_SEARCH.value + '$');
+				});
+
+				tr.createEl('td', { text: fSize, title: fSize + ' bytes' });
+				tr.createEl('td', { text: fMTime, title: fCTime + ' - Created\n' + fMTime + ' - Modified' });
+				const tags_per_file = getTagsPerFile(file);
+				const td5 = tr.createEl('td', { title: tags_per_file });
+				const fTags = tags_per_file.split(' ');
+				fTags.forEach((tag) => {
+					td5.createEl('a', { cls: 'dn-tag', text: tag }).onClickEvent((evt: MouseEvent) => {
+						this._INPUT_SEARCH.value = tag;
+						this.dnModalSearchVault(this._INPUT_SEARCH.value);
+					});
+				});
+
+			});
+
+			// Add pagination
+			paginationContainer.empty();
+			// Results count
+			paginationContainer.createEl('span', { cls: 'dn-pagination-total-results', text: `File(s): ${f.length}` + this._selected_category });
+			// Current page
+			paginationContainer.createEl('span', { cls: 'dn-pagination-current-page', text: `Page ${currentPage} of ${this._total_pages}` });
+
+			const btnPrev = paginationContainer.createEl('button', { cls: 'dn-btn-prev', text: '◀', title: 'Previous' });
+
+			if (currentPage === 1) {
+				btnPrev.disabled = true;
+			} else {
+				btnPrev.disabled = false;
+			}
+			btnPrev.addEventListener('click', () => {
+				if (currentPage > 1) {
+					this.dnShowModalSearchResults({ f, el, leaf, currentPage: currentPage - 1 });
+				}
+			});
+
+			const btnNext = paginationContainer.createEl('button', { cls: 'dn-btn-next', text: '▶', title: 'Next' });
+
+			if (currentPage === this._total_pages) {
+				btnNext.disabled = true;
+			} else {
+				btnNext.disabled = false;
+			}
+
+			btnNext.addEventListener('click', () => {
+				if (currentPage < this._total_pages) {
+					this.dnShowModalSearchResults({ f, el, leaf, currentPage: currentPage + 1 });
+				}
+			});
+
+			this.dnUpdateSortIndicators(this._sort_column,
+				this._sort_order,
+				this._th1,
+				this._th2,
+				this._th3,
+				this._th4);
+
+			const dnTableManager = new DNTableManager('#dn-table');
+			// Hide columns
+			dnTableManager.hideColumns(this.hide_columns);
+
+		} else {
+			tr.empty();
+			this._divSearchResults.createEl('p', { cls: 'dn-no-results-found', text: 'No files found.' });
 		}
 	}
 
@@ -523,7 +670,7 @@ export class DNModal extends Modal {
 					break;
 			}
 
-			this.dnShowSearchResults({ f: this._filtered_files, el: this._divSearchResults, leaf: this._leaf });
+			this.dnShowModalSearchResults({ f: this._files_results, el: this._divSearchResults, leaf: this._leaf });
 
 		}
 	}
@@ -545,119 +692,6 @@ export class DNModal extends Modal {
 		}
 	}
 
-	async dnShowSearchResults({ f, el, leaf, currentPage = 1 }: { f: TFile[]; el: HTMLElement; leaf: WorkspaceLeaf; currentPage?: number }): Promise<void> {
-
-		el.empty();
-
-		const paginationContainer = this._divSearchResults.createEl('div', { cls: 'dn-pagination' });
-		const table = el.createEl('table', { cls: this.selected_table_layout });
-		table.setAttribute('id', 'dn-table');
-
-		const thead = table.createEl('thead');
-		const tr = thead.createEl('tr');
-		this._th1 = tr.createEl('th', { text: 'Name' });
-		this._th2 = tr.createEl('th', { text: 'Path' });
-		this._th3 = tr.createEl('th', { text: 'Size' });
-		this._th4 = tr.createEl('th', { text: 'Date' });
-		this._th5 = tr.createEl('th', { text: 'Tags' });
-
-		this._th1.addEventListener('dblclick', () => this.dnAlternateSortColumn('name'));
-		this._th2.addEventListener('dblclick', () => this.dnAlternateSortColumn('path'));
-		this._th3.addEventListener('dblclick', () => this.dnAlternateSortColumn('size'));
-		this._th4.addEventListener('dblclick', () => this.dnAlternateSortColumn('modified'));
-		const tbody = table.createEl('tbody');
-		tbody.setAttribute('id', 'dn-table-results');
-
-		if (f.length > 0) {
-
-			if (this.intersectionObserver) {
-				this.intersectionObserver.disconnect();
-			}
-			// Pagination
-			this._total_pages = Math.ceil(f.length / this.files_per_page);
-			const paginatedData = f.slice((currentPage - 1) * this.files_per_page, currentPage * this.files_per_page);
-
-			paginatedData.forEach(async file => {
-				let tr = tbody.createEl('tr');
-				// Events
-				tr.addEventListener('contextmenu', (evt: MouseEvent) => { this.dnHandleClick(evt, file) });
-				tr.addEventListener('click', (evt: MouseEvent) => { this.dnHandleClick(evt, file) });
-				tr.addEventListener('dblclick', (evt: MouseEvent) => { this.dnHandleDblClick(evt, file) });
-
-				this.intersectionObserver.observe(tr);
-
-				let td1 = tr.createEl('td');
-				let td1Link = td1.createEl('a', { cls: this.dnSetFileIconClass(file.extension), text: file.name }).onClickEvent((evt: MouseEvent) => {
-					if (leaf !== null && file !== null) {
-						this.dnOpenFileAlt(file, evt);
-					}
-				});
-
-				let fSize = formatFileSize(file.stat.size);
-				let fMTime = moment(file.stat.mtime).format(this.date_format);
-				let td2 = tr.createEl('td');
-				let folder_path = getFolderStructure(file.path);
-				let td2_path = td2.createEl('a', { cls: 'dn-folder-path', text: folder_path, title: file.path }).onClickEvent((evt: MouseEvent) => {
-					this._INPUT_SEARCH.value = folder_path;
-					this.dnSearchVault(this._INPUT_SEARCH.value + '$');
-				});
-
-				let td3 = tr.createEl('td', { text: fSize, title: fSize + ' bytes' });
-				let td4 = tr.createEl('td', { text: fMTime, title: fMTime });
-				let tags_per_file = this.dnGetTagsPerFile(file);
-				let td5 = tr.createEl('td', { title: tags_per_file });
-				let fTags = tags_per_file.split(' ');
-				fTags.forEach((tag) => {
-					td5.createEl('a', { cls: 'dn-tag', text: tag }).onClickEvent((evt: MouseEvent) => {
-						this._INPUT_SEARCH.value = tag;
-						this.dnSearchVault(this._INPUT_SEARCH.value);
-					});
-				});
-
-			});
-
-			// Add pagination
-			paginationContainer.empty();
-			const resultsCount = paginationContainer.createEl('span', { cls: 'dn-pagination-total-results', text: `File(s): ${f.length}` + this._selected_category });
-			const currentPageIndicator = paginationContainer.createEl('span', { cls: 'dn-pagination-current-page', text: `Page ${currentPage} of ${this._total_pages}` });
-
-			const btnPrev = paginationContainer.createEl('button', { cls: 'dn-btn-prev', text: '◀', title: 'Previous' });
-			if (currentPage === 1) {
-				btnPrev.disabled = true;
-			} else {
-				btnPrev.disabled = false;
-			}
-			btnPrev.addEventListener('click', () => {
-				if (currentPage > 1) {
-					this.dnShowSearchResults({ f, el, leaf, currentPage: currentPage - 1 });
-				}
-			});
-			const btnNext = paginationContainer.createEl('button', { cls: 'dn-btn-next', text: '▶', title: 'Next' });
-			if (currentPage === this._total_pages) {
-				btnNext.disabled = true;
-			} else {
-				btnNext.disabled = false;
-			}
-
-			btnNext.addEventListener('click', () => {
-				if (currentPage < this._total_pages) {
-					this.dnShowSearchResults({ f, el, leaf, currentPage: currentPage + 1 });
-				}
-			});
-
-			this.dnUpdateSortIndicators(this._sort_column,
-				this._sort_order,
-				this._th1,
-				this._th2,
-				this._th3,
-				this._th4);
-
-		} else {
-			tr.empty();
-			this._divSearchResults.createEl('p', { cls: 'dn-no-results-found', text: 'No files found.' });
-		}
-	}
-
 	dnAlternateSortColumn(colName: string) {
 		switch (colName) {
 			case 'name':
@@ -673,40 +707,7 @@ export class DNModal extends Modal {
 				this.dnSortColumnNumber('modified', this._sort_order, true);
 				break;
 		}
-		this.dnShowSearchResults({ f: this._filtered_files, el: this._divSearchResults, leaf: this._leaf });
-	}
-
-	dnGetTagsPerFile(file: TFile): string {
-		const cur_file = this.app.vault.getAbstractFileByPath(file.path);
-		if (cur_file !== null) {
-
-			const tags = this.app.metadataCache.getFileCache(file)?.tags;
-			const frontmatter_tags = this.app.metadataCache.getFileCache(file)?.frontmatter;
-			const arrTags: string[] = [];
-
-			if (tags) {
-				for (let i = 0, len = tags.length; i < len; i++) {
-
-					if (arrTags.indexOf(tags[i].tag) < 0) {
-						arrTags.push(tags[i].tag);
-					}
-				}
-			}
-
-			if (frontmatter_tags !== undefined && frontmatter_tags.tags) {
-				for (let i = 0, len = frontmatter_tags.tags.length; i < len; i++) {
-
-					if (arrTags.indexOf(frontmatter_tags.tags[i]) < 0) {
-						arrTags.push('#' + frontmatter_tags.tags[i]);
-					}
-				}
-
-			}
-			return arrTags.join(' ');
-		} else {
-			return '';
-		}
-
+		this.dnShowModalSearchResults({ f: this._files_results, el: this._divSearchResults, leaf: this._leaf });
 	}
 
 	dnUpdateSortIndicators(activeColumn: string, sortOrder: string, col1: HTMLTableCellElement, col2: HTMLTableCellElement, col3: HTMLTableCellElement, col4: HTMLTableCellElement) {
@@ -754,17 +755,19 @@ export class DNModal extends Modal {
 
 		this.dnSetSelectSortValue(sortValue);
 
-		this._filtered_files.sort((fileA: TFile, fileB: TFile) => {
+		this._files_results.sort((fileA: TFile, fileB: TFile) => {
 			let sortA: string;
 			let sortB: string;
+			let folderStructureA: string;
+			let folderStructureB: string;
 			switch (sortColumn) {
 				case 'name':
 					sortA = fileA.name.toLowerCase();
 					sortB = fileB.name.toLowerCase();
 					break;
 				case 'path':
-					const folderStructureA = getFolderStructure(fileA.path);
-					const folderStructureB = getFolderStructure(fileB.path);
+					folderStructureA = getFolderStructure(fileA.path);
+					folderStructureB = getFolderStructure(fileB.path);
 					sortA = folderStructureA.toLowerCase();
 					sortB = folderStructureB.toLowerCase();
 					break;
@@ -804,9 +807,9 @@ export class DNModal extends Modal {
 
 		this.dnSetSelectSortValue(sortValue);
 
-		this._filtered_files.sort((fileA: TFile, fileB: TFile) => {
-			let sortA: number = 0;
-			let sortB: number = 0;
+		this._files_results.sort((fileA: TFile, fileB: TFile) => {
+			let sortA = 0;
+			let sortB = 0;
 
 			switch (sortColumn) {
 				case 'size':
@@ -829,11 +832,34 @@ export class DNModal extends Modal {
 		});
 	}
 
-
 	async dnGetRecentFiles(files: TFile[]): Promise<TFile[]> {
 		const arrRecentFiles = files;
 		return arrRecentFiles.sort((a, b) => b.stat.mtime - a.stat.mtime).slice(0, this.num_recent_files);
 	}
+
+	async dnCreateRecentFiles(title: string, divF: HTMLDivElement, files: TFile[], num_files: number) {
+		if (files.length === 0) {
+			divF.createEl('h3', { cls: 'dn-subtitles', text: title });
+			divF.createEl('p', { cls: 'dn-no-results-found', text: 'No files found.' });
+			divF.classList.add('dn-display-none');
+		} else {
+			divF.createEl('h3', { cls: 'dn-subtitles', text: title });
+			const sortedFiles = await this.dnGetRecentFiles(files);
+			sortedFiles.forEach(sfile => {
+				divF.createEl('a', { cls: this.dnSetFileIconClass(sfile.extension), text: sfile.basename, title: sfile.path }).onClickEvent((evt: MouseEvent) => {
+					if (sfile !== null) {
+						this.dnOpenFileAlt(sfile, evt);
+					}
+				});
+				if (sfile.extension !== 'md') {
+					divF.createEl('span', { cls: 'nav-file-tag', text: sfile.extension })
+				}
+
+				divF.createEl('br');
+			});
+		}
+	}
+
 
 	async dnOrganizeFiles({ arr }: { arr: TFile[] }): Promise<void> {
 		const arrNotes: TFile[] = [];
@@ -946,6 +972,27 @@ export class DNModal extends Modal {
 		}
 	}
 
+	// Custom Colors
+	dnSetCustomColors(): void {
+		document.body.style.setProperty('--dn-notes-color', this.color_notes);
+		document.body.style.setProperty('--dn-images-color', this.color_images);
+		document.body.style.setProperty('--dn-canvas-color', this.color_canvas);
+		document.body.style.setProperty('--dn-videos-color', this.color_videos);
+		document.body.style.setProperty('--dn-audios-color', this.color_audios);
+		document.body.style.setProperty('--dn-pdfs-color', this.color_pdf);
+		document.body.style.setProperty('--dn-other-color', this.color_other);
+	}
+
+	dnToggleColoredFiles(): void {
+		const dnMainContainer = document.getElementById("dn-container");
+		if (this.colored_files) {
+			dnMainContainer?.classList.add('dn-colored-files');
+		} else {
+			dnMainContainer?.classList.remove('dn-colored-files');
+		}
+		this.dnSetCustomColors();
+	}
+
 	dnSetView(view: number): void {
 		const divElements = [this._VIEW_DASHBOARD, this._VIEW_NAVIGATOR];
 		const topNavBtns = [this._BTN_DASHBOARD, this._BTN_NAVIGATOR];
@@ -1005,55 +1052,6 @@ export class DNModal extends Modal {
 			this._SELECT_TABLE_LAYOUT.value = val;
 			this.dnSelectTableLayout();
 		}
-	}
-
-	dnOpenFileAlt(f: TFile, evt: MouseEvent) {
-		if (!evt || typeof evt !== 'object' || !(f instanceof TFile)) {
-			return;
-		}
-
-		try {
-			if ((evt.button === 0) && (evt.ctrlKey || evt.metaKey)) {
-				this.app.workspace.getLeaf('tab').openFile(f);
-			} else if (evt.button === 1) {
-				this.app.workspace.getLeaf('tab').openFile(f);
-
-			} else if (evt.button === 0) {
-				this.dnOpenFile(f);
-			} else if (evt.button === 2 && !(evt.target instanceof HTMLTableCellElement)) {
-				evt.preventDefault();
-				this.dnGenerateContextMenu(evt, f);
-			}
-		} catch (er) {
-			return;
-		}
-	}
-
-	dnOpenFile(file: TFile) {
-		this.app.workspace.getLeaf(false).openFile(file);
-		this.close();
-	}
-
-	private dnHandleClick(evt: MouseEvent, file?: TFile) {
-		if (!evt || typeof evt !== 'object' || !(file instanceof TFile)) {
-			return;
-		}
-
-		this.dnSelectTableRow(evt);
-		if (evt.button === 2) {
-			evt.preventDefault();
-			this.dnGenerateContextMenu(evt, file);
-		}
-	}
-
-	private dnHandleDblClick(evt: MouseEvent, file?: TFile) {
-		if (!evt || typeof evt !== 'object' || !(file instanceof TFile)) {
-			return;
-		}
-
-		evt.preventDefault();
-		this.dnSelectTableRow(evt);
-		this.dnOpenFile(file);
 	}
 
 	dnSelectTableLayout(): void {
@@ -1164,7 +1162,7 @@ export class DNModal extends Modal {
 					mdFileProps.contentEl.createEl('br');
 
 					const propTags = mdFileProps.contentEl.createEl('div');
-					const curTags = this.dnGetTagsPerFile(file);
+					const curTags = getTagsPerFile(file);
 					propTags.createEl('span', { text: 'Tag(s): ', cls: 'dn-properties' });
 					if (curTags) {
 						const tags = curTags.split(' ');
@@ -1172,16 +1170,14 @@ export class DNModal extends Modal {
 							propTags.createEl('a', { text: tags[i], cls: 'dn-tag' }).onClickEvent((evt: MouseEvent) => {
 								mdFileProps.close();
 								this._INPUT_SEARCH.value = tags[i];
-								this.dnSearchVault(this._INPUT_SEARCH.value);
+								this.dnModalSearchVault(this._INPUT_SEARCH.value);
 							});
-						};
+						}
 					} else {
 						propTags.createEl('span', { text: 'No tags' });
 					}
 
 					mdFileProps.contentEl.createEl('br');
-
-
 
 					mdFileProps.contentEl.createEl('hr');
 
@@ -1198,6 +1194,28 @@ export class DNModal extends Modal {
 		this._DN_CTX_MENU.showAtMouseEvent(evt);
 	}
 
+	private dnHandleClick(evt: MouseEvent, file?: TFile) {
+		if (!evt || typeof evt !== 'object' || !(file instanceof TFile)) {
+			return;
+		}
+
+		this.dnSelectTableRow(evt);
+		if (evt.button === 2) {
+			evt.preventDefault();
+			this.dnGenerateContextMenu(evt, file);
+		}
+	}
+
+	private dnHandleDblClick(evt: MouseEvent, file?: TFile) {
+		if (!evt || typeof evt !== 'object' || !(file instanceof TFile)) {
+			return;
+		}
+
+		evt.preventDefault();
+		this.dnSelectTableRow(evt);
+		this.dnOpenFile(file);
+	}
+
 	private dnHandleIntersection = (entries: IntersectionObserverEntry[]) => {
 		entries.forEach(entry => {
 			if (!entry.isIntersecting) {
@@ -1208,12 +1226,40 @@ export class DNModal extends Modal {
 		});
 	}
 
+
+	dnOpenFileAlt(f: TFile, evt: MouseEvent) {
+		if (!evt || typeof evt !== 'object' || !(f instanceof TFile)) {
+			return;
+		}
+
+		try {
+			if ((evt.button === 0) && (evt.ctrlKey || evt.metaKey)) {
+				this.app.workspace.getLeaf('tab').openFile(f);
+			} else if (evt.button === 1) {
+				this.app.workspace.getLeaf('tab').openFile(f);
+
+			} else if (evt.button === 0) {
+				this.dnOpenFile(f);
+			} else if (evt.button === 2 && !(evt.target instanceof HTMLTableCellElement)) {
+				evt.preventDefault();
+				this.dnGenerateContextMenu(evt, f);
+			}
+		} catch (er) {
+			return;
+		}
+	}
+
+	dnOpenFile(file: TFile) {
+		this.app.workspace.getLeaf(false).openFile(file);
+		this.close();
+	}
+
 	onClose() {
 		const { contentEl } = this;
 		contentEl.empty();
 
 		if (this._INPUT_SEARCH && this._INPUT_SEARCH.removeEventListener) {
-			this._INPUT_SEARCH.removeEventListener('input', debounce(() => this.dnSearchVault(this._INPUT_SEARCH.value), 300, true));
+			this._INPUT_SEARCH.removeEventListener('input', debounce(() => this.dnModalSearchVault(this._INPUT_SEARCH.value), 300, true));
 		}
 		this._th1.removeEventListener('dblclick', () => this.dnAlternateSortColumn('name'));
 		this._th2.removeEventListener('dblclick', () => this.dnAlternateSortColumn('path'));
@@ -1225,4 +1271,5 @@ export class DNModal extends Modal {
 			this.intersectionObserver.disconnect();
 		}
 	}
+
 }

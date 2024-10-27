@@ -21,6 +21,10 @@ export class DNSettingTab extends PluginSettingTab {
     colorCompPdf: ColorComponent;
     colorCompOther: ColorComponent;
     toggleColoredFiles: ToggleComponent;
+    toggleHidePathColumn: ToggleComponent;
+    toggleHideSizeColumn: ToggleComponent;
+    toggleHideDateColumn: ToggleComponent;
+    toggleHideTagsColumn: ToggleComponent;
 
     constructor(app: App, plugin: DNPlugin) {
         super(app, plugin);
@@ -38,7 +42,7 @@ export class DNSettingTab extends PluginSettingTab {
                 btn.setButtonText('Open')
                     .setTooltip('Open dashboard navigator')
                     .onClick((evt: MouseEvent) => {
-                        this.plugin._DN_MODAL.open();
+                        this.plugin.DN_MODAL.open();
                     })
             });
 
@@ -54,7 +58,7 @@ export class DNSettingTab extends PluginSettingTab {
 
                     this.plugin.settings.default_view = parseInt(val);
 
-                    this.plugin._DN_MODAL.default_view = this.plugin.settings.default_view;
+                    this.plugin.DN_MODAL.default_view = this.plugin.settings.default_view;
 
                     await this.plugin.saveSettings();
                 }),
@@ -65,7 +69,7 @@ export class DNSettingTab extends PluginSettingTab {
                 btn.onClick(() => {
                     this.dropdownDefaultView.setValue(DEFAULT_SETTINGS.default_view.toString());
                     this.plugin.settings.default_view = DEFAULT_SETTINGS.default_view;
-                    this.plugin._DN_MODAL.default_view = this.plugin.settings.default_view;
+                    this.plugin.DN_MODAL.default_view = this.plugin.settings.default_view;
                     this.plugin.saveSettings();
                 });
             });
@@ -84,7 +88,7 @@ export class DNSettingTab extends PluginSettingTab {
 
                     this.plugin.settings.selected_table_layout = val;
 
-                    this.plugin._DN_MODAL.selected_table_layout = this.plugin.settings.selected_table_layout;
+                    this.plugin.DN_MODAL.selected_table_layout = this.plugin.settings.selected_table_layout;
 
                     await this.plugin.saveSettings();
                 }),
@@ -95,7 +99,7 @@ export class DNSettingTab extends PluginSettingTab {
                 btn.onClick(() => {
                     this.dropdownTableLayout.setValue(DEFAULT_SETTINGS.selected_table_layout.toString());
                     this.plugin.settings.selected_table_layout = DEFAULT_SETTINGS.selected_table_layout;
-                    this.plugin._DN_MODAL.selected_table_layout = this.plugin.settings.selected_table_layout;
+                    this.plugin.DN_MODAL.selected_table_layout = this.plugin.settings.selected_table_layout;
                     this.plugin.saveSettings();
                 });
             });
@@ -116,7 +120,7 @@ export class DNSettingTab extends PluginSettingTab {
 
                     this.plugin.settings.date_format = val;
 
-                    this.plugin._DN_MODAL.date_format = this.plugin.settings.date_format;
+                    this.plugin.DN_MODAL.date_format = this.plugin.settings.date_format;
 
                     await this.plugin.saveSettings();
                 }),
@@ -127,7 +131,7 @@ export class DNSettingTab extends PluginSettingTab {
                 btn.onClick(() => {
                     this.dropdownDateFormat.setValue(DEFAULT_SETTINGS.date_format.toString());
                     this.plugin.settings.date_format = DEFAULT_SETTINGS.date_format;
-                    this.plugin._DN_MODAL.date_format = this.plugin.settings.date_format;
+                    this.plugin.DN_MODAL.date_format = this.plugin.settings.date_format;
                     this.plugin.saveSettings();
                 });
             });
@@ -179,7 +183,7 @@ export class DNSettingTab extends PluginSettingTab {
 
                     this.plugin.settings.files_per_page = parseInt(val);
 
-                    this.plugin._DN_MODAL.files_per_page = this.plugin.settings.files_per_page;
+                    this.plugin.DN_MODAL.files_per_page = this.plugin.settings.files_per_page;
 
                     await this.plugin.saveSettings();
                 }),
@@ -190,7 +194,7 @@ export class DNSettingTab extends PluginSettingTab {
                 btn.onClick(() => {
                     this.dropdownFilesPerPage.setValue(DEFAULT_SETTINGS.files_per_page.toString());
                     this.plugin.settings.files_per_page = DEFAULT_SETTINGS.files_per_page;
-                    this.plugin._DN_MODAL.files_per_page = this.plugin.settings.files_per_page;
+                    this.plugin.DN_MODAL.files_per_page = this.plugin.settings.files_per_page;
                     this.plugin.saveSettings();
                 });
             });
@@ -209,7 +213,7 @@ export class DNSettingTab extends PluginSettingTab {
 
                     this.plugin.settings.num_recent_files = parseInt(val);
 
-                    this.plugin._DN_MODAL.num_recent_files = this.plugin.settings.num_recent_files;
+                    this.plugin.DN_MODAL.num_recent_files = this.plugin.settings.num_recent_files;
 
                     await this.plugin.saveSettings();
                 }),
@@ -220,7 +224,103 @@ export class DNSettingTab extends PluginSettingTab {
                 btn.onClick(() => {
                     this.dropdownRecentFiles.setValue(DEFAULT_SETTINGS.num_recent_files.toString());
                     this.plugin.settings.num_recent_files = DEFAULT_SETTINGS.num_recent_files;
-                    this.plugin._DN_MODAL.num_recent_files = this.plugin.settings.num_recent_files;
+                    this.plugin.DN_MODAL.num_recent_files = this.plugin.settings.num_recent_files;
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // Navigator: Hide column - path
+        new Setting(containerEl)
+            .setName('Hide column: Path')
+            .setDesc('Navigator: Hide path column')
+            .addToggle((toggle) => {
+                this.toggleHidePathColumn = toggle;
+                toggle
+                    .setValue(this.plugin.settings.hide_path)
+                    .onChange(async (val) => {
+                        this.plugin.settings.hide_path = val;
+                        this.plugin.dnUpdateHideColumn("path", val);
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.toggleHidePathColumn.setValue(DEFAULT_SETTINGS.hide_path);
+                    this.plugin.settings.hide_path = DEFAULT_SETTINGS.hide_path;
+                    this.plugin.dnUpdateHideColumn("path", DEFAULT_SETTINGS.hide_path);
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // Navigator: Hide column - size
+        new Setting(containerEl)
+            .setName('Hide column: Size')
+            .setDesc('Navigator: Hide size column')
+            .addToggle((toggle) => {
+                this.toggleHideSizeColumn = toggle;
+                toggle
+                    .setValue(this.plugin.settings.hide_size)
+                    .onChange(async (val) => {
+                        this.plugin.settings.hide_size = val;
+                        this.plugin.dnUpdateHideColumn("size", val);
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.toggleHideSizeColumn.setValue(DEFAULT_SETTINGS.hide_size);
+                    this.plugin.settings.hide_size = DEFAULT_SETTINGS.hide_size;
+                    this.plugin.dnUpdateHideColumn("size", DEFAULT_SETTINGS.hide_size);
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // Navigator: Hide column - date
+        new Setting(containerEl)
+            .setName('Hide column: Date')
+            .setDesc('Navigator: Hide date column')
+            .addToggle((toggle) => {
+                this.toggleHideDateColumn = toggle;
+                toggle
+                    .setValue(this.plugin.settings.hide_date)
+                    .onChange(async (val) => {
+                        this.plugin.settings.hide_date = val;
+                        this.plugin.dnUpdateHideColumn("date", val);
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.toggleHideDateColumn.setValue(DEFAULT_SETTINGS.hide_date);
+                    this.plugin.settings.hide_date = DEFAULT_SETTINGS.hide_date;
+                    this.plugin.dnUpdateHideColumn("date", DEFAULT_SETTINGS.hide_date);
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // Navigator: Hide column - tags
+        new Setting(containerEl)
+            .setName('Hide column: Tags')
+            .setDesc('Navigator: Hide tags column')
+            .addToggle((toggle) => {
+                this.toggleHideTagsColumn = toggle;
+                toggle
+                    .setValue(this.plugin.settings.hide_tags)
+                    .onChange(async (val) => {
+                        this.plugin.settings.hide_tags = val;
+                        this.plugin.dnUpdateHideColumn("tags", val);
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.toggleHideTagsColumn.setValue(DEFAULT_SETTINGS.hide_tags);
+                    this.plugin.settings.hide_tags = DEFAULT_SETTINGS.hide_tags;
+                    this.plugin.dnUpdateHideColumn("tags", DEFAULT_SETTINGS.hide_tags);
                     this.plugin.saveSettings();
                 });
             });
@@ -236,7 +336,7 @@ export class DNSettingTab extends PluginSettingTab {
                     .setValue(this.plugin.settings.excluded_ext)
                     .onChange(async (val) => {
                         this.plugin.settings.excluded_ext = val;
-                        this.plugin._DN_MODAL.excluded_extensions = this.plugin.dnGetExcludedExtensions(val);
+                        this.plugin.DN_MODAL.excluded_extensions = this.plugin.dnGetExcludedExtensions(val);
                         await this.plugin.saveSettings();
                     })
             }).addExtraButton((btn) => {
@@ -245,7 +345,7 @@ export class DNSettingTab extends PluginSettingTab {
                 btn.onClick(() => {
                     this.textExcludedExtensions.setValue('');
                     this.plugin.settings.excluded_ext = '';
-                    this.plugin._DN_MODAL.excluded_extensions = [];
+                    this.plugin.DN_MODAL.excluded_extensions = [];
                     this.plugin.saveSettings();
                 });
             });
@@ -261,7 +361,7 @@ export class DNSettingTab extends PluginSettingTab {
                     .setValue(this.plugin.settings.excluded_path)
                     .onChange(async (val) => {
                         this.plugin.settings.excluded_path = val;
-                        this.plugin._DN_MODAL.excluded_folders = this.plugin.dnGetExcludedFolders(val);
+                        this.plugin.DN_MODAL.excluded_folders = this.plugin.dnGetExcludedFolders(val);
                         await this.plugin.saveSettings();
                     })
             }).addExtraButton((btn) => {
@@ -270,7 +370,7 @@ export class DNSettingTab extends PluginSettingTab {
                 btn.onClick(() => {
                     this.textExcludedFolders.setValue('');
                     this.plugin.settings.excluded_path = '';
-                    this.plugin._DN_MODAL.excluded_folders = [];
+                    this.plugin.DN_MODAL.excluded_folders = [];
                     this.plugin.saveSettings();
                 });
             });
@@ -285,8 +385,8 @@ export class DNSettingTab extends PluginSettingTab {
                     .setValue(this.plugin.settings.colored_files)
                     .onChange(async (val) => {
                         this.plugin.settings.colored_files = val;
-                        this.plugin._DN_MODAL.colored_files = val;
-                        this.plugin._DN_MODAL.dnToggleColoredFiles();
+                        this.plugin.DN_MODAL.colored_files = val;
+                        this.plugin.DN_MODAL.dnToggleColoredFiles();
                         await this.plugin.saveSettings();
                     })
             }).addExtraButton((btn) => {
@@ -295,8 +395,8 @@ export class DNSettingTab extends PluginSettingTab {
                 btn.onClick(() => {
                     this.toggleColoredFiles.setValue(DEFAULT_SETTINGS.colored_files);
                     this.plugin.settings.colored_files = DEFAULT_SETTINGS.colored_files;
-                    this.plugin._DN_MODAL.colored_files = DEFAULT_SETTINGS.colored_files;
-                    this.plugin._DN_MODAL.dnToggleColoredFiles();
+                    this.plugin.DN_MODAL.colored_files = DEFAULT_SETTINGS.colored_files;
+                    this.plugin.DN_MODAL.dnToggleColoredFiles();
                     this.plugin.saveSettings();
                 });
             });
@@ -311,8 +411,8 @@ export class DNSettingTab extends PluginSettingTab {
                     .setValue(this.plugin.settings.color_notes)
                     .onChange(async (val) => {
                         this.plugin.settings.color_notes = val;
-                        this.plugin._DN_MODAL.color_notes = val;
-                        this.plugin._DN_MODAL.dnSetCustomColors();
+                        this.plugin.DN_MODAL.color_notes = val;
+                        this.plugin.DN_MODAL.dnSetCustomColors();
                         await this.plugin.saveSettings();
                     })
             }).addExtraButton((btn) => {
@@ -321,8 +421,8 @@ export class DNSettingTab extends PluginSettingTab {
                 btn.onClick(() => {
                     this.colorCompNotes.setValue(DEFAULT_SETTINGS.color_notes);
                     this.plugin.settings.color_notes = DEFAULT_SETTINGS.color_notes;
-                    this.plugin._DN_MODAL.color_notes = DEFAULT_SETTINGS.color_notes;
-                    this.plugin._DN_MODAL.dnSetCustomColors();
+                    this.plugin.DN_MODAL.color_notes = DEFAULT_SETTINGS.color_notes;
+                    this.plugin.DN_MODAL.dnSetCustomColors();
                     this.plugin.saveSettings();
                 });
             });
@@ -337,8 +437,8 @@ export class DNSettingTab extends PluginSettingTab {
                     .setValue(this.plugin.settings.color_canvas)
                     .onChange(async (val) => {
                         this.plugin.settings.color_canvas = val;
-                        this.plugin._DN_MODAL.color_canvas = val;
-                        this.plugin._DN_MODAL.dnSetCustomColors();
+                        this.plugin.DN_MODAL.color_canvas = val;
+                        this.plugin.DN_MODAL.dnSetCustomColors();
 
                         await this.plugin.saveSettings();
                     })
@@ -348,8 +448,8 @@ export class DNSettingTab extends PluginSettingTab {
                 btn.onClick(() => {
                     this.colorCompCanvas.setValue(DEFAULT_SETTINGS.color_canvas);
                     this.plugin.settings.color_canvas = DEFAULT_SETTINGS.color_canvas;
-                    this.plugin._DN_MODAL.color_canvas = DEFAULT_SETTINGS.color_canvas;
-                    this.plugin._DN_MODAL.dnSetCustomColors();
+                    this.plugin.DN_MODAL.color_canvas = DEFAULT_SETTINGS.color_canvas;
+                    this.plugin.DN_MODAL.dnSetCustomColors();
 
                     this.plugin.saveSettings();
                 });
@@ -365,8 +465,8 @@ export class DNSettingTab extends PluginSettingTab {
                     .setValue(this.plugin.settings.color_images)
                     .onChange(async (val) => {
                         this.plugin.settings.color_images = val;
-                        this.plugin._DN_MODAL.color_images = val;
-                        this.plugin._DN_MODAL.dnSetCustomColors();
+                        this.plugin.DN_MODAL.color_images = val;
+                        this.plugin.DN_MODAL.dnSetCustomColors();
 
                         await this.plugin.saveSettings();
                     })
@@ -376,8 +476,8 @@ export class DNSettingTab extends PluginSettingTab {
                 btn.onClick(() => {
                     this.colorCompImages.setValue(DEFAULT_SETTINGS.color_images);
                     this.plugin.settings.color_images = DEFAULT_SETTINGS.color_images;
-                    this.plugin._DN_MODAL.color_images = DEFAULT_SETTINGS.color_images;
-                    this.plugin._DN_MODAL.dnSetCustomColors();
+                    this.plugin.DN_MODAL.color_images = DEFAULT_SETTINGS.color_images;
+                    this.plugin.DN_MODAL.dnSetCustomColors();
 
                     this.plugin.saveSettings();
                 });
@@ -393,8 +493,8 @@ export class DNSettingTab extends PluginSettingTab {
                     .setValue(this.plugin.settings.color_videos)
                     .onChange(async (val) => {
                         this.plugin.settings.color_videos = val;
-                        this.plugin._DN_MODAL.color_videos = val;
-                        this.plugin._DN_MODAL.dnSetCustomColors();
+                        this.plugin.DN_MODAL.color_videos = val;
+                        this.plugin.DN_MODAL.dnSetCustomColors();
 
                         await this.plugin.saveSettings();
                     })
@@ -404,8 +504,8 @@ export class DNSettingTab extends PluginSettingTab {
                 btn.onClick(() => {
                     this.colorCompVideos.setValue(DEFAULT_SETTINGS.color_videos);
                     this.plugin.settings.color_videos = DEFAULT_SETTINGS.color_videos;
-                    this.plugin._DN_MODAL.color_videos = DEFAULT_SETTINGS.color_videos;
-                    this.plugin._DN_MODAL.dnSetCustomColors();
+                    this.plugin.DN_MODAL.color_videos = DEFAULT_SETTINGS.color_videos;
+                    this.plugin.DN_MODAL.dnSetCustomColors();
 
                     this.plugin.saveSettings();
                 });
@@ -421,8 +521,8 @@ export class DNSettingTab extends PluginSettingTab {
                     .setValue(this.plugin.settings.color_audios)
                     .onChange(async (val) => {
                         this.plugin.settings.color_audios = val;
-                        this.plugin._DN_MODAL.color_audios = val;
-                        this.plugin._DN_MODAL.dnSetCustomColors();
+                        this.plugin.DN_MODAL.color_audios = val;
+                        this.plugin.DN_MODAL.dnSetCustomColors();
 
                         await this.plugin.saveSettings();
                     })
@@ -432,8 +532,8 @@ export class DNSettingTab extends PluginSettingTab {
                 btn.onClick(() => {
                     this.colorCompAudios.setValue(DEFAULT_SETTINGS.color_audios);
                     this.plugin.settings.color_audios = DEFAULT_SETTINGS.color_audios;
-                    this.plugin._DN_MODAL.color_audios = DEFAULT_SETTINGS.color_audios;
-                    this.plugin._DN_MODAL.dnSetCustomColors();
+                    this.plugin.DN_MODAL.color_audios = DEFAULT_SETTINGS.color_audios;
+                    this.plugin.DN_MODAL.dnSetCustomColors();
 
                     this.plugin.saveSettings();
                 });
@@ -449,8 +549,8 @@ export class DNSettingTab extends PluginSettingTab {
                     .setValue(this.plugin.settings.color_pdf)
                     .onChange(async (val) => {
                         this.plugin.settings.color_pdf = val;
-                        this.plugin._DN_MODAL.color_pdf = val;
-                        this.plugin._DN_MODAL.dnSetCustomColors();
+                        this.plugin.DN_MODAL.color_pdf = val;
+                        this.plugin.DN_MODAL.dnSetCustomColors();
 
                         await this.plugin.saveSettings();
                     })
@@ -460,8 +560,8 @@ export class DNSettingTab extends PluginSettingTab {
                 btn.onClick(() => {
                     this.colorCompPdf.setValue(DEFAULT_SETTINGS.color_pdf);
                     this.plugin.settings.color_pdf = DEFAULT_SETTINGS.color_pdf;
-                    this.plugin._DN_MODAL.color_pdf = DEFAULT_SETTINGS.color_pdf;
-                    this.plugin._DN_MODAL.dnSetCustomColors();
+                    this.plugin.DN_MODAL.color_pdf = DEFAULT_SETTINGS.color_pdf;
+                    this.plugin.DN_MODAL.dnSetCustomColors();
 
                     this.plugin.saveSettings();
                 });
@@ -477,8 +577,8 @@ export class DNSettingTab extends PluginSettingTab {
                     .setValue(this.plugin.settings.color_other)
                     .onChange(async (val) => {
                         this.plugin.settings.color_other = val;
-                        this.plugin._DN_MODAL.color_other = val;
-                        this.plugin._DN_MODAL.dnSetCustomColors();
+                        this.plugin.DN_MODAL.color_other = val;
+                        this.plugin.DN_MODAL.dnSetCustomColors();
 
                         await this.plugin.saveSettings();
                     })
@@ -488,8 +588,8 @@ export class DNSettingTab extends PluginSettingTab {
                 btn.onClick(() => {
                     this.colorCompOther.setValue(DEFAULT_SETTINGS.color_other);
                     this.plugin.settings.color_other = DEFAULT_SETTINGS.color_other;
-                    this.plugin._DN_MODAL.color_other = DEFAULT_SETTINGS.color_other;
-                    this.plugin._DN_MODAL.dnSetCustomColors();
+                    this.plugin.DN_MODAL.color_other = DEFAULT_SETTINGS.color_other;
+                    this.plugin.DN_MODAL.dnSetCustomColors();
 
                     this.plugin.saveSettings();
                 });
