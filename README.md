@@ -70,7 +70,7 @@ You can combine search terms, file types (one per search) and date filters for m
 
 * **Multiple Commands:** You can use **multiple commands in a single query**, separated by spaces.
 
-* Feel free to experiment with different combinations of commands and filters to find the best way to access your content. For example: `@month @notes` and `@notes @month` (same effect -> list created/modified notes on the month). You can even expand this search with `@month @notes title_of_the_note` (or part of the title of the note, or tag).
+* Feel free to experiment with different combinations of commands and filters to find the best way to access your content. For example: `@month @notes` and `@notes @month` (same effect -> lists notes created/modified in the month). You can even expand this search with `@month @notes title_of_the_note` (or part of the note title, or tag).
 
 ### Excluding Results
 
@@ -86,7 +86,7 @@ You can combine exclusions with other filters, such as tags and date, to further
 
 - `@notes #meeting !#international @month`: This will list all notes tagged with `#meeting` that were created or modified this month, **excluding** those tagged with `#international`.
 
-- To find all notes tagged "meeting" created/modified this month: `@notes #meeting @month`
+- To find all notes tagged `#meeting` created/modified in the current month: `@notes #meeting @month`.
 
 By effectively using exclusions, you can tailor your searches to your specific needs and quickly find the information you're looking for.
 
