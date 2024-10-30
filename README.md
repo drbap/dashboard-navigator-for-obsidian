@@ -68,7 +68,7 @@ You can also filter content based on specific dates:
 - **Date filters shorthands**: 
   - `@d` (current day) -> `@day` or `@today`
   - `@d-1` -> `@day-1` or `@yesterday`
-  - `@d-2` -> `@day-2` to `@d-7` or `@day-7`
+  - `@d-2` -> `@day-2` to `@d-7` -> `@day-7`
   - `@w` -> `@week`
   - `@m` -> `@month`
   - `@y` -> `@year`
