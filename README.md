@@ -56,12 +56,29 @@ You can also filter content based on specific dates:
   - `@month`
   - `@year`
 
+### Search Filters Shorthands
+- **File categories shorthands**: 
+  - `@notes` or `@n`.
+  - `@images` or `@i`.
+  - `@canvas` or `@canvases` or `@c`.
+  - `@audios` or `@a`.
+  - `@videos` or `@v`.
+  - `@pdf`or `@pdfs` or `@p`.
+  - `@other`or `@others` or `@o`.
+- **Date filters shorthands**: 
+  - `@d` (current day) or `@day` or `@today`.
+  - `@d-1` or `@day-1` or `@yesterday`.
+  - `@d-2` or `@day-2` to `@d-7` or `@day-7`.
+  - `@w` or `@week`.
+  - `@m` or `@month`.
+  - `@y` or `@year`.
+
 ### Combining Search Terms, File Types and Date Filters
 
 You can combine search terms, file types (one per search) and date filters for more precise results:
 
-- `@notes #tag1 @month`: Lists **notes** with the tag `tag1` created/modified this month.
-- `@images @week`: Lists **images** added this week.
+- `@notes #tag1 @month`: Lists **notes** with the tag `tag1` created/modified this month (*Shorthand*: `@n #tag1 @m`).
+- `@images @week`: Lists **images** added this week (*Shorthand*: `@i @w`).
 
 
 ### Additional Tips
