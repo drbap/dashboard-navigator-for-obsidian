@@ -19,7 +19,7 @@ export class DNTableManager {
 			}
 		} else {
 			for (let i = 0; i < cells.length; i++) {
-				const colIndex = i % 5; // 5 columns of navigator
+				const colIndex = i % 6; // 6 columns of navigator
 				const columnName = this.getColumnNames()[colIndex];
 				if (columnNames.includes(columnName)) {
 					cells[i].classList.add('dn-hidden');
@@ -31,6 +31,6 @@ export class DNTableManager {
 	}
 
 	getColumnNames(): string[] {
-		return ['name', 'path', 'size', 'date', 'tags'];
+		return ['name', 'ext', 'path', 'size', 'date', 'tags'];
 	}
 }
