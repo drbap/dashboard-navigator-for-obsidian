@@ -1,4 +1,33 @@
 # Changelog
+
+## [3.1.0] - 2024-10-29
+
+**Navigator**: 
+- New **Ext** column (**File extension** column).
+- Sort results by file extension (Ext column).
+- **Navigator filter**: `@others`. You can use `@other`or `@others`.
+- **New navigator category filters shorthands**: 
+  - `@notes` or `@n`.
+  - `@images` or `@i`.
+  - `@canvas` or `@canvases` or `@c`.
+  - `@audios` or `@a`.
+  - `@videos` or `@v`.
+  - `@pdf`or `@pdfs` or `@p`.
+  - `@other`or `@others` or `@o`.
+- **New navigator date filters shorthands**: 
+  - `@d` (current day) or `@day` or `@today`.
+  - `@yesterday` or `@day-1` or `@d-1`.
+  - `@day-2` or `@d-2` to `@day-7` or `@d-7`.
+  - `@w` or `@week`.
+  - `@m` or `@month`.
+  - `@y` or `@year`.
+
+- UI sort select element (with column names).
+- When clicking on the dashboard category button it will show the filter on the navigator view search. Example: Notes button (dashboard view) -> `@notes`(navigator view search);
+
+**Plugin Settings**:
+- Hide Extension Column (Ext column).
+
 ## [3.0.0] - 2024-10-27
 - **Improved user-friendly search with special filters** (advanced search).
 
