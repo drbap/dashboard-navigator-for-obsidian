@@ -138,6 +138,7 @@ By effectively using exclusions, you can tailor your searches to your specific n
 The column-hiding feature gives you the flexibility to customize the **navigator view** to suit your specific preferences and workflow. By **hiding unnecessary columns**, you can create a cleaner, more focused view that highlights the information most relevant to you.
 
 You can hide the following columns:
+- **Ext**: Shows the file extension.
 - **Path**: Shows the location of the file within your vault structure.
 - **Size**: Displays the file size of the file.
 - **Date**: Indicates the modification date of the file.
