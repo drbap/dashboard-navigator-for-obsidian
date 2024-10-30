@@ -21,6 +21,7 @@ export class DNSettingTab extends PluginSettingTab {
     colorCompPdf: ColorComponent;
     colorCompOther: ColorComponent;
     toggleColoredFiles: ToggleComponent;
+    toggleHideExtColumn: ToggleComponent;
     toggleHidePathColumn: ToggleComponent;
     toggleHideSizeColumn: ToggleComponent;
     toggleHideDateColumn: ToggleComponent;
@@ -225,6 +226,30 @@ export class DNSettingTab extends PluginSettingTab {
                     this.dropdownRecentFiles.setValue(DEFAULT_SETTINGS.num_recent_files.toString());
                     this.plugin.settings.num_recent_files = DEFAULT_SETTINGS.num_recent_files;
                     this.plugin.DN_MODAL.num_recent_files = this.plugin.settings.num_recent_files;
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // Navigator: Hide column - ext
+        new Setting(containerEl)
+            .setName('Hide column: Ext')
+            .setDesc('Navigator: Hide file extension column')
+            .addToggle((toggle) => {
+                this.toggleHideExtColumn = toggle;
+                toggle
+                    .setValue(this.plugin.settings.hide_ext)
+                    .onChange(async (val) => {
+                        this.plugin.settings.hide_ext = val;
+                        this.plugin.dnUpdateHideColumn("ext", val);
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.toggleHideExtColumn.setValue(DEFAULT_SETTINGS.hide_ext);
+                    this.plugin.settings.hide_ext = DEFAULT_SETTINGS.hide_ext;
+                    this.plugin.dnUpdateHideColumn("ext", DEFAULT_SETTINGS.hide_ext);
                     this.plugin.saveSettings();
                 });
             });

@@ -41,6 +41,7 @@ export class DNModal extends Modal {
 	private _th3: HTMLTableCellElement;
 	private _th4: HTMLTableCellElement;
 	private _th5: HTMLTableCellElement;
+	private _th6: HTMLTableCellElement;
 
 	private _total_pages: number;
 
@@ -77,6 +78,7 @@ export class DNModal extends Modal {
 
 	private readonly intersectionObserver: IntersectionObserver;
 	private _DN_CTX_MENU: Menu;
+
 
 	constructor(app: App) {
 		super(app);
@@ -188,12 +190,14 @@ export class DNModal extends Modal {
 		this._SELECT_SORT.addEventListener('change', () => { this.dnSortColumnWithSelect(); });
 
 		// Select sort options
-		this._SELECT_SORT.createEl('option', { text: 'File name (A to Z)', value: 'name-asc' });
-		this._SELECT_SORT.createEl('option', { text: 'File name (Z to A)', value: 'name-desc' });
+		this._SELECT_SORT.createEl('option', { text: 'Name (A to Z)', value: 'name-asc' });
+		this._SELECT_SORT.createEl('option', { text: 'Name (Z to A)', value: 'name-desc' });
+		this._SELECT_SORT.createEl('option', { text: 'Extension (A to Z)', value: 'ext-asc' });
+		this._SELECT_SORT.createEl('option', { text: 'Extension (Z to A)', value: 'ext-desc' });
 		this._SELECT_SORT.createEl('option', { text: 'Path (A to Z)', value: 'path-asc' });
 		this._SELECT_SORT.createEl('option', { text: 'Path (Z to A)', value: 'path-desc' });
-		this._SELECT_SORT.createEl('option', { text: 'File size (smallest to largest)', value: 'size-asc' });
-		this._SELECT_SORT.createEl('option', { text: 'File size (largest to smallest)', value: 'size-desc' });
+		this._SELECT_SORT.createEl('option', { text: 'Size (smallest to largest)', value: 'size-asc' });
+		this._SELECT_SORT.createEl('option', { text: 'Size (largest to smallest)', value: 'size-desc' });
 		this._SELECT_SORT.createEl('option', { text: 'Date/time (oldest to newest)', value: 'modified-asc' });
 		this._SELECT_SORT.createEl('option', { text: 'Date/time (newest to oldest)', value: 'modified-desc' });
 
@@ -339,10 +343,8 @@ export class DNModal extends Modal {
 		btn.createEl('span', { cls: 'dn-btn-stats-number', text: btnCategoryFiles.length.toString() });
 		btn.onClickEvent((evt: MouseEvent) => {
 			this._files_results = btnCategoryFiles;
-			this._selected_category = ' (' + btnTitle + ')';
-			this.dnSortFilteredFiles(false);
-			this.dnShowModalSearchResults({ f: btnCategoryFiles, el: displayEl, leaf });
-			this.dnSetView(2);
+			this._INPUT_SEARCH.value = '@' + btnTitle.toLocaleLowerCase();
+			this.dnModalSearchVault(this._INPUT_SEARCH.value);
 		});
 
 		return btn;
@@ -428,45 +430,64 @@ export class DNModal extends Modal {
 						const dateSearch = val.slice(1).toLowerCase().split(' ');
 
 						switch (dateSearch[0]) {
+							case 'd':
 							case 'day':
 							case 'today':
 								return mtime.isSame(moment(), 'day');
+							case 'd-1':
 							case 'day-1':
 							case 'yesterday':
 								return mtime.isSame(moment().subtract(1, 'days'), 'day');
+							case 'd-2':
 							case 'day-2':
 								return mtime.isSame(moment().subtract(2, 'days'), 'day');
+							case 'd-3':
 							case 'day-3':
 								return mtime.isSame(moment().subtract(3, 'days'), 'day');
+							case 'd-4':
 							case 'day-4':
 								return mtime.isSame(moment().subtract(4, 'days'), 'day');
+							case 'd-5':
 							case 'day-5':
 								return mtime.isSame(moment().subtract(5, 'days'), 'day');
+							case 'd-6':
 							case 'day-6':
 								return mtime.isSame(moment().subtract(6, 'days'), 'day');
+							case 'd-7':
 							case 'day-7':
 								return mtime.isSame(moment().subtract(7, 'days'), 'day');
+							case 'w':
 							case 'week':
 								return mtime.isBetween(moment().subtract(7, 'days'), moment(), 'day', '[]');
+							case 'm':
 							case 'month':
 								return mtime.isSame(moment(), 'month');
+							case 'y':
 							case 'year':
 								return mtime.isSame(moment(), 'year');
+							case 'n':
 							case 'notes':
 								return this._notes.includes(file);
+							case 'c':
 							case 'canvases':
 							case 'canvas':
 								return this._canvas.includes(file);
+							case 'i':
 							case 'images':
 								return this._images.includes(file);
+							case 'a':
 							case 'audios':
 								return this._audios.includes(file);
+							case 'v':
 							case 'videos':
 								return this._videos.includes(file);
+							case 'p':
 							case 'pdf':
 							case 'pdfs':
 								return this._pdf.includes(file);
+							case 'o':
 							case 'other':
+							case 'others':
 								return this._other.includes(file);
 							default:
 								return false;
@@ -479,8 +500,6 @@ export class DNModal extends Modal {
 					}
 				});
 		}
-
-		this._selected_category = '';
 
 		this.dnSortFilteredFiles(false);
 
@@ -525,15 +544,17 @@ export class DNModal extends Modal {
 		const thead = table.createEl('thead');
 		const tr = thead.createEl('tr');
 		this._th1 = tr.createEl('th', { text: 'Name' });
-		this._th2 = tr.createEl('th', { text: 'Path' });
-		this._th3 = tr.createEl('th', { text: 'Size' });
-		this._th4 = tr.createEl('th', { text: 'Date' });
-		this._th5 = tr.createEl('th', { text: 'Tags' });
+		this._th2 = tr.createEl('th', { text: 'Ext' });
+		this._th3 = tr.createEl('th', { text: 'Path' });
+		this._th4 = tr.createEl('th', { text: 'Size' });
+		this._th5 = tr.createEl('th', { text: 'Date' });
+		this._th6 = tr.createEl('th', { text: 'Tags' });
 
 		this._th1.addEventListener('dblclick', () => this.dnAlternateSortColumn('name'));
-		this._th2.addEventListener('dblclick', () => this.dnAlternateSortColumn('path'));
-		this._th3.addEventListener('dblclick', () => this.dnAlternateSortColumn('size'));
-		this._th4.addEventListener('dblclick', () => this.dnAlternateSortColumn('modified'));
+		this._th2.addEventListener('dblclick', () => this.dnAlternateSortColumn('ext'));
+		this._th3.addEventListener('dblclick', () => this.dnAlternateSortColumn('path'));
+		this._th4.addEventListener('dblclick', () => this.dnAlternateSortColumn('size'));
+		this._th5.addEventListener('dblclick', () => this.dnAlternateSortColumn('modified'));
 
 		// Tbody
 		const tbody = table.createEl('tbody');
@@ -564,23 +585,33 @@ export class DNModal extends Modal {
 					}
 				});
 
+				const fExt = file.extension;
 				const fSize = formatFileSize(file.stat.size);
 				const fMTime = moment(file.stat.mtime).format(this.date_format);
 				const fCTime = moment(file.stat.ctime).format(this.date_format);
+
 				const td2 = tr.createEl('td');
+
+				td2.createEl('a', { cls: 'dn-ext', text: fExt, title: fExt }).onClickEvent((evt: MouseEvent) => {
+					this._INPUT_SEARCH.value = '.' + fExt;
+					this.dnModalSearchVault(this._INPUT_SEARCH.value);
+				});
+
+				const td3 = tr.createEl('td');
 				const folder_path = getFolderStructure(file.path);
-				td2.createEl('a', { cls: 'dn-folder-path', text: folder_path, title: file.path }).onClickEvent((evt: MouseEvent) => {
+				td3.createEl('a', { cls: 'dn-folder-path', text: folder_path, title: file.path }).onClickEvent((evt: MouseEvent) => {
 					this._INPUT_SEARCH.value = folder_path;
 					this.dnModalSearchVault(this._INPUT_SEARCH.value + '$');
 				});
 
+
 				tr.createEl('td', { text: fSize, title: fSize + ' bytes' });
 				tr.createEl('td', { text: fMTime, title: fCTime + ' - Created\n' + fMTime + ' - Modified' });
 				const tags_per_file = getTagsPerFile(file);
-				const td5 = tr.createEl('td', { title: tags_per_file });
+				const td6 = tr.createEl('td', { title: tags_per_file });
 				const fTags = tags_per_file.split(' ');
 				fTags.forEach((tag) => {
-					td5.createEl('a', { cls: 'dn-tag', text: tag }).onClickEvent((evt: MouseEvent) => {
+					td6.createEl('a', { cls: 'dn-tag', text: tag }).onClickEvent((evt: MouseEvent) => {
 						this._INPUT_SEARCH.value = tag;
 						this.dnModalSearchVault(this._INPUT_SEARCH.value);
 					});
@@ -591,7 +622,7 @@ export class DNModal extends Modal {
 			// Add pagination
 			paginationContainer.empty();
 			// Results count
-			paginationContainer.createEl('span', { cls: 'dn-pagination-total-results', text: `File(s): ${f.length}` + this._selected_category });
+			paginationContainer.createEl('span', { cls: 'dn-pagination-total-results', text: `File(s): ${f.length}` });
 			// Current page
 			paginationContainer.createEl('span', { cls: 'dn-pagination-current-page', text: `Page ${currentPage} of ${this._total_pages}` });
 
@@ -627,7 +658,8 @@ export class DNModal extends Modal {
 				this._th1,
 				this._th2,
 				this._th3,
-				this._th4);
+				this._th4,
+				this._th5);
 
 			const dnTableManager = new DNTableManager('#dn-table');
 			// Hide columns
@@ -643,6 +675,7 @@ export class DNModal extends Modal {
 		switch (this._sort_column) {
 			case 'name':
 			case 'path':
+			case 'ext':
 				this.dnSortColumnString(this._sort_column, this._sort_order, toggle);
 				break;
 			case 'size':
@@ -662,6 +695,7 @@ export class DNModal extends Modal {
 			switch (this._sort_column) {
 				case 'name':
 				case 'path':
+				case 'ext':
 					this.dnSortColumnString(this._sort_column, this._sort_order, false);
 					break;
 				case 'size':
@@ -676,7 +710,7 @@ export class DNModal extends Modal {
 	}
 
 	dnIsValidSort(val: string): boolean {
-		if (['name-asc', 'name-desc', 'path-asc', 'path-desc',
+		if (['name-asc', 'name-desc', 'path-asc', 'path-desc', 'ext-asc', 'ext-desc',
 			'size-asc', 'size-desc', 'modified-asc', 'modified-desc'].includes(val)) {
 			return true;
 		} else {
@@ -700,6 +734,9 @@ export class DNModal extends Modal {
 			case 'path':
 				this.dnSortColumnString('path', this._sort_order, true);
 				break;
+			case 'ext':
+				this.dnSortColumnString('ext', this._sort_order, true);
+				break;
 			case 'size':
 				this.dnSortColumnNumber('size', this._sort_order, true);
 				break;
@@ -710,24 +747,28 @@ export class DNModal extends Modal {
 		this.dnShowModalSearchResults({ f: this._files_results, el: this._divSearchResults, leaf: this._leaf });
 	}
 
-	dnUpdateSortIndicators(activeColumn: string, sortOrder: string, col1: HTMLTableCellElement, col2: HTMLTableCellElement, col3: HTMLTableCellElement, col4: HTMLTableCellElement) {
+	dnUpdateSortIndicators(activeColumn: string, sortOrder: string, col1: HTMLTableCellElement, col2: HTMLTableCellElement, col3: HTMLTableCellElement, col4: HTMLTableCellElement, col5: HTMLTableCellElement) {
 		col1.classList.remove('sort-active', 'sort-asc', 'sort-desc');
 		col2.classList.remove('sort-active', 'sort-asc', 'sort-desc');
 		col3.classList.remove('sort-active', 'sort-asc', 'sort-desc');
 		col4.classList.remove('sort-active', 'sort-asc', 'sort-desc');
-		let activeThCell = col4;
+		col5.classList.remove('sort-active', 'sort-asc', 'sort-desc');
+		let activeThCell = col5;
 		switch (activeColumn) {
 			case 'name':
 				activeThCell = col1;
 				break;
-			case 'path':
+			case 'ext':
 				activeThCell = col2;
 				break;
-			case 'size':
+			case 'path':
 				activeThCell = col3;
 				break;
-			case 'modified':
+			case 'size':
 				activeThCell = col4;
+				break;
+			case 'modified':
+				activeThCell = col5;
 				break;
 		}
 		activeThCell.classList.add('sort-active');
@@ -735,7 +776,7 @@ export class DNModal extends Modal {
 	}
 
 	dnSortColumnString(sortColumn: string, sortOrder: string, toggleSortOrder: boolean) {
-		const supportedColumns = ['name', 'path'];
+		const supportedColumns = ['name', 'path', 'ext'];
 
 		if (!supportedColumns.includes(sortColumn)) {
 			return;
@@ -764,6 +805,10 @@ export class DNModal extends Modal {
 				case 'name':
 					sortA = fileA.name.toLowerCase();
 					sortB = fileB.name.toLowerCase();
+					break;
+				case 'ext':
+					sortA = fileA.extension.toLowerCase();
+					sortB = fileB.extension.toLowerCase();
 					break;
 				case 'path':
 					folderStructureA = getFolderStructure(fileA.path);
@@ -1262,9 +1307,10 @@ export class DNModal extends Modal {
 			this._INPUT_SEARCH.removeEventListener('input', debounce(() => this.dnModalSearchVault(this._INPUT_SEARCH.value), 300, true));
 		}
 		this._th1.removeEventListener('dblclick', () => this.dnAlternateSortColumn('name'));
-		this._th2.removeEventListener('dblclick', () => this.dnAlternateSortColumn('path'));
-		this._th3.removeEventListener('dblclick', () => this.dnAlternateSortColumn('size'));
-		this._th4.removeEventListener('dblclick', () => this.dnAlternateSortColumn('modified'));
+		this._th2.removeEventListener('dblclick', () => this.dnAlternateSortColumn('ext'));
+		this._th3.removeEventListener('dblclick', () => this.dnAlternateSortColumn('path'));
+		this._th4.removeEventListener('dblclick', () => this.dnAlternateSortColumn('size'));
+		this._th5.removeEventListener('dblclick', () => this.dnAlternateSortColumn('modified'));
 		this._SELECT_SORT.removeEventListener('change', () => { this.dnSortColumnWithSelect(); });
 
 		if (this.intersectionObserver) {

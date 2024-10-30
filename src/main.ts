@@ -19,6 +19,7 @@ interface DNSettings {
 	color_pdf: string;
 	color_other: string;
 	colored_files: boolean;
+	hide_ext: boolean;
 	hide_path: boolean;
 	hide_size: boolean;
 	hide_date: boolean;
@@ -43,6 +44,7 @@ export const DEFAULT_SETTINGS: DNSettings = {
 	color_pdf: '#00a300',
 	color_other: '#828282',
 	colored_files: false,
+	hide_ext: false,
 	hide_path: false,
 	hide_size: false,
 	hide_date: false,
@@ -117,13 +119,14 @@ export default class DNPlugin extends Plugin {
 	}
 
 	dnSetHiddenColumns(arrCols: string[]): string[] {
-		const allowedCols = ["path", "size", "date", "tags"];
+		const allowedCols = ['ext', 'path', 'size', 'date', 'tags'];
 		arrCols = arrCols.filter(col => allowedCols.includes(col));
 
-		if (arrCols.length <= 4 && arrCols.some(col => ["path", "size", "date", "tags"].includes(col))) {
+		if (arrCols.length <= 5 && arrCols.some(col => ['ext', 'path', 'size', 'date', 'tags'].includes(col))) {
 			return arrCols;
 		} else {
 			this.settings.hide_columns = [];
+			this.settings.hide_ext = false;
 			this.settings.hide_path = false;
 			this.settings.hide_size = false;
 			this.settings.hide_date = false;
@@ -134,7 +137,7 @@ export default class DNPlugin extends Plugin {
 	}
 
 	dnUpdateHideColumn(col: string, val: boolean): void {
-		const allowedCols = ['path', 'size', 'date', 'tags'];
+		const allowedCols = ['ext', 'path', 'size', 'date', 'tags'];
 		if (allowedCols.includes(col) && val === true) {
 			if (!this.settings.hide_columns.includes(col)) {
 				this.settings.hide_columns.push(col);
