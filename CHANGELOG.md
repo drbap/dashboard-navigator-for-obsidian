@@ -12,8 +12,8 @@
   - `@canvas` or `@canvases` or `@c`.
   - `@audios` or `@a`.
   - `@videos` or `@v`.
-  - `@pdf`or `@pdfs` or `@p`.
-  - `@other`or `@others` or `@o`.
+  - `@pdf` or `@pdfs` or `@p`.
+  - `@other` or `@others` or `@o`.
 - **New navigator date filters shorthands**: 
   - `@d` (current day) or `@day` or `@today`.
   - `@yesterday` or `@day-1` or `@d-1`.
