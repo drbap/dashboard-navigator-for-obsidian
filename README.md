@@ -58,20 +58,20 @@ You can also filter content based on specific dates:
 
 ### Search Filters Shorthands
 - **File categories shorthands**: 
-  - `@notes` or `@n`.
-  - `@images` or `@i`.
-  - `@canvas` or `@canvases` or `@c`.
-  - `@audios` or `@a`.
-  - `@videos` or `@v`.
-  - `@pdf`or `@pdfs` or `@p`.
-  - `@other`or `@others` or `@o`.
+  - `@n` -> `@notes`
+  - `@i` -> `@images`
+  - `@c` -> `@canvas` or `@canvases`
+  - `@a` -> `@audios`
+  - `@v` -> `@videos`
+  - `@p` -> `@pdf`or `@pdfs`
+  - `@o` -> `@other`or `@others`
 - **Date filters shorthands**: 
-  - `@d` (current day) or `@day` or `@today`.
-  - `@d-1` or `@day-1` or `@yesterday`.
-  - `@d-2` or `@day-2` to `@d-7` or `@day-7`.
-  - `@w` or `@week`.
-  - `@m` or `@month`.
-  - `@y` or `@year`.
+  - `@d` (current day) -> `@day` or `@today`
+  - `@d-1` -> `@day-1` or `@yesterday`
+  - `@d-2` -> `@day-2` to `@d-7` or `@day-7`
+  - `@w` -> `@week`
+  - `@m` -> `@month`
+  - `@y` -> `@year`
 
 ### Combining Search Terms, File Types and Date Filters
 
