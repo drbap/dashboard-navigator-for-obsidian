@@ -22,7 +22,7 @@
   - `@m` or `@month`.
   - `@y` or `@year`.
 
-- UI sort select element (with column names).
+- UI sort select element (dropdown select -> options with column names - easier to use).
 - When clicking on the dashboard category button it will show the filter on the navigator view search. Example: Notes button (dashboard view) -> `@notes`(navigator view search);
 
 **Plugin Settings**:
