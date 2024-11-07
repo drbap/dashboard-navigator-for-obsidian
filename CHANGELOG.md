@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.0.0] - 2024-11-07
+- **New Column**: **Frontmatter** (frontmatter metadata).
+
+- **Settings**: Hide frontmatter column (toggle).
+
+- **New context menu item**: **Frontmatter**.
+   - **Frontmatter properties window**. This window will list frontmatter properties for the selected file. If you click on the selected property it will list all the files with the same property value combination.
+
+- **Improved File Properties window/modal**: added frontmatter properties.
+
+- **Enhanced Search Functionality**:
+  - **Specific Quoted Search**: Search for specific sentences using quotes or single quotes. For example, `"this is the description of a note"`.
+
+- **Improved dashboard category buttons**: Quickly filter your notes by clicking a dashboard category button. This automatically applies the filter to the navigator search and focuses the search input for easy typing.
+
+- **Improved date filtering**: Enhanced date filtering for ranges like `@day-1`, `@day-2` (or `@d-2`),  etc. Now, these filters show **cumulative results**. For example, `@day-1` displays files created/modified **today** AND **yesterday**.
+
+- **Improved month filtering**: `@month-1` or `@m-1` to `@month-12` or `@m-12`. `@month` or `@m`= current month (check readme for more information).
+
+- **Visual Enhancements**: Larger tag font size and improved hover effects for tags and frontmatter columns.
+
 ## [3.1.0] - 2024-10-29
 
 **Navigator**: 
