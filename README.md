@@ -44,18 +44,6 @@ You can combine the basic commands with search terms to narrow down your results
 * `@notes #tag1`: Lists **notes** with the tag `#tag1`.
 * `@notes desired_word #tag2`: Lists **notes** with `desired_word` and `#tag2`.
 
-### Date-Based Filtering
-
-You can also filter content based on specific dates:
-
-- Enter `@` + the keywords below to quickly filter the results:
-  - `@day` (or today)
-  - `@day-1` (yesterday)
-  - `@day-2` to `@day-7`
-  - `@week`
-  - `@month`
-  - `@year`
-
 ### Search Filters Shorthands
 - **File categories shorthands**: 
   - `@n` = `@notes`
@@ -65,13 +53,29 @@ You can also filter content based on specific dates:
   - `@v` = `@videos`
   - `@p` = `@pdf`or `@pdfs`
   - `@o` = `@other`or `@others`
-- **Date filters shorthands**: 
-  - `@d` (current day) = `@day` or `@today`
-  - `@d-1` = `@day-1` or `@yesterday`
-  - `@d-2` = `@day-2` to `@d-7` = `@day-7`
-  - `@w` = `@week`
-  - `@m` = `@month`
-  - `@y` = `@year`
+
+### Date Filters and Shorthands
+
+For quick filtering by date ranges, use the following date filters or the respective shorthands:
+
+* **Current Day:**
+  - `@d`, `@day`, or `@today`
+* **Current Day and Yesterday:**
+  - `@d-1` or `@day-1`
+* **Current Day and Past X Days:**
+  - `@d-2` to `@d-7` or `@day-2` to `@day-7` (for 2 to 7 days before)
+* **Current Week:**
+  - `@w` or `@week`
+* **Current Month and Past X Months:**
+  - `@m` or `@month` (current month)
+  - `@m-1` or `@month-1` (current month and previous month)
+  - `@m-2` to `@m-12` or `@month-2` to `@month-12` (current month and 2 to 12 months prior)
+* **Current Year:**
+  - `@y` or `@year`
+
+**Example:**
+
+To filter for data from the current month and the previous month, you would use `@m-1`.
 
 ### Combining Search Terms, File Types and Date Filters
 
@@ -80,6 +84,10 @@ You can combine search terms, file types (one per search) and date filters for m
 - `@notes #tag1 @month`: Lists **notes** with the tag `tag1` created/modified this month (*Shorthand*: `@n #tag1 @m`).
 - `@images @week`: Lists **images** added this week (*Shorthand*: `@i @w`).
 
+
+### Quoted Search
+
+  - **Specific Quoted Search**: Search for specific sentences using double quotes or single quotes. For example, `"this is the description of a note"`.
 
 ### Additional Tips
 
@@ -107,6 +115,33 @@ You can combine exclusions with other filters, such as tags and date, to further
 
 By effectively using exclusions, you can tailor your searches to your specific needs and quickly find the information you're looking for.
 
+### Frontmatter Metadata Search
+
+To search for specific frontmatter metadata, use the following syntax:
+
+**1. Search by Property or Value:**
+
+- **Property Match (all notes with this property)**: `'name_of_the_property:'`
+
+  - Example: `'task:'` or `'created:`
+
+- **Search for the value in one metadata property:** `'task:' value` or `'task:' 'This is a sentence to match'`. The sentence to match can be in single or double quotes
+
+  - Example: `'*task*:' 'create pdf'`
+
+**2. Search by Property and Value:**
+
+- **Exact Match:**
+`'name_of_the_property: value'`
+
+  - Example: `'topic: javascript'`
+
+**Tips:**
+
+- Use single quotes (`'`) to enclose when searching for specific metadata.
+
+- You can use the context menu (navigator view or dashboard view to open the **Frontmatter** or **File Properties** modal). Click on the desired frontmatter metadata to quickly search for an exact match within your notes.
+
 ## Sort Files
 
 ![Dashboard navigator for Obsidian - sort](images/dn_navigator_sort.png)
@@ -127,11 +162,15 @@ By effectively using exclusions, you can tailor your searches to your specific n
 
 ![Dashboard navigator for Obsidian - context menu 2](images/dn_navigator_context_menu_02.png)
 
-- Right-click the mouse button on the desired file link or table result to open the context menu. You can open the note in various ways (same tab, new tab, new window and also show its properties). You can also open the note by **double clicking** on the desired result.
+- Right-click the mouse button on the desired file link or table result to open the context menu. You can open the note in various ways (same tab, new tab, new window and also show its properties and metadata). You can also open the note by **double clicking** on the desired result.
 
 ## File Properties
 
 ![Dashboard navigator for Obsidian - file properties](images/dn_navigator_file_properties.png)
+
+## Frontmatter Modal
+
+![Dashboard navigator for Obsidian - frontmatter modal](images/dn_navigator_frontmatter_modal.png)
 
 ## Navigator View: Hide Columns
 
@@ -143,6 +182,7 @@ You can hide the following columns:
 - **Size**: Displays the file size of the file.
 - **Date**: Indicates the modification date of the file.
 - **Tags**: Lists the tags associated with the note, making it easier to categorize and search for notes.
+- **Frontmatter**: Lists the frontmatter/metadata associated with the note.
 
 ## Excluded File Extensions
 
@@ -159,7 +199,10 @@ You can hide the following columns:
 
 ## Colored Files
 
-- Select custom colors for files in the dashboard and navigator views. These colors will be reflected in the piechart graph, making it easier to identify and track different file types. To activate this feature, go to **plugin settings** and **toggle colored files**.
+![Dashboard navigator for Obsidian - colored files](images/dashboard_navigator.gif)
+
+- Select custom colors for files in the dashboard and navigator views. 
+- These colors will be reflected in the piechart graph, making it easier to identify and track different file types. To activate this feature, go to **plugin settings** and **toggle colored files**.
 
 ## Plugin Settings
 
@@ -167,11 +210,6 @@ You can hide the following columns:
 
 ![Dashboard navigator for Obsidian - settings 2 colored files](images/dn_navigator_settings2.png)
 
-## Select Custom Colors
-
-![Dashboard navigator for Obsidian - context menu 2](images/dn_navigator_context_menu_02.png)
-
-- Open **plugin settings** and select custom colors for notes, images and other file categories (piechart and files).
 
 ## Installation
 
