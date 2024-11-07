@@ -32,3 +32,17 @@ export function getTagsPerFile(file: TFile): string {
 	}
 
 }
+
+export function getPropsPerFile(file: TFile): string {
+	const fileProperties: string[] = [];
+
+	const cache = this.app.metadataCache.getFileCache(file);
+
+	if (cache?.frontmatter) {
+		for (const [key, value] of Object.entries(cache.frontmatter)) {
+			fileProperties.push(`'${key}: ${value}'`);
+		}
+	}
+
+	return fileProperties.join(' \n');
+}
