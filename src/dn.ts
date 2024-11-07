@@ -1,6 +1,6 @@
 import { App, debounce, Menu, Modal, TAbstractFile, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
 import { formatFileSize, getFolderStructure } from './utils/format';
-import { getTagsPerFile } from './utils/tags';
+import { getPropsPerFile, getTagsPerFile } from './utils/tags';
 import { DNPieChart } from './utils/dnpiechart';
 import { DNTableManager } from './utils/dntablemanager';
 import { moment } from 'obsidian';
@@ -42,6 +42,7 @@ export class DNModal extends Modal {
 	private _th4: HTMLTableCellElement;
 	private _th5: HTMLTableCellElement;
 	private _th6: HTMLTableCellElement;
+	private _th7: HTMLTableCellElement;
 
 	private _total_pages: number;
 
@@ -89,6 +90,24 @@ export class DNModal extends Modal {
 
 		const { contentEl } = this;
 
+		await this.updateModalData();
+
+		const leaf = this.app.workspace?.getMostRecentLeaf();
+		if (leaf !== null) {
+			this._leaf = leaf;
+		}
+
+		this.dnCreateMainUI(contentEl);
+		this.dnSetView(this.default_view);
+
+		this.dnSetSelectLayoutValue(this.selected_table_layout);
+		this.dnSetSelectSortValue(this.selected_sort_value);
+
+		this.dnToggleColoredFiles();
+
+	}
+
+	async updateModalData() {
 		this._files = [];
 		this._folders = [];
 		this._recent = [];
@@ -99,11 +118,6 @@ export class DNModal extends Modal {
 		this._videos = [];
 		this._pdf = [];
 		this._other = [];
-
-		const leaf = this.app.workspace?.getMostRecentLeaf();
-		if (leaf !== null) {
-			this._leaf = leaf;
-		}
 
 		const dnFilesAndFolders: TAbstractFile[] = this.app.vault.getAllLoadedFiles();
 		for (const absF of dnFilesAndFolders) {
@@ -126,14 +140,6 @@ export class DNModal extends Modal {
 		await this.dnOrganizeFiles({ arr: this._files_excluded_filters });
 
 		this._recent = await this.dnGetRecentFiles(this._files_excluded_filters);
-
-		this.dnCreateMainUI(contentEl);
-		this.dnSetView(this.default_view);
-
-		this.dnSetSelectLayoutValue(this.selected_table_layout);
-		this.dnSetSelectSortValue(this.selected_sort_value);
-
-		this.dnToggleColoredFiles();
 	}
 
 	async dnCreateMainUI(el: HTMLElement) {
@@ -343,8 +349,9 @@ export class DNModal extends Modal {
 		btn.createEl('span', { cls: 'dn-btn-stats-number', text: btnCategoryFiles.length.toString() });
 		btn.onClickEvent((evt: MouseEvent) => {
 			this._files_results = btnCategoryFiles;
-			this._INPUT_SEARCH.value = '@' + btnTitle.toLocaleLowerCase();
+			this._INPUT_SEARCH.value = '@' + btnTitle.toLocaleLowerCase() + ' ';
 			this.dnModalSearchVault(this._INPUT_SEARCH.value);
+			this._INPUT_SEARCH.focus();
 		});
 
 		return btn;
@@ -368,8 +375,23 @@ export class DNModal extends Modal {
 
 	async dnModalSearchVault(val: string) {
 		this.dnSetView(2);
-		const searchParams = val.toLowerCase().trim().split(/\s+/);
 
+		const search_raw_vals = /!(?:"(?:\\"|[^"])*"|'(?:\\'|[^'])*')|"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\S+/g
+
+		let searchParams = val.toLowerCase().trim().match(search_raw_vals);
+
+		if (!searchParams) {
+			return this.searchAction('', this._files_excluded_filters);
+		}
+		searchParams = searchParams.map(param => {
+			if (param.startsWith('"') && param.endsWith('"')) {
+				return param.slice(1, -1); // Remove double quotes
+			} else if (param.startsWith("'") && param.endsWith("'")) {
+				return param.slice(1, -1); // Remove single quotes
+			} else {
+				return param;
+			}
+		});
 
 		const firstParam = searchParams[0];
 		await this.searchAction(firstParam, this._files_excluded_filters);
@@ -387,7 +409,13 @@ export class DNModal extends Modal {
 		let rExp: RegExp;
 
 		const isExcludeSearch = val.startsWith('!') && val.length >= 2;
-		const excludeParam = isExcludeSearch ? val.slice(1) : val;
+		let excludeParam = isExcludeSearch ? val.slice(1) : val;
+
+		if (excludeParam.startsWith('"') && excludeParam.endsWith('"')) {
+			excludeParam = excludeParam.slice(1, -1); // Remove double quotes
+		} else if (excludeParam.startsWith("'") && excludeParam.endsWith("'")) {
+			excludeParam = excludeParam.slice(1, -1); // Remove single quotes
+		}
 
 		try {
 			if (isExcludeSearch) {
@@ -416,7 +444,8 @@ export class DNModal extends Modal {
 				const isMatch = file.name.toLowerCase().includes(excludeParam) ||
 					getFolderStructure(file.path).toLowerCase().includes(excludeParam) ||
 					moment(file.stat.mtime).format(this.date_format).toLowerCase().includes(excludeParam) ||
-					getTagsPerFile(file).toLowerCase().includes(excludeParam);
+					getTagsPerFile(file).toLowerCase().includes(excludeParam) ||
+					getPropsPerFile(file).toLowerCase().includes(excludeParam);
 
 				return isExcludeSearch ? !isMatch : isMatch;
 			});
@@ -426,77 +455,12 @@ export class DNModal extends Modal {
 
 					if (isDateSearch) {
 
-						const mtime = moment(file.stat.mtime);
 						const dateSearch = val.slice(1).toLowerCase().split(' ');
 
-						switch (dateSearch[0]) {
-							case 'd':
-							case 'day':
-							case 'today':
-								return mtime.isSame(moment(), 'day');
-							case 'd-1':
-							case 'day-1':
-							case 'yesterday':
-								return mtime.isSame(moment().subtract(1, 'days'), 'day');
-							case 'd-2':
-							case 'day-2':
-								return mtime.isSame(moment().subtract(2, 'days'), 'day');
-							case 'd-3':
-							case 'day-3':
-								return mtime.isSame(moment().subtract(3, 'days'), 'day');
-							case 'd-4':
-							case 'day-4':
-								return mtime.isSame(moment().subtract(4, 'days'), 'day');
-							case 'd-5':
-							case 'day-5':
-								return mtime.isSame(moment().subtract(5, 'days'), 'day');
-							case 'd-6':
-							case 'day-6':
-								return mtime.isSame(moment().subtract(6, 'days'), 'day');
-							case 'd-7':
-							case 'day-7':
-								return mtime.isSame(moment().subtract(7, 'days'), 'day');
-							case 'w':
-							case 'week':
-								return mtime.isBetween(moment().subtract(7, 'days'), moment(), 'day', '[]');
-							case 'm':
-							case 'month':
-								return mtime.isSame(moment(), 'month');
-							case 'y':
-							case 'year':
-								return mtime.isSame(moment(), 'year');
-							case 'n':
-							case 'notes':
-								return this._notes.includes(file);
-							case 'c':
-							case 'canvases':
-							case 'canvas':
-								return this._canvas.includes(file);
-							case 'i':
-							case 'images':
-								return this._images.includes(file);
-							case 'a':
-							case 'audios':
-								return this._audios.includes(file);
-							case 'v':
-							case 'videos':
-								return this._videos.includes(file);
-							case 'p':
-							case 'pdf':
-							case 'pdfs':
-								return this._pdf.includes(file);
-							case 'o':
-							case 'other':
-							case 'others':
-								return this._other.includes(file);
-							default:
-								return false;
-						}
+						return this.dnHandleSpecialSearch(dateSearch[0], file);
+
 					} else {
-						return rExp.test(file.name.toLowerCase())
-							|| rExp.test(getFolderStructure(file.path).toLowerCase())
-							|| rExp.test(moment(file.stat.mtime).format(this.date_format))
-							|| rExp.test(getTagsPerFile(file).toLowerCase());
+						return this.dnHandleNormalSearch(rExp, file);
 					}
 				});
 		}
@@ -549,6 +513,7 @@ export class DNModal extends Modal {
 		this._th4 = tr.createEl('th', { text: 'Size' });
 		this._th5 = tr.createEl('th', { text: 'Date' });
 		this._th6 = tr.createEl('th', { text: 'Tags' });
+		this._th7 = tr.createEl('th', { text: 'Frontmatter' });
 
 		this._th1.addEventListener('dblclick', () => this.dnAlternateSortColumn('name'));
 		this._th2.addEventListener('dblclick', () => this.dnAlternateSortColumn('ext'));
@@ -608,11 +573,20 @@ export class DNModal extends Modal {
 				tr.createEl('td', { text: fSize, title: fSize + ' bytes' });
 				tr.createEl('td', { text: fMTime, title: fCTime + ' - Created\n' + fMTime + ' - Modified' });
 				const tags_per_file = getTagsPerFile(file);
+				const props_per_file = getPropsPerFile(file);
 				const td6 = tr.createEl('td', { title: tags_per_file });
 				const fTags = tags_per_file.split(' ');
 				fTags.forEach((tag) => {
 					td6.createEl('a', { cls: 'dn-tag', text: tag }).onClickEvent((evt: MouseEvent) => {
 						this._INPUT_SEARCH.value = tag;
+						this.dnModalSearchVault(this._INPUT_SEARCH.value);
+					});
+				});
+				const td7 = tr.createEl('td', { title: props_per_file });
+				const fProps = props_per_file.split('\n');
+				fProps.forEach((prop) => {
+					td7.createEl('a', { cls: 'dn-tag', text: prop }).onClickEvent((evt: MouseEvent) => {
+						this._INPUT_SEARCH.value = prop;
 						this.dnModalSearchVault(this._INPUT_SEARCH.value);
 					});
 				});
@@ -1170,6 +1144,57 @@ export class DNModal extends Modal {
 
 		this._DN_CTX_MENU.addItem((item) =>
 			item
+				.setTitle('Frontmatter')
+				.setIcon('text')
+				.onClick(() => {
+					const fpModal = new Modal(this.app);
+					fpModal.contentEl.createEl('h4', { text: 'Frontmatter' });
+
+					const fpFile = fpModal.contentEl.createEl('div');
+					fpFile.createEl('span', { text: 'File: ', cls: 'dn-properties' });
+					fpFile.createEl('span', { text: file.name });
+					fpModal.contentEl.createEl('br');
+
+					const fpPath = fpModal.contentEl.createEl('div');
+					fpPath.createEl('span', { text: 'Path: ', cls: 'dn-properties' });
+					fpPath.createEl('span', { text: getFolderStructure(file.path) });
+					fpModal.contentEl.createEl('br');
+
+					fpModal.contentEl.createEl('span', { text: 'Frontmatter: ', cls: 'dn-properties' });
+					fpModal.contentEl.createEl('br');
+
+					const frontmatterDiv = fpModal.contentEl.createEl('div', { cls: 'dn-properties-frontmatter-modal' });
+					const curProps = getPropsPerFile(file);
+					if (curProps) {
+						const prop = curProps.split(' \n');
+						for (let i = 0, len = prop.length; i < len; i++) {
+							frontmatterDiv.createEl('a', { text: prop[i], cls: 'dn-fproperties' }).onClickEvent((evt: MouseEvent) => {
+								fpModal.close();
+								this._INPUT_SEARCH.value = prop[i];
+								this.dnModalSearchVault(this._INPUT_SEARCH.value);
+							});
+							frontmatterDiv.createEl('br');
+						}
+					} else {
+						frontmatterDiv.createEl('span', { text: 'No frontmatter' });
+					}
+
+					fpModal.contentEl.createEl('br');
+
+					const divBottom = fpModal.contentEl.createEl('div', { cls: 'dn-div-bottom-properties' });
+					const btnCloseProps = divBottom.createEl('button', { text: 'Ok', cls: 'dn-btn-close-properties' });
+					btnCloseProps.onClickEvent(() => {
+						fpModal.close();
+					});
+
+					fpModal.open();
+				})
+		);
+
+		this._DN_CTX_MENU.addSeparator();
+
+		this._DN_CTX_MENU.addItem((item) =>
+			item
 				.setTitle('File properties')
 				.setIcon('file-cog')
 				.onClick(() => {
@@ -1179,7 +1204,6 @@ export class DNModal extends Modal {
 					const propFileName = mdFileProps.contentEl.createEl('div');
 					propFileName.createEl('span', { text: 'File name: ', cls: 'dn-properties' });
 					propFileName.createEl('span', { text: file.basename });
-					mdFileProps.contentEl.createEl('br');
 
 					const propFileExt = mdFileProps.contentEl.createEl('div');
 					propFileExt.createEl('span', { text: 'Extension: ', cls: 'dn-properties' });
@@ -1199,7 +1223,6 @@ export class DNModal extends Modal {
 					const propDateCreated = mdFileProps.contentEl.createEl('div');
 					propDateCreated.createEl('span', { text: 'Created: ', cls: 'dn-properties' });
 					propDateCreated.createEl('span', { text: moment(file.stat.ctime).format(this.date_format) });
-					mdFileProps.contentEl.createEl('br');
 
 					const propDateModified = mdFileProps.contentEl.createEl('div');
 					propDateModified.createEl('span', { text: 'Modified: ', cls: 'dn-properties' });
@@ -1224,7 +1247,26 @@ export class DNModal extends Modal {
 
 					mdFileProps.contentEl.createEl('br');
 
-					mdFileProps.contentEl.createEl('hr');
+					mdFileProps.contentEl.createEl('span', { text: 'Frontmatter: ', cls: 'dn-properties' });
+					mdFileProps.contentEl.createEl('br');
+
+					const frontmatterProps = mdFileProps.contentEl.createEl('div', { cls: 'dn-properties-frontmatter' });
+					const curProps = getPropsPerFile(file);
+					if (curProps) {
+						const prop = curProps.split(' \n');
+						for (let i = 0, len = prop.length; i < len; i++) {
+							frontmatterProps.createEl('a', { text: prop[i], cls: 'dn-fproperties' }).onClickEvent((evt: MouseEvent) => {
+								mdFileProps.close();
+								this._INPUT_SEARCH.value = prop[i];
+								this.dnModalSearchVault(this._INPUT_SEARCH.value);
+							});
+							frontmatterProps.createEl('br');
+						}
+					} else {
+						frontmatterProps.createEl('span', { text: 'No frontmatter' });
+					}
+
+					mdFileProps.contentEl.createEl('br');
 
 					const divBottom = mdFileProps.contentEl.createEl('div', { cls: 'dn-div-bottom-properties' });
 					const btnCloseProps = divBottom.createEl('button', { text: 'Ok', cls: 'dn-btn-close-properties' });
@@ -1271,6 +1313,117 @@ export class DNModal extends Modal {
 		});
 	}
 
+	private dnHandleNormalSearch(rExp: RegExp, file: TFile): boolean {
+		return rExp.test(file.name.toLowerCase())
+			|| rExp.test(getFolderStructure(file.path).toLowerCase())
+			|| rExp.test(moment(file.stat.mtime).format(this.date_format))
+			|| rExp.test(getTagsPerFile(file).toLowerCase())
+			|| rExp.test(getPropsPerFile(file).toLowerCase());
+	}
+
+	private dnHandleSpecialSearch(search: string, file: TFile) {
+
+		const mtime = moment(file.stat.mtime);
+
+		switch (search) {
+			case 'd':
+			case 'day':
+			case 'today':
+				return mtime.isSame(moment(), 'day');
+			case 'd-1':
+			case 'day-1':
+			case 'yesterday':
+				return mtime.isBetween(moment().subtract(1, 'days'), moment(), 'day', '[]');
+			case 'd-2':
+			case 'day-2':
+				return mtime.isBetween(moment().subtract(2, 'days'), moment(), 'day', '[]');
+			case 'd-3':
+			case 'day-3':
+				return mtime.isBetween(moment().subtract(3, 'days'), moment(), 'day', '[]');
+			case 'd-4':
+			case 'day-4':
+				return mtime.isBetween(moment().subtract(4, 'days'), moment(), 'day', '[]');
+			case 'd-5':
+			case 'day-5':
+				return mtime.isBetween(moment().subtract(5, 'days'), moment(), 'day', '[]');
+			case 'd-6':
+			case 'day-6':
+				return mtime.isBetween(moment().subtract(6, 'days'), moment(), 'day', '[]');
+			case 'd-7':
+			case 'day-7':
+			case 'w':
+			case 'week':
+				return mtime.isBetween(moment().subtract(7, 'days'), moment(), 'day', '[]');
+			case 'm':
+			case 'month':
+				return mtime.isSame(moment(), 'month');
+			case 'm-1':
+			case 'month-1':
+				return mtime.isBetween(moment().subtract(1, 'month'), moment(), 'month', '[]');
+			case 'm-2':
+			case 'month-2':
+				return mtime.isBetween(moment().subtract(2, 'month'), moment(), 'month', '[]');
+			case 'm-3':
+			case 'month-3':
+				return mtime.isBetween(moment().subtract(3, 'month'), moment(), 'month', '[]');
+			case 'm-4':
+			case 'month-4':
+				return mtime.isBetween(moment().subtract(4, 'month'), moment(), 'month', '[]');
+			case 'm-5':
+			case 'month-5':
+				return mtime.isBetween(moment().subtract(5, 'month'), moment(), 'month', '[]');
+			case 'm-6':
+			case 'month-6':
+				return mtime.isBetween(moment().subtract(6, 'month'), moment(), 'month', '[]');
+			case 'm-7':
+			case 'month-7':
+				return mtime.isBetween(moment().subtract(7, 'month'), moment(), 'month', '[]');
+			case 'm-8':
+			case 'month-8':
+				return mtime.isBetween(moment().subtract(8, 'month'), moment(), 'month', '[]');
+			case 'm-9':
+			case 'month-9':
+				return mtime.isBetween(moment().subtract(9, 'month'), moment(), 'month', '[]');
+			case 'm-10':
+			case 'month-10':
+				return mtime.isBetween(moment().subtract(10, 'month'), moment(), 'month', '[]');
+			case 'm-11':
+			case 'month-11':
+				return mtime.isBetween(moment().subtract(11, 'month'), moment(), 'month', '[]');
+			case 'm-12':
+			case 'month-12':
+				return mtime.isBetween(moment().subtract(12, 'month'), moment(), 'month', '[]');
+			case 'y':
+			case 'year':
+				return mtime.isSame(moment(), 'year');
+			case 'n':
+			case 'notes':
+				return this._notes.includes(file);
+			case 'c':
+			case 'canvases':
+			case 'canvas':
+				return this._canvas.includes(file);
+			case 'i':
+			case 'images':
+				return this._images.includes(file);
+			case 'a':
+			case 'audios':
+				return this._audios.includes(file);
+			case 'v':
+			case 'videos':
+				return this._videos.includes(file);
+			case 'p':
+			case 'pdf':
+			case 'pdfs':
+				return this._pdf.includes(file);
+			case 'o':
+			case 'other':
+			case 'others':
+				return this._other.includes(file);
+			default:
+				return false;
+		}
+	}
 
 	dnOpenFileAlt(f: TFile, evt: MouseEvent) {
 		if (!evt || typeof evt !== 'object' || !(f instanceof TFile)) {

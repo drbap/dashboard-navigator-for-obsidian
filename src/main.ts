@@ -24,6 +24,7 @@ interface DNSettings {
 	hide_size: boolean;
 	hide_date: boolean;
 	hide_tags: boolean;
+	hide_frontmatter: boolean;
 	hide_columns: string[];
 }
 
@@ -49,6 +50,7 @@ export const DEFAULT_SETTINGS: DNSettings = {
 	hide_size: false,
 	hide_date: false,
 	hide_tags: false,
+	hide_frontmatter: false,
 	hide_columns: []
 }
 
@@ -106,6 +108,7 @@ export default class DNPlugin extends Plugin {
 				this.DN_MODAL.default_view = 2;
 				this.DN_MODAL.open();
 			}
+
 		});
 
 		this.addSettingTab(new DNSettingTab(this.app, this));
@@ -119,10 +122,10 @@ export default class DNPlugin extends Plugin {
 	}
 
 	dnSetHiddenColumns(arrCols: string[]): string[] {
-		const allowedCols = ['ext', 'path', 'size', 'date', 'tags'];
+		const allowedCols = ['ext', 'path', 'size', 'date', 'tags', 'frontmatter'];
 		arrCols = arrCols.filter(col => allowedCols.includes(col));
 
-		if (arrCols.length <= 5 && arrCols.some(col => ['ext', 'path', 'size', 'date', 'tags'].includes(col))) {
+		if (arrCols.length <= 6 && arrCols.some(col => ['ext', 'path', 'size', 'date', 'tags', 'frontmatter'].includes(col))) {
 			return arrCols;
 		} else {
 			this.settings.hide_columns = [];
@@ -131,13 +134,14 @@ export default class DNPlugin extends Plugin {
 			this.settings.hide_size = false;
 			this.settings.hide_date = false;
 			this.settings.hide_tags = false;
+			this.settings.hide_frontmatter = false;
 			this.saveSettings();
 			return [];
 		}
 	}
 
 	dnUpdateHideColumn(col: string, val: boolean): void {
-		const allowedCols = ['ext', 'path', 'size', 'date', 'tags'];
+		const allowedCols = ['ext', 'path', 'size', 'date', 'tags', 'frontmatter'];
 		if (allowedCols.includes(col) && val === true) {
 			if (!this.settings.hide_columns.includes(col)) {
 				this.settings.hide_columns.push(col);

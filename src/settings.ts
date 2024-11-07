@@ -26,6 +26,7 @@ export class DNSettingTab extends PluginSettingTab {
     toggleHideSizeColumn: ToggleComponent;
     toggleHideDateColumn: ToggleComponent;
     toggleHideTagsColumn: ToggleComponent;
+    toggleHideFrontmatterColumn: ToggleComponent;
 
     constructor(app: App, plugin: DNPlugin) {
         super(app, plugin);
@@ -346,6 +347,30 @@ export class DNSettingTab extends PluginSettingTab {
                     this.toggleHideTagsColumn.setValue(DEFAULT_SETTINGS.hide_tags);
                     this.plugin.settings.hide_tags = DEFAULT_SETTINGS.hide_tags;
                     this.plugin.dnUpdateHideColumn("tags", DEFAULT_SETTINGS.hide_tags);
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // Navigator: Hide column - frontmatter
+        new Setting(containerEl)
+            .setName('Hide column: Frontmatter')
+            .setDesc('Navigator: Hide frontmatter properties column')
+            .addToggle((toggle) => {
+                this.toggleHideFrontmatterColumn = toggle;
+                toggle
+                    .setValue(this.plugin.settings.hide_frontmatter)
+                    .onChange(async (val) => {
+                        this.plugin.settings.hide_frontmatter = val;
+                        this.plugin.dnUpdateHideColumn("frontmatter", val);
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.toggleHideFrontmatterColumn.setValue(DEFAULT_SETTINGS.hide_frontmatter);
+                    this.plugin.settings.hide_frontmatter = DEFAULT_SETTINGS.hide_frontmatter;
+                    this.plugin.dnUpdateHideColumn("frontmatter", DEFAULT_SETTINGS.hide_frontmatter);
                     this.plugin.saveSettings();
                 });
             });
