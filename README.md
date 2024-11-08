@@ -127,7 +127,7 @@ To search for specific frontmatter metadata, use the following syntax:
 
 - **Search for the value in one metadata property:** `'task:' value` or `'task:' 'This is a sentence to match'`. The sentence to match can be in single or double quotes
 
-  - Example: `'*task*:' 'create pdf'`
+  - Example: `'task:' 'create pdf'`
 
 **2. Search by Property and Value:**
 
