@@ -542,12 +542,12 @@ a.dn-tag:hover {
 }
 
 a.dn-fproperties::before {
-	content: '▪';
+	content: '•';
 	color: var(--dn-border-color);
 }
 
 a.dn-fproperties:hover::before {
-	content: '▪';
+	content: '•';
 	color: var(--text-accent-hover);
 }
 
@@ -652,7 +652,7 @@ table#dn-table.dn-tbl-default td {
 }
 
 .dn-properties-frontmatter-modal {
-	height: 300px;
+	height: 250px;
 }
 
 @media screen and (max-width: 1024px) {
@@ -724,7 +724,9 @@ table#dn-table.dn-tbl-default td {
 	table#dn-table th:nth-child(5),
 	table#dn-table td:nth-child(5),
 	table#dn-table th:nth-child(6),
-	table#dn-table td:nth-child(6) {
+	table#dn-table td:nth-child(6),
+	table#dn-table th:nth-child(7),
+	table#dn-table td:nth-child(7) {
 		display: none;
 	}
 
