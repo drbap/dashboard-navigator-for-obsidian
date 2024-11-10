@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.0.1] - 2024-11-10
+- Right-click on links in **Ext**, **Path**, **Tags** and **Frontmatter** columns. Will not work as a left-click.
+- Right-click on tags and frontmatter properties (links) inside **Properties** and **Frontmatter** windows/modals. Will not work as a left-click.
+- Mobile tweaks for the new frontmatter column (small screens).
+- Frontmatter window: Frontmatter properties symbol (square -> circle).
+
 ## [4.0.0] - 2024-11-07
 - **New Column**: **Frontmatter** (frontmatter metadata).
 
