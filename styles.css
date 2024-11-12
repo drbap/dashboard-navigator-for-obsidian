@@ -318,7 +318,8 @@ table#dn-table th:nth-child(1),
 table#dn-table th:nth-child(2),
 table#dn-table th:nth-child(3),
 table#dn-table th:nth-child(4),
-table#dn-table th:nth-child(5) {
+table#dn-table th:nth-child(5),
+table#dn-table th:nth-child(6) {
 	resize: horizontal;
 }
 
@@ -645,14 +646,23 @@ table#dn-table.dn-tbl-default td {
 	overflow-y: auto;
 	resize: vertical;
 	min-height: 48px;
-	height: 60px;
+	height: 120px;
 	border: 1px solid var(--dn-border-color);
 	padding: var(--size-4-1);
 	line-height: 1.8em;
+	font-size: 1em;
+	word-wrap: break-word;
+	word-break: break-word;
 }
 
-.dn-properties-frontmatter-modal {
-	height: 250px;
+.modal:has(.dn-properties-modal),
+.modal:has(.dn-frontmatter-modal) {
+	min-height: 60%;
+	min-width: 30%;
+	width: 60%;
+	max-width: 90%;
+
+	resize: both;
 }
 
 @media screen and (max-width: 1024px) {
