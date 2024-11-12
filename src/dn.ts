@@ -388,6 +388,8 @@ export class DNModal extends Modal {
 				return param.slice(1, -1); // Remove double quotes
 			} else if (param.startsWith("'") && param.endsWith("'")) {
 				return param.slice(1, -1); // Remove single quotes
+			} else if (param.startsWith(".")) {
+				return '\\' + param;
 			} else {
 				return param;
 			}
@@ -1164,6 +1166,7 @@ export class DNModal extends Modal {
 				.onClick(() => {
 					// Frontmatter modal
 					const fpModal = new Modal(this.app);
+					fpModal.contentEl.setAttribute('class', 'dn-frontmatter-modal');
 					fpModal.contentEl.createEl('h4', { text: 'Frontmatter' });
 
 					const fpFile = fpModal.contentEl.createEl('div');
@@ -1180,6 +1183,9 @@ export class DNModal extends Modal {
 					fpModal.contentEl.createEl('br');
 
 					const frontmatterDiv = fpModal.contentEl.createEl('div', { cls: 'dn-properties-frontmatter-modal' });
+					frontmatterDiv.setAttribute('contenteditable', 'true');
+					frontmatterDiv.setAttribute('spellcheck', 'false');
+
 					const curProps = getPropsPerFile(file);
 					if (curProps) {
 						const prop = curProps.split(' \n');
@@ -1208,6 +1214,7 @@ export class DNModal extends Modal {
 					});
 
 					fpModal.open();
+					frontmatterDiv.blur();
 				})
 		);
 
@@ -1219,6 +1226,7 @@ export class DNModal extends Modal {
 				.setIcon('file-cog')
 				.onClick(() => {
 					const mdFileProps = new Modal(this.app);
+					mdFileProps.contentEl.setAttribute('class', 'dn-properties-modal');
 					mdFileProps.contentEl.createEl('h4', { text: 'Properties' });
 
 					const propFileName = mdFileProps.contentEl.createEl('div');
@@ -1275,6 +1283,8 @@ export class DNModal extends Modal {
 					mdFileProps.contentEl.createEl('br');
 
 					const frontmatterProps = mdFileProps.contentEl.createEl('div', { cls: 'dn-properties-frontmatter' });
+					frontmatterProps.setAttribute('contenteditable', 'true');
+					frontmatterProps.setAttribute('spellcheck', 'false');
 					const curProps = getPropsPerFile(file);
 					if (curProps) {
 						const prop = curProps.split(' \n');
@@ -1304,6 +1314,7 @@ export class DNModal extends Modal {
 					});
 
 					mdFileProps.open();
+					frontmatterProps.blur();
 				})
 		);
 
