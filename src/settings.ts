@@ -27,6 +27,7 @@ export class DNSettingTab extends PluginSettingTab {
     toggleHideDateColumn: ToggleComponent;
     toggleHideTagsColumn: ToggleComponent;
     toggleHideFrontmatterColumn: ToggleComponent;
+    toggleUseFirstAliases: ToggleComponent;
 
     constructor(app: App, plugin: DNPlugin) {
         super(app, plugin);
@@ -645,5 +646,27 @@ export class DNSettingTab extends PluginSettingTab {
                 });
             });
 
+        new Setting(containerEl)
+            .setName('Use First Alias as Name')
+            .setDesc('Display the alias instead of the note name (similar to links)')
+            .addToggle((toggle) => {
+                this.toggleUseFirstAliases = toggle;
+                toggle
+                    .setValue(this.plugin.settings.use_alias)
+                    .onChange(async (val) => {
+                        this.plugin.settings.use_alias = val;
+                        this.plugin.DN_MODAL.use_alias = this.plugin.settings.use_alias;
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.toggleUseFirstAliases.setValue(DEFAULT_SETTINGS.use_alias);
+                    this.plugin.settings.use_alias = DEFAULT_SETTINGS.use_alias;
+                    this.plugin.DN_MODAL.use_alias = this.plugin.settings.use_alias;
+                    this.plugin.saveSettings();
+                });
+            });
     }
 }

@@ -47,4 +47,9 @@ export function getPropsPerFile(file: TFile): string {
 	return fileProperties.join(' \n');
 }
 
+export function getFirstAliasPerFile(file: TFile): string | null {
+	const cache = this.app.metadataCache.getFileCache(file);
+	return cache?.frontmatter?.aliases?.[0]
+}
+
 

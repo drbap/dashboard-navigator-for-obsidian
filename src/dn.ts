@@ -1,6 +1,6 @@
 import { App, Component, debounce, MarkdownRenderer, Menu, Modal, normalizePath, TAbstractFile, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
 import { formatFileSize, formatFileSizeKBMB, getFolderStructure } from './utils/format';
-import { getPropsPerFile, getTagsPerFile } from './utils/tags';
+import { getPropsPerFile, getTagsPerFile, getFirstAliasPerFile } from './utils/tags';
 import { DNPieChart } from './utils/dnpiechart';
 import { DNTableManager } from './utils/dntablemanager';
 import { moment } from 'obsidian';
@@ -93,6 +93,7 @@ export class DNModal extends Modal {
 	previousX: number;
 	previousY: number;
 
+	use_alias = false;
 
 	constructor(app: App) {
 		super(app);
@@ -595,7 +596,7 @@ export class DNModal extends Modal {
 				tr.removeEventListener('mouseover', async (evt: MouseEvent) => { this.dnHandleHoverPreview(evt, file); });
 
 				const td1 = tr.createEl('td');
-				td1.createEl('a', { cls: this.dnSetFileIconClass(file.extension), text: file.name }).onClickEvent((evt: MouseEvent) => {
+				td1.createEl('a', { cls: this.dnSetFileIconClass(file.extension), text: this.dnGetFileName(file) }).onClickEvent((evt: MouseEvent) => {
 					if (leaf !== null && file !== null) {
 						this.dnOpenFileAlt(file, evt);
 					}
@@ -923,6 +924,13 @@ export class DNModal extends Modal {
 		return arrRecentFiles.sort((a, b) => b.stat.mtime - a.stat.mtime).slice(0, this.num_recent_files);
 	}
 
+	dnGetFileName(file: TFile): string {
+		if (this.use_alias) {
+			return getFirstAliasPerFile(file) || file.basename
+		}
+		return file.basename
+	}
+
 	async dnCreateRecentFiles(title: string, divF: HTMLDivElement, files: TFile[], num_files: number) {
 		if (files.length === 0) {
 			divF.createEl('h3', { cls: 'dn-subtitles', text: title });
@@ -941,7 +949,7 @@ export class DNModal extends Modal {
 
 				const aLink = divF.createEl('a', {
 					cls: this.dnSetFileIconClass(sfile.extension),
-					text: sfile.basename,
+					text: this.dnGetFileName(sfile),
 					title: sfile.path
 				});
 

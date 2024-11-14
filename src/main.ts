@@ -26,6 +26,7 @@ interface DNSettings {
 	hide_tags: boolean;
 	hide_frontmatter: boolean;
 	hide_columns: string[];
+	use_alias: boolean;
 }
 
 export const DEFAULT_SETTINGS: DNSettings = {
@@ -51,7 +52,8 @@ export const DEFAULT_SETTINGS: DNSettings = {
 	hide_date: false,
 	hide_tags: false,
 	hide_frontmatter: false,
-	hide_columns: []
+	hide_columns: [],
+	use_alias: true
 }
 
 export default class DNPlugin extends Plugin {
@@ -86,6 +88,7 @@ export default class DNPlugin extends Plugin {
 		this.DN_MODAL.color_other = this.settings.color_other;
 
 		this.DN_MODAL.hide_columns = this.dnSetHiddenColumns(this.settings.hide_columns);
+		this.DN_MODAL.use_alias = this.settings.use_alias;
 
 		this.addRibbonIcon('gauge', 'Open dashboard navigator', (evt: MouseEvent) => {
 			this.DN_MODAL.default_view = this.settings.default_view;
