@@ -155,6 +155,30 @@ To search for specific frontmatter metadata, use the following syntax:
   - Row striped
   - Column striped
   - Bordered
+
+## Preview Files (Hover and Context Menu)
+
+![Dashboard navigator for Obsidian - context menu](images/dn_show_preview_01.png)
+
+- **Quick File Inspection**: You can choose to preview files using either the **hover preview** or the dedicated context menu item (**Show preview**) in the Dashboard and/or Navigator views. 
+
+- By simply hovering over a file or note while holding down the `Ctrl` (Windows/Linux) or `Command` (macOS) key, you can instantly preview its content.
+
+- **Context Menu**: `Show preview` option. This allows you to preview a file or note without the need for a modifier key.
+
+- The **preview window** displays the file's **name** and **path**, providing valuable context without opening the file itself. When you **hover over the preview window**, three intuitive buttons appear:
+
+1. **Open**: Directly opens the file.
+2. **Open in New Tab**: Opens the file in a new tab.
+3. **Open in New Window**: Opens the file in a completely new window.
+
+![Dashboard navigator for Obsidian - context menu](images/dn_show_preview_02.png)
+
+### Drag-and-Drop Preview Window
+
+- **Drag-and-Drop Positioning**: You have the freedom to move the preview window to any desired location on the screen. The preview window's position is remembered for subsequent previews (till you close the Dashboard navigator window), ensuring consistency and reducing the need for constant readjustment.
+
+- **Default Position**: If you close and reopen the Dashboard navigator window, the preview will automatically return to its default position.
  
 ## Context Menu
 
