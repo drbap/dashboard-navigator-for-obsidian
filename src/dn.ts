@@ -1,5 +1,5 @@
-import { App, debounce, Menu, Modal, TAbstractFile, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
-import { formatFileSize, getFolderStructure } from './utils/format';
+import { App, Component, debounce, MarkdownRenderer, Menu, Modal, TAbstractFile, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
+import { formatFileSize, formatFileSizeKBMB, getFolderStructure } from './utils/format';
 import { getPropsPerFile, getTagsPerFile } from './utils/tags';
 import { DNPieChart } from './utils/dnpiechart';
 import { DNTableManager } from './utils/dntablemanager';
@@ -10,6 +10,8 @@ export class DNModal extends Modal {
 	private _files: TFile[];
 	private _folders: TFolder[];
 	private _recent: TFile[];
+	private _last_opened: TFile[];
+
 	//Categories
 	private _notes: TFile[];
 	private _images: TFile[];
@@ -80,6 +82,17 @@ export class DNModal extends Modal {
 	private readonly intersectionObserver: IntersectionObserver;
 	private _DN_CTX_MENU: Menu;
 
+	private _previewComponent: Component;
+	private _hoverDiv: HTMLElement;
+	private _hoverRender: HTMLElement;
+	private _isDraggingPreview: boolean;
+	private _hoverDivLeft: string;
+	private _hoverDivTop: string;
+	initialX: number;
+	initialY: number;
+	previousX: number;
+	previousY: number;
+
 
 	constructor(app: App) {
 		super(app);
@@ -89,6 +102,9 @@ export class DNModal extends Modal {
 	async onOpen() {
 
 		const { contentEl } = this;
+
+		this._previewComponent = new Component();
+		this._hoverDiv = this.contentEl.createEl('div', { cls: 'dn-preview' });
 
 		await this.updateModalData();
 
@@ -105,12 +121,29 @@ export class DNModal extends Modal {
 
 		this.dnToggleColoredFiles();
 
+		// Preview window
+		this._isDraggingPreview = false;
+		this._hoverDivLeft = '';
+		this._hoverDivTop = '';
+
+		this._hoverDiv.addEventListener('click', (evt: MouseEvent) => { evt.stopPropagation() });
+
+		this.contentEl.addEventListener('click', (evt: MouseEvent) => {
+			this.dnHidePreview();
+		});
+
+		// Drag event listeners
+		this._hoverDiv.addEventListener('mousedown', (evt) => this.dnHoverDragOnMouseDown(evt));
+		this._hoverDiv.addEventListener('mousemove', (evt) => this.dnHoverDragOnMouseMove(evt));
+		this._hoverDiv.addEventListener('mouseup', (evt) => this.dnHoverDragOnMouseUp(evt));
+
 	}
 
 	async updateModalData() {
 		this._files = [];
 		this._folders = [];
 		this._recent = [];
+		this._last_opened = [];
 		this._notes = [];
 		this._images = [];
 		this._canvas = [];
@@ -140,6 +173,15 @@ export class DNModal extends Modal {
 		await this.dnOrganizeFiles({ arr: this._files_excluded_filters });
 
 		this._recent = await this.dnGetRecentFiles(this._files_excluded_filters);
+
+		const arrStrLastOpened = this.app.workspace.getLastOpenFiles();
+
+		arrStrLastOpened.forEach(async file => {
+			const f_temp = await this.app.vault.getAbstractFileByPath(file);
+			if (f_temp instanceof TFile) {
+				this._last_opened.push(f_temp);
+			}
+		});
 	}
 
 	async dnCreateMainUI(el: HTMLElement) {
@@ -221,6 +263,9 @@ export class DNModal extends Modal {
 
 		const divVaultGraph = this._VIEW_DASHBOARD.createEl('div');
 		divVaultGraph.setAttribute('id', 'dn-vault-graph');
+
+		const divLastOpenedFiles = this._VIEW_DASHBOARD.createEl('div');
+		divLastOpenedFiles.setAttribute('id', 'dn-last-opened-files');
 
 		const divRecentFiles = this._VIEW_DASHBOARD.createEl('div');
 		divRecentFiles.setAttribute('id', 'dn-recent-files');
@@ -324,6 +369,7 @@ export class DNModal extends Modal {
 		divStatsFrame.createEl('div', { cls: 'dn-stats-folders', text: 'Folders: ' + this._folders.length });
 
 		// Recent files by type/category
+		await this.dnCreateRecentFiles('Recently opened', divLastOpenedFiles, this._last_opened, this.num_recent_files);
 		await this.dnCreateRecentFiles('Recent files', divRecentFiles, this._recent, this.num_recent_files);
 		await this.dnCreateRecentFiles('Recent notes', divRecentNotes, this._notes, this.num_recent_files);
 		await this.dnCreateRecentFiles('Recent canvases', divCanvas, this._canvas, this.num_recent_files);
@@ -389,7 +435,7 @@ export class DNModal extends Modal {
 			} else if (param.startsWith("'") && param.endsWith("'")) {
 				return param.slice(1, -1); // Remove single quotes
 			} else if (param.startsWith(".")) {
-				return '\\' + param;
+				return '\\' + param + '$';
 			} else {
 				return param;
 			}
@@ -539,11 +585,14 @@ export class DNModal extends Modal {
 			paginatedData.forEach(async file => {
 				const tr = tbody.createEl('tr');
 				// Events
-				tr.addEventListener('contextmenu', (evt: MouseEvent) => { this.dnHandleClick(evt, file) });
-				tr.addEventListener('click', (evt: MouseEvent) => { this.dnHandleClick(evt, file) });
-				tr.addEventListener('dblclick', (evt: MouseEvent) => { this.dnHandleDblClick(evt, file) });
+				tr.addEventListener('contextmenu', (evt: MouseEvent) => { this.dnHandleClick(evt, file); });
+				tr.addEventListener('click', (evt: MouseEvent) => { this.dnHandleClick(evt, file); });
+				tr.addEventListener('dblclick', (evt: MouseEvent) => { this.dnHandleDblClick(evt, file); });
+				tr.addEventListener('mouseover', async (evt: MouseEvent) => { this.dnHandleHoverPreview(evt, file); });
 
 				this.intersectionObserver.observe(tr);
+
+				tr.removeEventListener('mouseover', async (evt: MouseEvent) => { this.dnHandleHoverPreview(evt, file); });
 
 				const td1 = tr.createEl('td');
 				td1.createEl('a', { cls: this.dnSetFileIconClass(file.extension), text: file.name }).onClickEvent((evt: MouseEvent) => {
@@ -613,9 +662,9 @@ export class DNModal extends Modal {
 			// Add pagination
 			paginationContainer.empty();
 			// Results count
-			paginationContainer.createEl('span', { cls: 'dn-pagination-total-results', text: `File(s): ${f.length}` });
+			paginationContainer.createEl('span', { cls: 'dn-pagination-total-results', text: `File(s): ${f.length} ` });
 			// Current page
-			paginationContainer.createEl('span', { cls: 'dn-pagination-current-page', text: `Page ${currentPage} of ${this._total_pages}` });
+			paginationContainer.createEl('span', { cls: 'dn-pagination-current-page', text: `Page ${currentPage} of ${this._total_pages} ` });
 
 			const btnPrev = paginationContainer.createEl('button', { cls: 'dn-btn-prev', text: '◀', title: 'Previous' });
 
@@ -880,18 +929,34 @@ export class DNModal extends Modal {
 			divF.classList.add('dn-display-none');
 		} else {
 			divF.createEl('h3', { cls: 'dn-subtitles', text: title });
-			const sortedFiles = await this.dnGetRecentFiles(files);
+			let sortedFiles: TFile[] = [];
+			if (title === 'Recently opened') {
+				sortedFiles = files.slice(0, this.num_recent_files);
+			} else {
+				sortedFiles = await this.dnGetRecentFiles(files);
+
+			}
 			sortedFiles.forEach(sfile => {
-				divF.createEl('a', { cls: this.dnSetFileIconClass(sfile.extension), text: sfile.basename, title: sfile.path }).onClickEvent((evt: MouseEvent) => {
+
+				const aLink = divF.createEl('a', {
+					cls: this.dnSetFileIconClass(sfile.extension),
+					text: sfile.basename,
+					title: sfile.path
+				});
+
+				aLink.onClickEvent((evt: MouseEvent) => {
 					if (sfile !== null) {
 						this.dnOpenFileAlt(sfile, evt);
 					}
 				});
+
 				if (sfile.extension !== 'md') {
 					divF.createEl('span', { cls: 'nav-file-tag', text: sfile.extension })
 				}
 
 				divF.createEl('br');
+
+				aLink.addEventListener('mouseover', (evt: MouseEvent) => this.dnHandleHoverPreview(evt, sfile));
 			});
 		}
 	}
@@ -1161,6 +1226,17 @@ export class DNModal extends Modal {
 
 		this._DN_CTX_MENU.addItem((item) =>
 			item
+				.setTitle('Show preview')
+				.setIcon('eye')
+				.onClick((evt: MouseEvent) => {
+					this.dnShowPreviewFile(evt, file);
+				})
+		);
+
+		this._DN_CTX_MENU.addSeparator();
+
+		this._DN_CTX_MENU.addItem((item) =>
+			item
 				.setTitle('Frontmatter')
 				.setIcon('text')
 				.onClick(() => {
@@ -1169,17 +1245,19 @@ export class DNModal extends Modal {
 					fpModal.contentEl.setAttribute('class', 'dn-frontmatter-modal');
 					fpModal.contentEl.createEl('h4', { text: 'Frontmatter' });
 
-					const fpFile = fpModal.contentEl.createEl('div');
-					fpFile.createEl('span', { text: 'File: ', cls: 'dn-properties' });
-					fpFile.createEl('span', { text: file.name });
-					fpModal.contentEl.createEl('br');
+					const rowName = fpModal.contentEl.createEl('div', { cls: 'dn-property-row' });
+					rowName.createEl('div', { text: 'Name: ', cls: 'dn-property-name-sm' });
+					rowName.createEl('div', { text: file.name, cls: 'dn-property-value' });
 
-					const fpPath = fpModal.contentEl.createEl('div');
-					fpPath.createEl('span', { text: 'Path: ', cls: 'dn-properties' });
-					fpPath.createEl('span', { text: getFolderStructure(file.path) });
+
+					const rowPath = fpModal.contentEl.createEl('div', { cls: 'dn-property-row' });
+					rowPath.createEl('div', { text: 'Path: ', cls: 'dn-property-name-sm' });
+					rowPath.createEl('div', { text: getFolderStructure(file.path), cls: 'dn-property-value' });
+
 					fpModal.contentEl.createEl('br');
 
 					fpModal.contentEl.createEl('span', { text: 'Frontmatter: ', cls: 'dn-properties' });
+
 					fpModal.contentEl.createEl('br');
 
 					const frontmatterDiv = fpModal.contentEl.createEl('div', { cls: 'dn-properties-frontmatter-modal' });
@@ -1208,7 +1286,14 @@ export class DNModal extends Modal {
 					fpModal.contentEl.createEl('br');
 
 					const divBottom = fpModal.contentEl.createEl('div', { cls: 'dn-div-bottom-properties' });
-					const btnCloseProps = divBottom.createEl('button', { text: 'Ok', cls: 'dn-btn-close-properties' });
+
+					const btnPropsOpen = divBottom.createEl('button', { text: 'Open', cls: 'dn-btn-properties-open-file' });
+					btnPropsOpen.onClickEvent(() => {
+						fpModal.close();
+						this.dnOpenFile(file);
+					});
+
+					const btnCloseProps = divBottom.createEl('button', { text: 'Close', cls: 'dn-btn-properties-close' });
 					btnCloseProps.onClickEvent(() => {
 						fpModal.close();
 					});
@@ -1218,7 +1303,6 @@ export class DNModal extends Modal {
 				})
 		);
 
-		this._DN_CTX_MENU.addSeparator();
 
 		this._DN_CTX_MENU.addItem((item) =>
 			item
@@ -1227,39 +1311,45 @@ export class DNModal extends Modal {
 				.onClick(() => {
 					const mdFileProps = new Modal(this.app);
 					mdFileProps.contentEl.setAttribute('class', 'dn-properties-modal');
-					mdFileProps.contentEl.createEl('h4', { text: 'Properties' });
+					mdFileProps.contentEl.createEl('h4', { text: 'File properties' });
 
-					const propFileName = mdFileProps.contentEl.createEl('div');
-					propFileName.createEl('span', { text: 'File name: ', cls: 'dn-properties' });
-					propFileName.createEl('span', { text: file.basename });
+					const rowName = mdFileProps.contentEl.createEl('div', { cls: 'dn-property-row' });
+					rowName.createEl('div', { text: 'Name: ', cls: 'dn-property-name' });
+					rowName.createEl('div', { text: file.name, cls: 'dn-property-value' });
 
-					const propFileExt = mdFileProps.contentEl.createEl('div');
-					propFileExt.createEl('span', { text: 'Extension: ', cls: 'dn-properties' });
-					propFileExt.createEl('span', { text: file.extension, cls: 'nav-file-tag' });
+					const rowExt = mdFileProps.contentEl.createEl('div', { cls: 'dn-property-row' });
+					rowExt.createEl('div', { text: 'Extension: ', cls: 'dn-property-name' });
+					const rowExtValue = rowExt.createEl('div', { cls: 'dn-property-value' });
+					rowExtValue.createEl('span', { text: file.extension, cls: 'nav-file-tag' });
+
+					const rowPath = mdFileProps.contentEl.createEl('div', { cls: 'dn-property-row' });
+					rowPath.createEl('div', { text: 'Path: ', cls: 'dn-property-name' });
+					rowPath.createEl('div', { text: getFolderStructure(file.path), cls: 'dn-property-value' });
+
 					mdFileProps.contentEl.createEl('br');
 
-					const propFilePath = mdFileProps.contentEl.createEl('div');
-					propFilePath.createEl('span', { text: 'Path: ', cls: 'dn-properties' });
-					propFilePath.createEl('span', { text: getFolderStructure(file.path) });
+					const rowSize = mdFileProps.contentEl.createEl('div', { cls: 'dn-property-row' });
+					rowSize.createEl('div', { text: 'Size: ', cls: 'dn-property-name' });
+					rowSize.createEl('div', { text: formatFileSize(file.stat.size) + ' bytes' + formatFileSizeKBMB(file.stat.size) });
+
 					mdFileProps.contentEl.createEl('br');
 
-					const propFileSize = mdFileProps.contentEl.createEl('div');
-					propFileSize.createEl('span', { text: 'Size: ', cls: 'dn-properties' });
-					propFileSize.createEl('span', { text: formatFileSize(file.stat.size) + ' bytes' });
+					const rowDateCreated = mdFileProps.contentEl.createEl('div', { cls: 'dn-property-row' });
+					rowDateCreated.createEl('div', { text: 'Created: ', cls: 'dn-property-name' });
+					rowDateCreated.createEl('div', { text: moment(file.stat.ctime).format(this.date_format) });
+
+					const rowDateModified = mdFileProps.contentEl.createEl('div', { cls: 'dn-property-row' });
+					rowDateModified.createEl('div', { text: 'Modified: ', cls: 'dn-property-name' });
+					rowDateModified.createEl('div', { text: moment(file.stat.mtime).format(this.date_format) });
+
 					mdFileProps.contentEl.createEl('br');
 
-					const propDateCreated = mdFileProps.contentEl.createEl('div');
-					propDateCreated.createEl('span', { text: 'Created: ', cls: 'dn-properties' });
-					propDateCreated.createEl('span', { text: moment(file.stat.ctime).format(this.date_format) });
+					const rowTags = mdFileProps.contentEl.createEl('div', { cls: 'dn-property-row' });
+					rowTags.createEl('div', { text: 'Tag(s): ', cls: 'dn-property-name' });
+					const propTags = rowTags.createEl('div');
 
-					const propDateModified = mdFileProps.contentEl.createEl('div');
-					propDateModified.createEl('span', { text: 'Modified: ', cls: 'dn-properties' });
-					propDateModified.createEl('span', { text: moment(file.stat.mtime).format(this.date_format) });
-					mdFileProps.contentEl.createEl('br');
-
-					const propTags = mdFileProps.contentEl.createEl('div');
 					const curTags = getTagsPerFile(file);
-					propTags.createEl('span', { text: 'Tag(s): ', cls: 'dn-properties' });
+
 					if (curTags) {
 						const tags = curTags.split(' ');
 						for (let i = 0, len = tags.length; i < len; i++) {
@@ -1308,7 +1398,14 @@ export class DNModal extends Modal {
 					mdFileProps.contentEl.createEl('br');
 
 					const divBottom = mdFileProps.contentEl.createEl('div', { cls: 'dn-div-bottom-properties' });
-					const btnCloseProps = divBottom.createEl('button', { text: 'Ok', cls: 'dn-btn-close-properties' });
+
+					const btnPropsOpen = divBottom.createEl('button', { text: 'Open', cls: 'dn-btn-properties-open-file' });
+					btnPropsOpen.onClickEvent(() => {
+						mdFileProps.close();
+						this.dnOpenFile(file);
+					});
+
+					const btnCloseProps = divBottom.createEl('button', { text: 'Close', cls: 'dn-btn-properties-close' });
 					btnCloseProps.onClickEvent(() => {
 						mdFileProps.close();
 					});
@@ -1351,6 +1448,87 @@ export class DNModal extends Modal {
 				entry.target.removeEventListener('dblclick', this.dnHandleDblClick);
 			}
 		});
+	}
+
+	private dnHandleHoverPreview(evt: MouseEvent, file: TFile) {
+		evt.stopImmediatePropagation();
+		if (evt.ctrlKey || evt.metaKey) {
+			this.dnShowPreviewFile(evt, file);
+
+		}
+	}
+
+	dnShowPreviewFile(evt: MouseEvent, file: TFile) {
+		this._hoverDiv.empty();
+
+
+		const divPreviewName = this._hoverDiv.createEl('div', { cls: 'dn-property-row' });
+		divPreviewName.createEl('div', { text: 'Name: ', cls: 'dn-property-name-sm' });
+		divPreviewName.createEl('div', { text: file.name, cls: 'dn-property-value' });
+
+		const divPreviewPath = this._hoverDiv.createEl('div', { cls: 'dn-property-row' });
+		divPreviewPath.createEl('div', { text: 'Path: ', cls: 'dn-property-name-sm' });
+		divPreviewPath.createEl('div', { text: getFolderStructure(file.path), cls: 'dn-property-value' });
+
+
+		const divButtons = this._hoverDiv.createEl('div', { cls: 'dn-div-top-preview-btns' });
+		divButtons.classList.add('dn-hidden');
+
+		this._hoverDiv.addEventListener('mouseenter', () => { divButtons.classList.remove('dn-hidden'); });
+		this._hoverDiv.addEventListener('mouseleave', () => { divButtons.classList.add('dn-hidden'); });
+
+		const btnPreviewOpenFile = divButtons.createEl('button', { text: 'Open', cls: 'dn-btn-properties-open-file' });
+		btnPreviewOpenFile.onClickEvent(() => {
+			this.dnHidePreview();
+			this.close();
+			this.dnOpenFile(file);
+		});
+
+		const btnPreviewOpenFileNewTab = divButtons.createEl('button', { text: 'Open in new tab', cls: 'dn-btn-properties-open-file' });
+		btnPreviewOpenFileNewTab.onClickEvent(() => {
+			this.dnHidePreview();
+			this.close();
+			this.app.workspace.getLeaf('tab').openFile(file);
+		});
+
+		const btnPreviewOpenFileNewWindow = divButtons.createEl('button', { text: 'Open in new window', cls: 'dn-btn-properties-open-file' });
+		btnPreviewOpenFileNewWindow.onClickEvent(() => {
+			this.dnHidePreview();
+			this.app.workspace.getLeaf('window').openFile(file);
+		});
+
+		this._hoverRender = this._hoverDiv.createEl('div', { cls: 'dn-pr-content' });
+
+		MarkdownRenderer.render(
+			this.app,
+			'![[' + file.path + ']]',
+			this._hoverRender,
+			file.path,
+			this._previewComponent
+		);
+
+		this._hoverRender.addEventListener('mousedown', (evt: MouseEvent) => { evt.stopPropagation() });
+
+		this._hoverDiv.style.display = 'block';
+
+		const screenWidth = window.innerWidth;
+		const screenHeight = window.innerHeight;
+		const divW = this._hoverDiv.offsetWidth;
+		const divH = this._hoverDiv.offsetHeight;
+
+		if (this._hoverDivLeft === '') {
+			this._hoverDiv.style.left = ((screenWidth - divW) / 2).toString() + 'px';
+			this._hoverDiv.style.top = ((screenHeight - divH) / 2).toString() + 'px';
+		}
+
+		this._hoverRender.removeEventListener('mousedown', (evt: MouseEvent) => { evt.stopPropagation() });
+
+	}
+
+	private dnHidePreview() {
+		this._isDraggingPreview = false;
+		this._hoverDiv.style.display = 'none';
+		this._hoverDiv.empty();
 	}
 
 	private dnHandleNormalSearch(rExp: RegExp, file: TFile): boolean {
@@ -1492,9 +1670,43 @@ export class DNModal extends Modal {
 		this.close();
 	}
 
+	dnHoverDragOnMouseDown(evt: MouseEvent) {
+		evt.stopPropagation();
+		this._isDraggingPreview = true;
+		this.initialX = evt.screenX - this._hoverDiv.offsetLeft;
+		this.initialY = evt.screenY - this._hoverDiv.offsetTop;
+		this.previousX = evt.screenX;
+		this.previousY = evt.screenY;
+	}
+
+	dnHoverDragOnMouseMove(evt: MouseEvent) {
+		evt.stopPropagation();
+		if (this._isDraggingPreview) {
+			const newX = evt.screenX - this.initialX;
+			const newY = evt.screenY - this.initialY;
+
+			if (Math.abs(evt.screenX - this.previousX) > 5 || Math.abs(evt.screenY - this.previousY) > 5) {
+				this._hoverDiv.style.left = newX + 'px';
+				this._hoverDiv.style.top = newY + 'px';
+				this.previousX = evt.screenX;
+				this.previousY = evt.screenY;
+			}
+
+			this._hoverDivLeft = newX + 'px';
+			this._hoverDivTop = newY + 'px';
+		}
+	}
+
+	dnHoverDragOnMouseUp(evt: MouseEvent) {
+		evt.stopPropagation();
+		this._isDraggingPreview = false;
+	}
+
 	onClose() {
 		const { contentEl } = this;
 		contentEl.empty();
+		this._previewComponent.unload();
+
 
 		if (this._INPUT_SEARCH && this._INPUT_SEARCH.removeEventListener) {
 			this._INPUT_SEARCH.removeEventListener('input', debounce(() => this.dnModalSearchVault(this._INPUT_SEARCH.value), 300, true));
@@ -1505,6 +1717,18 @@ export class DNModal extends Modal {
 		this._th4.removeEventListener('dblclick', () => this.dnAlternateSortColumn('size'));
 		this._th5.removeEventListener('dblclick', () => this.dnAlternateSortColumn('modified'));
 		this._SELECT_SORT.removeEventListener('change', () => { this.dnSortColumnWithSelect(); });
+
+
+		this._hoverDiv.removeEventListener('click', (evt: MouseEvent) => { evt.stopPropagation() });
+		this.contentEl.removeEventListener('click', (evt: MouseEvent) => {
+			this.dnHidePreview();
+		});
+
+		// Remove drag event listeners
+		this._hoverDiv.removeEventListener('mousedown', (evt) => this.dnHoverDragOnMouseDown(evt));
+		this._hoverDiv.removeEventListener('mousemove', (evt) => this.dnHoverDragOnMouseMove(evt));
+		this._hoverDiv.removeEventListener('mouseup', (evt) => this.dnHoverDragOnMouseUp(evt));
+
 
 		if (this.intersectionObserver) {
 			this.intersectionObserver.disconnect();
