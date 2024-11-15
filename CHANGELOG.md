@@ -1,5 +1,24 @@
 # Changelog
 
+## [5.0.0] - 2024-11-15
+
+**Dashboard view:**
+- New **Recently opened** group list has been added. This list will display your recently opened files. To see a file in the list, simply close its tab or open another file.
+
+**Navigator view:**
+- **Preview files** on hover (holding the `Ctrl` or `Command` key). The preview window will show the file name and path.
+
+- **New context menu item**: **Show Preview**. You can also preview the note/file without using the modifier key.
+
+- **Drag preview window**: Move the preview window to your preferred position. Subsequent previews will open in the same spot, minimizing distractions. If you open the dashboard navigator window again, the preview will return to the default position (according the file).
+
+- **Frontmatter modal** and **File Properties modals** size and design adjustments. You can now directly open the selected file with the new "**Open**" button.
+
+- File properties window: **Size** will display file size in bytes, KB, or MB.
+
+- **Enhanced file extension search**: Find files precisely by their extension (e.g., `.png`, `.md`). Search results are limited to **files with the exact extension**.
+
+
 ## [4.1.0] - 2024-11-11
 
 - Copy contents of frontmatter properties (Properties and Frontmatter modals).
