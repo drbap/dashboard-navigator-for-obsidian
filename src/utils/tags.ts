@@ -46,3 +46,5 @@ export function getPropsPerFile(file: TFile): string {
 
 	return fileProperties.join(' \n');
 }
+
+

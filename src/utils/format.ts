@@ -16,3 +16,14 @@ export function getFolderStructure(folder: string): string {
 
 	return "/" + folders.join("/");
 }
+
+
+export function formatFileSizeKBMB(total_bytes: number): string {
+	if (total_bytes < 1024) {
+		return '';
+	} else if (total_bytes < 1048576) {
+		return ` (${(total_bytes / 1024).toFixed(2)} KB)`;
+	} else {
+		return ` (${(total_bytes / (1024 * 1024)).toFixed(2)} MB)`;
+	}
+}
