@@ -10,7 +10,7 @@
 
 - **New context menu item**: **Show Preview**. You can also preview the note/file without using the modifier key.
 
-- **Drag preview window**: Move the preview window to your preferred position. Subsequent previews will open in the same spot, minimizing distractions. If you open the dashboard navigator window again, the preview will return to the default position (according the file).
+- **Drag preview window**: Move the preview window to your preferred position. Subsequent previews will open in the same spot, minimizing distractions. If you open the dashboard navigator window again, the preview will return to the default position (according to the file).
 
 - **Frontmatter modal** and **File Properties modals** size and design adjustments. You can now directly open the selected file with the new "**Open**" button.
 
