@@ -631,7 +631,13 @@ table#dn-table.dn-tbl-default td {
 	word-wrap: break-word;
 }
 
-.dn-div-top-preview-btns,
+.dn-div-top-preview-btns {
+	text-align: left;
+	display: flex;
+	justify-content: left;
+	gap: 8px;
+}
+
 .dn-div-bottom-properties {
 	text-align: left;
 	display: flex;
@@ -765,10 +771,12 @@ table#dn-table.dn-tbl-default td {
 .dn-preview {
 	display: none;
 	position: fixed;
+	min-width: 400px;
+	min-height: 300px;
 	width: 600px;
 	height: auto;
-	max-width: 800px;
-	max-height: 480px;
+	max-width: 100%;
+	max-height: 100%;
 	overflow: auto;
 	border: 2px solid var(--dn-border-color);
 	background: var(--background-primary);
@@ -776,11 +784,21 @@ table#dn-table.dn-tbl-default td {
 	z-index: 90000;
 	border-radius: var(--radius-m);
 	box-shadow: 0 0 1em #00000082;
-	cursor: move;
+	resize: both;
 }
 
 .dn-preview:hover {
 	border: 2px solid var(--dn-border-color-hover);
+}
+
+.dn-preview-titlebar {
+	cursor: move;
+	border-left: 4px solid var(--text-faint);
+	padding-left: 8px;
+}
+
+.dn-preview-titlebar:hover {
+	border-left: 4px solid var(--text-accent);
 }
 
 .dn-preview .dn-pr-file-name::before {

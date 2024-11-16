@@ -158,7 +158,7 @@ To search for specific frontmatter metadata, use the following syntax:
 
 ## Preview Files (Hover and Context Menu)
 
-![Dashboard navigator for Obsidian - context menu](images/dn_show_preview_01.png)
+![Dashboard navigator for Obsidian - context menu](images/dn_show_preview.png)
 
 - **Quick File Inspection**: You can choose to preview files using either the **hover preview** or the dedicated context menu item (**Show preview**) in the Dashboard and/or Navigator views. 
 
@@ -166,13 +166,12 @@ To search for specific frontmatter metadata, use the following syntax:
 
 - **Context Menu**: `Show preview` option. This allows you to preview a file or note without the need for a modifier key.
 
-- The **preview window** displays the file's **name** and **path**, providing valuable context without opening the file itself. When you **hover over the preview window**, three intuitive buttons appear:
+- The **preview window** displays the file's **name** and **path**. You will find three buttons on this window:
 
 1. **Open**: Directly opens the file.
 2. **Open in New Tab**: Opens the file in a new tab.
 3. **Open in New Window**: Opens the file in a completely new window.
 
-![Dashboard navigator for Obsidian - context menu](images/dn_show_preview_02.png)
 
 ### Drag-and-Drop Preview Window
 
