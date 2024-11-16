@@ -126,17 +126,6 @@ export class DNModal extends Modal {
 		this._hoverDivLeft = '';
 		this._hoverDivTop = '';
 
-		this._hoverDiv.addEventListener('click', (evt: MouseEvent) => { evt.stopPropagation() });
-
-		this.contentEl.addEventListener('click', (evt: MouseEvent) => {
-			this.dnHidePreview();
-		});
-
-		// Drag event listeners
-		this._hoverDiv.addEventListener('mousedown', (evt) => this.dnHoverDragOnMouseDown(evt));
-		this._hoverDiv.addEventListener('mousemove', (evt) => this.dnHoverDragOnMouseMove(evt));
-		this._hoverDiv.addEventListener('mouseup', (evt) => this.dnHoverDragOnMouseUp(evt));
-
 	}
 
 	async updateModalData() {
@@ -1461,21 +1450,24 @@ export class DNModal extends Modal {
 	dnShowPreviewFile(evt: MouseEvent, file: TFile) {
 		this._hoverDiv.empty();
 
+		const btnClosePreview = this._hoverDiv.createEl('div', { cls: 'modal-close-button' });
 
-		const divPreviewName = this._hoverDiv.createEl('div', { cls: 'dn-property-row' });
+		btnClosePreview.onClickEvent(() => {
+			this.dnHidePreview();
+		});
+
+		const previewTop = this._hoverDiv.createEl('div', 'dn-preview-titlebar');
+
+		const divPreviewName = previewTop.createEl('div', { cls: 'dn-property-row' });
 		divPreviewName.createEl('div', { text: 'Name: ', cls: 'dn-property-name-sm' });
 		divPreviewName.createEl('div', { text: file.name, cls: 'dn-property-value' });
 
-		const divPreviewPath = this._hoverDiv.createEl('div', { cls: 'dn-property-row' });
+		const divPreviewPath = previewTop.createEl('div', { cls: 'dn-property-row' });
 		divPreviewPath.createEl('div', { text: 'Path: ', cls: 'dn-property-name-sm' });
 		divPreviewPath.createEl('div', { text: getFolderStructure(file.path), cls: 'dn-property-value' });
 
 
 		const divButtons = this._hoverDiv.createEl('div', { cls: 'dn-div-top-preview-btns' });
-		divButtons.classList.add('dn-hidden');
-
-		this._hoverDiv.addEventListener('mouseenter', () => { divButtons.classList.remove('dn-hidden'); });
-		this._hoverDiv.addEventListener('mouseleave', () => { divButtons.classList.add('dn-hidden'); });
 
 		const btnPreviewOpenFile = divButtons.createEl('button', { text: 'Open', cls: 'dn-btn-properties-open-file' });
 		btnPreviewOpenFile.onClickEvent(() => {
@@ -1509,6 +1501,11 @@ export class DNModal extends Modal {
 
 		this._hoverRender.addEventListener('mousedown', (evt: MouseEvent) => { evt.stopPropagation() });
 
+		// Drag event listeners
+		previewTop.addEventListener('mousedown', (evt) => this.dnHoverDragOnMouseDown(evt));
+		this._hoverDiv.addEventListener('mousemove', (evt) => this.dnHoverDragOnMouseMove(evt));
+		this._hoverDiv.addEventListener('mouseup', (evt) => this.dnHoverDragOnMouseUp(evt));
+
 		this._hoverDiv.style.display = 'block';
 
 		const screenWidth = window.innerWidth;
@@ -1521,6 +1518,7 @@ export class DNModal extends Modal {
 			this._hoverDiv.style.top = ((screenHeight - divH) / 2).toString() + 'px';
 		}
 
+		previewTop.removeEventListener('mousedown', (evt) => this.dnHoverDragOnMouseDown(evt));
 		this._hoverRender.removeEventListener('mousedown', (evt: MouseEvent) => { evt.stopPropagation() });
 
 	}
@@ -1719,13 +1717,7 @@ export class DNModal extends Modal {
 		this._SELECT_SORT.removeEventListener('change', () => { this.dnSortColumnWithSelect(); });
 
 
-		this._hoverDiv.removeEventListener('click', (evt: MouseEvent) => { evt.stopPropagation() });
-		this.contentEl.removeEventListener('click', (evt: MouseEvent) => {
-			this.dnHidePreview();
-		});
-
 		// Remove drag event listeners
-		this._hoverDiv.removeEventListener('mousedown', (evt) => this.dnHoverDragOnMouseDown(evt));
 		this._hoverDiv.removeEventListener('mousemove', (evt) => this.dnHoverDragOnMouseMove(evt));
 		this._hoverDiv.removeEventListener('mouseup', (evt) => this.dnHoverDragOnMouseUp(evt));
 
