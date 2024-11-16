@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.1.0] - 2024-11-16
+
+- **Preview window** improvements:
+  - Resizable.
+  - Open buttons always visible.
+  - Close button
+  - New design (hover will trigger left border of the titlebar to indicate that it is the part to drag). The mouse cursor will also change.
+
 ## [5.0.0] - 2024-11-15
 
 **Dashboard view:**
