@@ -1,5 +1,8 @@
 # Changelog
 
+## [5.1.1] - 2024-11-16
+- CSS adjustments of preview window.
+
 ## [5.1.0] - 2024-11-16
 
 - **Preview window** improvements:
