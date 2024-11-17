@@ -651,11 +651,11 @@ export class DNModal extends Modal {
 			// Add pagination
 			paginationContainer.empty();
 			// Results count
-			paginationContainer.createEl('span', { cls: 'dn-pagination-total-results', text: `File(s): ${f.length} ` });
+			paginationContainer.createEl('div', { cls: 'dn-pagination-total-results', text: `File(s): ${f.length} ` });
 			// Current page
-			paginationContainer.createEl('span', { cls: 'dn-pagination-current-page', text: `Page ${currentPage} of ${this._total_pages} ` });
+			const rightPagDiv = paginationContainer.createEl('div', { cls: 'dn-pagination-current-page', text: `Page ${currentPage} of ${this._total_pages} ` });
 
-			const btnPrev = paginationContainer.createEl('button', { cls: 'dn-btn-prev', text: '◀', title: 'Previous' });
+			const btnPrev = rightPagDiv.createEl('button', { cls: 'dn-btn-prev', text: '◀', title: 'Previous' });
 
 			if (currentPage === 1) {
 				btnPrev.disabled = true;
@@ -668,7 +668,7 @@ export class DNModal extends Modal {
 				}
 			});
 
-			const btnNext = paginationContainer.createEl('button', { cls: 'dn-btn-next', text: '▶', title: 'Next' });
+			const btnNext = rightPagDiv.createEl('button', { cls: 'dn-btn-next', text: '▶', title: 'Next' });
 
 			if (currentPage === this._total_pages) {
 				btnNext.disabled = true;
@@ -696,6 +696,7 @@ export class DNModal extends Modal {
 
 		} else {
 			tr.empty();
+			paginationContainer.createEl('div', { cls: 'dn-pagination-total-results', text: `File(s): 0 ` });
 			this._divSearchResults.createEl('p', { cls: 'dn-no-results-found', text: 'No files found.' });
 		}
 	}
@@ -1449,14 +1450,15 @@ export class DNModal extends Modal {
 
 	dnShowPreviewFile(evt: MouseEvent, file: TFile) {
 		this._hoverDiv.empty();
+		const topBar = this._hoverDiv.createEl('div', { cls: 'dn-preview-top-bar' });
+		const btnClosePreview = topBar.createEl('div', { cls: 'modal-close-button' });
 
-		const btnClosePreview = this._hoverDiv.createEl('div', { cls: 'modal-close-button' });
-
-		btnClosePreview.onClickEvent(() => {
+		btnClosePreview.onClickEvent((evt) => {
+			evt.stopPropagation();
 			this.dnHidePreview();
 		});
 
-		const previewTop = this._hoverDiv.createEl('div', 'dn-preview-titlebar');
+		const previewTop = topBar.createEl('div', 'dn-preview-titlebar');
 
 		const divPreviewName = previewTop.createEl('div', { cls: 'dn-property-row' });
 		divPreviewName.createEl('div', { text: 'Name: ', cls: 'dn-property-name-sm' });
@@ -1467,7 +1469,7 @@ export class DNModal extends Modal {
 		divPreviewPath.createEl('div', { text: getFolderStructure(file.path), cls: 'dn-property-value' });
 
 
-		const divButtons = this._hoverDiv.createEl('div', { cls: 'dn-div-top-preview-btns' });
+		const divButtons = topBar.createEl('div', { cls: 'dn-div-top-preview-btns' });
 
 		const btnPreviewOpenFile = divButtons.createEl('button', { text: 'Open', cls: 'dn-btn-properties-open-file' });
 		btnPreviewOpenFile.onClickEvent(() => {
