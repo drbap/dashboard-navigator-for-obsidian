@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.2.0] - 2024-11-17
+- **Navigator View**:
+  - **Improved Table Headers**: Table headers now remain fixed while scrolling, improving readability and navigation.
+  - **Improved Page Results/Pagination Bar**: Easily navigate through search results by scrolling (they now remain fixed while scrolling). Quickly switch between pages and also locate the column table headers.
+- **Preview Window**:
+  - **Fixed Titlebar**: The titlebar now stays fixed at the top of the preview window, providing easy access to controls even when scrolling long notes. You can now easily close the preview window and access the 3 open file buttons eliminating the need to scroll to the top of the window.
+
 ## [5.1.1] - 2024-11-16
 - CSS adjustments of preview window.
 
