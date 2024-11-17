@@ -774,7 +774,7 @@ table#dn-table.dn-tbl-default td {
 	min-width: 400px;
 	min-height: 300px;
 	width: 600px;
-	height: auto;
+	height: 480px;
 	max-width: 100%;
 	max-height: 100%;
 	overflow: auto;
@@ -792,6 +792,7 @@ table#dn-table.dn-tbl-default td {
 }
 
 .dn-preview-titlebar {
+	width: 90%;
 	cursor: move;
 	border-left: 4px solid var(--text-faint);
 	padding-left: 8px;
