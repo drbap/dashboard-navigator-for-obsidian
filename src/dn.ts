@@ -1,4 +1,4 @@
-import { App, Component, debounce, MarkdownRenderer, Menu, Modal, TAbstractFile, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
+import { App, Component, debounce, MarkdownRenderer, Menu, Modal, normalizePath, TAbstractFile, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
 import { formatFileSize, formatFileSizeKBMB, getFolderStructure } from './utils/format';
 import { getPropsPerFile, getTagsPerFile } from './utils/tags';
 import { DNPieChart } from './utils/dnpiechart';
@@ -82,7 +82,7 @@ export class DNModal extends Modal {
 	private readonly intersectionObserver: IntersectionObserver;
 	private _DN_CTX_MENU: Menu;
 
-	private _previewComponent: Component;
+	private _previewComponent: Component = new Component();
 	private _hoverDiv: HTMLElement;
 	private _hoverRender: HTMLElement;
 	private _isDraggingPreview: boolean;
@@ -103,7 +103,7 @@ export class DNModal extends Modal {
 
 		const { contentEl } = this;
 
-		this._previewComponent = new Component();
+		this._previewComponent.load();
 		this._hoverDiv = this.contentEl.createEl('div', { cls: 'dn-preview' });
 
 		await this.updateModalData();
@@ -122,6 +122,7 @@ export class DNModal extends Modal {
 		this.dnToggleColoredFiles();
 
 		// Preview window
+
 		this._isDraggingPreview = false;
 		this._hoverDivLeft = '';
 		this._hoverDivTop = '';
@@ -425,6 +426,8 @@ export class DNModal extends Modal {
 				return param.slice(1, -1); // Remove single quotes
 			} else if (param.startsWith(".")) {
 				return '\\' + param + '$';
+			} else if (param.startsWith("/") && param.length === 1) {
+				return '^/$';
 			} else {
 				return param;
 			}
@@ -445,7 +448,7 @@ export class DNModal extends Modal {
 
 		let rExp: RegExp;
 
-		const isExcludeSearch = val.startsWith('!') && val.length >= 2;
+		const isExcludeSearch = val.startsWith('!') && val.length >= 1;
 		let excludeParam = isExcludeSearch ? val.slice(1) : val;
 
 		if (excludeParam.startsWith('"') && excludeParam.endsWith('"')) {
@@ -477,15 +480,23 @@ export class DNModal extends Modal {
 		}
 
 		if (isExcludeSearch) {
-			this._files_results = files.filter(file => {
-				const isMatch = file.name.toLowerCase().includes(excludeParam) ||
-					getFolderStructure(file.path).toLowerCase().includes(excludeParam) ||
-					moment(file.stat.mtime).format(this.date_format).toLowerCase().includes(excludeParam) ||
-					getTagsPerFile(file).toLowerCase().includes(excludeParam) ||
-					getPropsPerFile(file).toLowerCase().includes(excludeParam);
+			let isMatch: boolean;
+			if (excludeParam === '/') {
+				this._files_results = files.filter(file => {
+					isMatch = getFolderStructure(file.path).toLowerCase() === '/';
+					return isExcludeSearch ? !isMatch : isMatch;
+				});
+			} else {
+				this._files_results = files.filter(file => {
+					isMatch = file.name.toLowerCase().includes(excludeParam) ||
+						getFolderStructure(file.path).toLowerCase().includes(excludeParam) ||
+						moment(file.stat.mtime).format(this.date_format).toLowerCase().includes(excludeParam) ||
+						getTagsPerFile(file).toLowerCase().includes(excludeParam) ||
+						getPropsPerFile(file).toLowerCase().includes(excludeParam);
 
-				return isExcludeSearch ? !isMatch : isMatch;
-			});
+					return isExcludeSearch ? !isMatch : isMatch;
+				});
+			}
 		} else {
 			this._files_results = files.filter(
 				file => {
@@ -1450,6 +1461,7 @@ export class DNModal extends Modal {
 
 	dnShowPreviewFile(evt: MouseEvent, file: TFile) {
 		this._hoverDiv.empty();
+
 		const topBar = this._hoverDiv.createEl('div', { cls: 'dn-preview-top-bar' });
 		const btnClosePreview = topBar.createEl('div', { cls: 'modal-close-button' });
 
@@ -1493,22 +1505,24 @@ export class DNModal extends Modal {
 
 		this._hoverRender = this._hoverDiv.createEl('div', { cls: 'dn-pr-content' });
 
-		MarkdownRenderer.render(
-			this.app,
-			'![[' + file.path + ']]',
-			this._hoverRender,
-			file.path,
-			this._previewComponent
-		);
+		try {
+			MarkdownRenderer.render(
+				this.app,
+				'![[' + normalizePath(file.path) + ']]',
+				this._hoverRender,
+				normalizePath(file.path),
+				this._previewComponent
+			);
+		} catch (error) {
+			return;
+		}
 
-		this._hoverRender.addEventListener('mousedown', (evt: MouseEvent) => { evt.stopPropagation() });
+		this._hoverDiv.style.display = 'block';
 
 		// Drag event listeners
 		previewTop.addEventListener('mousedown', (evt) => this.dnHoverDragOnMouseDown(evt));
 		this._hoverDiv.addEventListener('mousemove', (evt) => this.dnHoverDragOnMouseMove(evt));
 		this._hoverDiv.addEventListener('mouseup', (evt) => this.dnHoverDragOnMouseUp(evt));
-
-		this._hoverDiv.style.display = 'block';
 
 		const screenWidth = window.innerWidth;
 		const screenHeight = window.innerHeight;
@@ -1521,7 +1535,6 @@ export class DNModal extends Modal {
 		}
 
 		previewTop.removeEventListener('mousedown', (evt) => this.dnHoverDragOnMouseDown(evt));
-		this._hoverRender.removeEventListener('mousedown', (evt: MouseEvent) => { evt.stopPropagation() });
 
 	}
 
