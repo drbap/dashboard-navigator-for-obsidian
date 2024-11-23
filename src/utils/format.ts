@@ -11,7 +11,7 @@ export function formatFileSize(fileSize: number): string {
 export function getFolderStructure(folder: string): string {
 	const folders = folder.split("/").slice(0, -1);
 	if (folders.length === 0) {
-		return "//";
+		return "/";
 	}
 
 	return "/" + folders.join("/");
