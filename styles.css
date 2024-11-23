@@ -830,18 +830,34 @@ table#dn-table.dn-tbl-default td {
 }
 
 .dn-preview .dn-pr-content {
-	display: grid;
-	grid-template-rows: 1fr;
-	grid-template-columns: 1fr;
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
 	width: 100%;
 	background: var(--background-primary);
 	border-radius: var(--radius-s);
 	cursor: auto;
+	position: relative;
 }
 
 .dn-preview .dn-pr-content img {
 	width: 100%;
 	height: auto;
+}
+
+.dn-preview .dn-pr-content span.pdf-embed {
+	width: 100% !important;
+	height: 2000px;
+	max-height: inherit;
+	overflow: auto;
+}
+
+.dn-preview .dn-pr-content span.pdf-embed .pdf-toolbar-right {
+	display: none;
+}
+
+.dn-preview .dn-pr-content span.pdf-embed .pdf-viewer-container.node-insert-event {
+	overflow: auto;
 }
 
 .dn-preview .markdown-embed-title {

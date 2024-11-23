@@ -1,6 +1,6 @@
 {
 	"name": "dashboard-navigator",
-	"version": "5.2.0",
+	"version": "5.2.1",
 	"description": "Dashboard navigator plugin for Obsidian",
 	"main": "main.js",
 	"scripts": {
