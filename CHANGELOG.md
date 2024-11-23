@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.2.1] - 2024-11-23
+
+- **Improvement:** **Simplified root folder search**. Previously, you needed to use `//` to search for files in the root folder. Now, you can directly use `/`. To exclude files from the root folder, use `!/`.
+
+- **Fixed**: **PDF files** preview (`hover + Ctrl key` and `Show preview`context menu).
+
+- **Fixed**: Display of **embedded queries**. You can now easily view query results directly in the dashboard navigator preview. Example: <code>\```query tag:#todo```</code>.
+
 ## [5.2.0] - 2024-11-17
 - **Navigator View**:
   - **Improved Table Headers**: Table headers now remain fixed while scrolling, improving readability and navigation.
