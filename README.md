@@ -16,7 +16,7 @@
   - Total folders, 
   - Vault pie chart of notes and other file formats.
   
-- **Recent files by type**: Easily access your most frequently used files (created/modified), categorized for quick reference. Save time searching and keep important notes readily available.
+- **Recent files by type**: Easily access your recently created or modified files, categorized for quick reference. Save time searching and keep important notes readily available.
 
 - **Recently opened files**: Quickly access your recently opened files. To see a file in the list, simply close its tab or open another file.
 
