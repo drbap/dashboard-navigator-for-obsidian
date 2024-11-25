@@ -1,7 +1,7 @@
 # Contributing
 
-Thank you for your interest in contributing to this project!
-Your ideas and suggestions are invaluable to me. 
+Thank you for your interest in contributing to this project. 
+Your input and suggestions are always appreciated.
 
 **Important Note: Due to my busy schedule, I am currently not accepting pull requests.**
 
