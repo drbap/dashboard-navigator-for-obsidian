@@ -251,7 +251,11 @@ You can hide the following columns:
 
 ## Feedback
 
-Have suggestions for new features, usability improvements, or found a bug? Your feedback is appreciated! Submit an issue on GitHub and I'll do my best to respond as soon as possible. Thanks.
+Have suggestions for new features, usability improvements, or found a bug? Your feedback is appreciated! Submit an issue on GitHub and I'll do my best to respond as soon as possible.
+
+**Important Note**: I'm currently not accepting pull requests. Please refer to **contributing.md** for future updates about it.
+
+Thanks.
 
 ## License and Acknowledgements
 
