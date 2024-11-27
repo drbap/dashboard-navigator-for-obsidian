@@ -630,32 +630,40 @@ export class DNModal extends Modal {
 
 				tr.createEl('td', { text: fSize, title: fSize + ' bytes' });
 				tr.createEl('td', { text: fMTime, title: fCTime + ' - Created\n' + fMTime + ' - Modified' });
+
 				const tags_per_file = getTagsPerFile(file);
 				const props_per_file = getPropsPerFile(file);
+
 				const td6 = tr.createEl('td', { title: tags_per_file });
-				const fTags = tags_per_file.split(' ');
-				fTags.forEach((tag) => {
-					td6.createEl('a', { cls: 'dn-tag', text: tag }).onClickEvent((evt: MouseEvent) => {
-						if (evt.button === 2) {
-							evt.preventDefault();
-						} else {
-							this._INPUT_SEARCH.value = tag;
-							this.dnModalSearchVault(this._INPUT_SEARCH.value);
-						}
+				if (tags_per_file !== '') {
+					const fTags = tags_per_file.split(' ');
+					fTags.forEach((tag) => {
+						td6.createEl('a', { cls: 'tag', text: tag, href: tag }).onClickEvent((evt: MouseEvent) => {
+							if (evt.button === 2) {
+								evt.preventDefault();
+							} else {
+								this._INPUT_SEARCH.value = tag;
+								this.dnModalSearchVault(this._INPUT_SEARCH.value);
+							}
+						});
 					});
-				});
-				const td7 = tr.createEl('td', { title: props_per_file });
-				const fProps = props_per_file.split('\n');
-				fProps.forEach((prop) => {
-					td7.createEl('a', { cls: 'dn-tag', text: prop }).onClickEvent((evt: MouseEvent) => {
-						if (evt.button === 2) {
-							evt.preventDefault();
-						} else {
-							this._INPUT_SEARCH.value = prop;
-							this.dnModalSearchVault(this._INPUT_SEARCH.value);
-						}
+				}
+
+				const td7 = tr.createEl('td');
+				if (props_per_file !== '') {
+					const fProps = props_per_file.split('\n');
+					fProps.forEach((prop) => {
+						td7.createEl('a', { cls: 'dn-tag', text: prop, title: props_per_file }).onClickEvent((evt: MouseEvent) => {
+							if (evt.button === 2) {
+								evt.preventDefault();
+							} else {
+								this._INPUT_SEARCH.value = prop;
+								this.dnModalSearchVault(this._INPUT_SEARCH.value);
+							}
+						});
 					});
-				});
+				}
+
 
 			});
 
@@ -1351,10 +1359,10 @@ export class DNModal extends Modal {
 
 					const curTags = getTagsPerFile(file);
 
-					if (curTags) {
+					if (curTags !== '') {
 						const tags = curTags.split(' ');
 						for (let i = 0, len = tags.length; i < len; i++) {
-							propTags.createEl('a', { text: tags[i], cls: 'dn-tag' }).onClickEvent((evt: MouseEvent) => {
+							propTags.createEl('a', { text: tags[i], href: tags[i], cls: 'tag' }).onClickEvent((evt: MouseEvent) => {
 								if (evt.button === 2) {
 									evt.preventDefault();
 								} else {
