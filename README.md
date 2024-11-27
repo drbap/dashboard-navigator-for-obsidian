@@ -229,6 +229,10 @@ You can hide the following columns:
 - Select custom colors for files in the dashboard and navigator views. 
 - These colors will be reflected in the piechart graph, making it easier to identify and track different file types. To activate this feature, go to **plugin settings** and **toggle colored files**.
 
+## Colored Tags Support
+
+- If the theme being used supports colored tags or if you are using custom CSS snippet to color tags, the **tags** column and **file properties** window will show colored tags accordingly.
+
 ## Plugin Settings
 
 ![Dashboard navigator for Obsidian - settings](images/dn_navigator_settings.png)
