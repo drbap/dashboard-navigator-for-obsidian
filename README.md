@@ -270,3 +270,20 @@ Dashboard navigator plugin for Obsidian
 MIT License ⓒ Bernardo Pires
 
 The Dashboard navigator icon (ribbon icon) and file icons are from [Lucide](https://lucide.dev/) Icons used by Obsidian. The Lucide icon library is licensed under the [ISC License](https://lucide.dev/license).
+
+### Thanks for the Suggestions and Feature Requests
+
+I'd like to express my sincere gratitude to everyone who has contributed suggestions and feature requests to improve this project. Your input is really valuable to me. Whether it's a new feature idea, a bug report, or a suggestion for improvement, I'll do my best to implement or fix it as soon as possible.
+
+* A special thanks to @merlinuwe for his ongoing support and constructive feedback since version 1.0.0. His suggestions and testing, including Issues #1, #5, #10, #11, and #12, have helped to improve the plugin's functionality and user experience. Some suggestions I hope to implement in future updates.
+
+* Thanks to @Minus10Celcius for suggesting the custom colors pie chart and the ability to hide columns in the navigator view (Issue #2).
+
+* Thanks to @oldjove for the idea of excluding folders from the dashboard view and adding different shortcuts for the dashboard and navigator views (Issues #3 and #4).
+
+* Thanks to @mudnug for suggesting the display of the .jpeg file extension in images (Issue #7).
+
+* Thanks to @nanjingman for the suggestion to add a file extensions column to the navigator view (Issue #9).
+
+I'm also grateful to everyone who took the time to star this repository. It really gives me extra motivation to keep improving this project. I hope you find this plugin useful in your daily tasks.
+
