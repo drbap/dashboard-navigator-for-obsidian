@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.3.0] - 2024-11-26
+- **Colored Tags**: If the theme being used supports colored tags or if you are using custom CSS snippet to color tags, the **tags** column and **file properties** window will show colored tags accordingly.
+- Improved get tags function.
+
 ## [5.2.1] - 2024-11-23
 
 - **Improvement:** **Simplified root folder search**. Previously, you needed to use `//` to search for files in the root folder. Now, you can directly use `/`. To exclude files from the root folder, use `!/`.
