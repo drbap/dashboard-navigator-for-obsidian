@@ -525,21 +525,6 @@ a.dn-f-other::before {
 	font-style: italic;
 }
 
-a.dn-tag {
-	display: inline-block;
-	border-radius: var(--tag-radius);
-	margin-right: var(--size-4-1);
-	padding-inline-end: var(--tag-padding-x);
-	font-size: var(--font-size);
-	background-color: var(--tag-background);
-	color: var(--tag-color);
-	text-decoration: none;
-}
-
-a.dn-tag:hover {
-	color: var(--text-accent-hover);
-}
-
 a.dn-fproperties::before {
 	content: '•';
 	color: var(--dn-border-color);
@@ -895,4 +880,28 @@ table#dn-table.dn-tbl-default td {
 
 .dn-property-value span.nav-file-tag {
 	margin: 0;
+}
+
+/* Tags */
+.dn-property-row a.tag,
+table#dn-table a.tag {
+	display: inline-block;
+	margin-right: var(--size-4-1);
+	font-size: var(--font-size);
+	text-decoration: none;
+}
+
+a.dn-tag {
+	display: inline-block;
+	border-radius: var(--tag-radius);
+	margin-right: var(--size-4-1);
+	padding-inline-end: var(--tag-padding-x);
+	font-size: var(--font-size);
+	background-color: var(--tag-background);
+	color: var(--tag-color);
+	text-decoration: none;
+}
+
+a.dn-tag:hover {
+	color: var(--text-accent-hover);
 }
