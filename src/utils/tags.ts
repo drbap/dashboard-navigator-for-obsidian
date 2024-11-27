@@ -19,9 +19,9 @@ export function getTagsPerFile(file: TFile): string {
 
 		if (frontmatter_tags !== undefined && frontmatter_tags.tags) {
 			for (let i = 0, len = frontmatter_tags.tags.length; i < len; i++) {
-
-				if (arrTags.indexOf(frontmatter_tags.tags[i]) < 0) {
-					arrTags.push('#' + frontmatter_tags.tags[i]);
+				const fmTag = '#' + frontmatter_tags.tags[i];
+				if (arrTags.indexOf(fmTag) < 0) {
+					arrTags.push(fmTag);
 				}
 			}
 
