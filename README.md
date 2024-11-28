@@ -89,7 +89,7 @@ You can combine search terms, file types (one per search) and date filters for m
 
 ### Quoted Search
 
-  - **Specific Quoted Search**: Search for specific sentences using double quotes or single quotes. For example, `"this is the description of a note"`.
+  - **Specific Quoted Search**: Search for specific sentences in frontmatter metadata or for specific filename using double or single quotes. For example, `"this is the description of a note"`.
 
 ### Additional Tips
 
