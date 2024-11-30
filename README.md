@@ -204,7 +204,7 @@ The column-hiding feature gives you the flexibility to customize the **navigator
 You can hide the following columns:
 - **Ext**: Shows the file extension.
 - **Path**: Shows the location of the file within your vault structure.
-- **Size**: Displays the file size of the file.
+- **Size**: Displays the file size.
 - **Date**: Indicates the modification date of the file.
 - **Tags**: Lists the tags associated with the note, making it easier to categorize and search for notes.
 - **Frontmatter**: Lists the frontmatter/metadata associated with the note.
