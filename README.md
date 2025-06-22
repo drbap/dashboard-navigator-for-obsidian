@@ -7,7 +7,7 @@
 
 ## Features
 
-![Dashboard navigator for Obsidian - dashboard](images/dn_dashboard_01.png)
+![Dashboard navigator for Obsidian - search](images/dn_top_buttons.png)
 
 - **Vault stats and graph**: Gain insightful statistics about your vault, including:
   - Number of notes, images, audios, videos, PDF and other file formats.
@@ -183,10 +183,6 @@ To search for specific frontmatter metadata, use the following syntax:
  
 ## Context Menu
 
-![Dashboard navigator for Obsidian - context menu](images/dn_navigator_context_menu.png)
-
-![Dashboard navigator for Obsidian - context menu 2](images/dn_navigator_context_menu_02.png)
-
 - Right-click the mouse button on the desired file link or table result to open the context menu. You can open the note in various ways (same tab, new tab, new window and also show its properties and metadata). You can also open the note by **double clicking** on the desired result.
 
 ## File Properties
@@ -196,6 +192,10 @@ To search for specific frontmatter metadata, use the following syntax:
 ## Frontmatter Modal
 
 ![Dashboard navigator for Obsidian - frontmatter modal](images/dn_navigator_frontmatter_modal.png)
+
+## Tags Modal
+
+![Dashboard navigator for Obsidian - tags modal](images/dn_tags_modal.png)
 
 ## Navigator View: Hide Columns
 
@@ -232,13 +232,6 @@ You can hide the following columns:
 ## Colored Tags Support
 
 - If the theme being used supports colored tags or if you are using custom CSS snippet to color tags, the **tags** column and **file properties** window will show colored tags accordingly.
-
-## Plugin Settings
-
-![Dashboard navigator for Obsidian - settings](images/dn_navigator_settings.png)
-
-![Dashboard navigator for Obsidian - settings 2 colored files](images/dn_navigator_settings2.png)
-
 
 ## Installation
 
