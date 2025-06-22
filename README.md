@@ -144,6 +144,22 @@ To search for specific frontmatter metadata, use the following syntax:
 
 - You can use the context menu (navigator view or dashboard view to open the **Frontmatter** or **File Properties** modal). Click on the desired frontmatter metadata to quickly search for an exact match within your notes.
 
+### Tag actions
+
+You can quickly filter your search results by interacting with **tags** directly within the **Navigator view**, **File Properties modal**, or **Tags modal**. These actions let you include or exclude tags from your current search query.
+
+  - A `Shift + left-click` on a tag toggles between these states:
+
+    - **Add tag:** This adds the tag to your search query. You'll **only see results that have this tag.** (e.g., `#tag`)
+
+    - **Remove tag:** This removes the tag from your search query. The tag will **no longer filter your results**.
+
+  - A `Ctrl + left-click` on a tag toggles between these states, specifically managing an *exclusion command*:
+
+    - **Add exclusion command:** This adds a command to your search query to **exclude** the tag. You'll **only see results that *do NOT* have this tag.** (e.g., `!#tag`)
+
+    - **Remove exclusion command:** This removes the exclusion command for that tag from your search query. The tag will **no longer filter your results by exclusion**.
+
 ## Search Top Buttons
 
 ![Dashboard navigator for Obsidian - save search](images/dn_top_buttons_explained.png)
