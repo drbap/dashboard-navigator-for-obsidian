@@ -34,7 +34,7 @@ The Dashboard navigator search allows you to quickly access and filter specific 
 - `@notes`: Lists all **notes**.
 - `@images`: Lists all **images**.
 - `@canvas` or `@canvases`: Lists all **canvases**.
-- `@audios`: Lists all **audio** files.
+- `@audio` or `@audios`: Lists all **audio** files.
 - `@videos`: Lists all **video** files.
 - `@pdf` or `@pdfs`: Lists all **PDF** files.
 - `@other`: Lists all **other** file types.
