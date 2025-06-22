@@ -51,7 +51,7 @@ You can combine the basic commands with search terms to narrow down your results
   - `@n` = `@notes`
   - `@i` = `@images`
   - `@c` = `@canvas` or `@canvases`
-  - `@a` = `@audios`
+  - `@a` = `@audio`
   - `@v` = `@videos`
   - `@p` = `@pdf`or `@pdfs`
   - `@o` = `@other`or `@others`
