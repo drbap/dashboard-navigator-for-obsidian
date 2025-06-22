@@ -1,6 +1,9 @@
 import { Plugin } from 'obsidian';
 import { DNSettingTab } from './settings';
 import { DNModal } from './dn';
+import { DNSaveSearchModal, DNSaveSearchItem } from './modals/dnsavesearchmodal';
+import { DNSavedSearchesModal } from './modals/dnsavedsearchesmodal';
+import { DNInfoModal } from './modals/dninfomodal';
 
 interface DNSettings {
 	default_view: number;
@@ -26,6 +29,7 @@ interface DNSettings {
 	hide_tags: boolean;
 	hide_frontmatter: boolean;
 	hide_columns: string[];
+	saved_searches: DNSaveSearchItem[];
 }
 
 export const DEFAULT_SETTINGS: DNSettings = {
@@ -51,20 +55,29 @@ export const DEFAULT_SETTINGS: DNSettings = {
 	hide_date: false,
 	hide_tags: false,
 	hide_frontmatter: false,
-	hide_columns: []
+	hide_columns: [],
+	saved_searches: []
 }
 
 export default class DNPlugin extends Plugin {
 
 	DN_MODAL: DNModal;
+	DN_SAVE_SEARCH_MODAL: DNSaveSearchModal;
+	DN_SAVED_SEARCHES_MODAL: DNSavedSearchesModal;
+	DN_INFO_MODAL: DNInfoModal;
 
 	settings: DNSettings;
+
 
 	async onload() {
 
 		await this.loadSettings();
 
-		this.DN_MODAL = new DNModal(this.app);
+		this.DN_MODAL = new DNModal(this.app, this);
+
+		this.DN_SAVE_SEARCH_MODAL = new DNSaveSearchModal(this.app, this);
+		this.DN_SAVED_SEARCHES_MODAL = new DNSavedSearchesModal(this.app, this);
+		this.DN_INFO_MODAL = new DNInfoModal(this.app);
 
 		// Set modal settings
 		this.DN_MODAL.default_view = this.settings.default_view;

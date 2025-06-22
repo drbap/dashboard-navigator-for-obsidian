@@ -231,6 +231,10 @@ export class DNSettingTab extends PluginSettingTab {
                 });
             });
 
+        const headingColumns1 = containerEl.createEl('div', { cls: 'setting-item setting-item-heading' });
+        const headingColumns2 = headingColumns1.createEl('div', { cls: 'setting-item setting-item-info' });
+        headingColumns2.createEl('div', { text: 'Columns', cls: 'setting-item-name' });
+
         // Navigator: Hide column - ext
         new Setting(containerEl)
             .setName('Hide column: Ext')
@@ -375,6 +379,10 @@ export class DNSettingTab extends PluginSettingTab {
                 });
             });
 
+        const headingExcludedFilesFolders1 = containerEl.createEl('div', { cls: 'setting-item setting-item-heading' });
+        const headingExcludedFilesFolders2 = headingExcludedFilesFolders1.createEl('div', { cls: 'setting-item setting-item-info' });
+        headingExcludedFilesFolders2.createEl('div', { text: 'Excluded files and folders', cls: 'setting-item-name' });
+
         // Excluded file extensions
         new Setting(containerEl)
             .setName('Excluded file extensions')
@@ -425,6 +433,9 @@ export class DNSettingTab extends PluginSettingTab {
                 });
             });
 
+        const headingFileColors1 = containerEl.createEl('div', { cls: 'setting-item setting-item-heading' });
+        const headingFileColors2 = headingFileColors1.createEl('div', { cls: 'setting-item setting-item-info' });
+        headingFileColors2.createEl('div', { text: 'File colors', cls: 'setting-item-name' });
         // Toggle colored files
         new Setting(containerEl)
             .setName('Toggle colored files')
