@@ -24,22 +24,6 @@
 
 - **Advanced file search**: Find your files quickly with powerful **search** and **sort** functionalities. More information below.
 
-## Search Top Buttons
-
-![Dashboard navigator for Obsidian - save search](images/dn_top_buttons_explained.png)
-
-## Save Search
-
-![Dashboard navigator for Obsidian - save search](images/dn_save_search.png)
-
-- You can now **save your search queries** directly from the Navigator view! This feature lets you store complex or frequently used searches, along with a helpful **description**, so you can easily find and reuse them later.
-
-## Saved Searches and Filter
-
-![Dashboard navigator for Obsidian - save search](images/dn_saved_searches.png)
-
-- Just click on any saved search within the modal, and it'll instantly run that search in your Navigator view. No more re-typing complex queries! You can also filter your saved searches.
-
 ## Intuitive Advanced Search
 
 The Dashboard navigator search allows you to quickly access and filter specific files within your vault. Quickly find notes, images, canvases, audios, videos, PDFs, and more with simple commands.
@@ -159,6 +143,25 @@ To search for specific frontmatter metadata, use the following syntax:
 - Use single quotes (`'`) to enclose when searching for specific metadata.
 
 - You can use the context menu (navigator view or dashboard view to open the **Frontmatter** or **File Properties** modal). Click on the desired frontmatter metadata to quickly search for an exact match within your notes.
+
+## Search Top Buttons
+
+![Dashboard navigator for Obsidian - save search](images/dn_top_buttons_explained.png)
+
+## Save Search
+
+![Dashboard navigator for Obsidian - save search](images/dn_save_search.png)
+
+- You can now **save your search queries** directly from the Navigator view! This feature lets you store complex or frequently used searches, along with a helpful **description**, so you can easily find and reuse them later.
+
+## Saved Searches and Filter
+
+![Dashboard navigator for Obsidian - save search](images/dn_saved_searches.png)
+
+- Just click on any saved search within the modal, and it'll instantly run that search in your Navigator view. No more re-typing complex queries! You can also filter your saved searches.
+- **Left-click on the selected saved search** in order to search in Navigator view.
+- **Double-click the left mouse button** on the selected search to seach in Navigator view and also close the saved search modal.
+
 
 ## Sort Files
 
