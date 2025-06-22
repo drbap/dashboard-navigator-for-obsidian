@@ -1,5 +1,33 @@
 # Changelog
 
+## [6.0.0] - 2025-06-21
+- *New* **Save search** feature:
+  - You can now **save your search queries** directly from the Navigator view! This feature lets you store **complex** or **frequently used searches**, along with a helpful description, so you can easily find and reuse them later.
+- *New* **Saved searches modal/window**:
+  - Just click on any saved search within the modal, and it'll instantly run that search in your Navigator view. No more re-typing complex queries! You can also filter your saved searches.
+
+- *New* **Help/quick reference** (basic offline plugin help - search commands and how to use).
+
+- *New* **Tags modal/window**.
+
+- *New* context menu item: Tags (it will show the tags modal). 
+
+- Improved Frontmatter modal.
+
+- *New* **Tag Actions**. You can quickly filter your search results by interacting with **tags** directly within the **Navigator view**, **File Properties modal**, or **Tags modal**. These actions let you include or exclude tags from your current search query.
+
+  - A `Shift + left-click` on a tag toggles between these states:
+
+    - **Add tag:** This adds the tag to your search query. You'll **only see results that have this tag.** (e.g., `#tag`)
+
+    - **Remove tag:** This removes the tag from your search query. The tag will **no longer filter your results**.
+
+  - A `Ctrl + left-click` on a tag toggles between these states, specifically managing an *exclusion command*:
+
+    - **Add exclusion command:** This adds a command to your search query to **exclude** the tag. You'll **only see results that *do NOT* have this tag.** (e.g., `!#tag`)
+
+    - **Remove exclusion command:** This removes the exclusion command for that tag from your search query. The tag will **no longer filter your results by exclusion**.
+
 ## [5.3.0] - 2024-11-26
 - **Colored Tags**: If the theme being used supports colored tags or if you are using custom CSS snippet to color tags, the **tags** column and **file properties** window will show colored tags accordingly.
 - Improved get tags function.
