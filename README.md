@@ -160,6 +160,9 @@ You can quickly filter your search results by interacting with **tags** directly
 
     - **Remove exclusion command:** This removes the exclusion command for that tag from your search query. The tag will **no longer filter your results by exclusion**.
 
+#### Quick Search Reset: `Shift + middle-click` any tag
+- `Shift + middle-click` any tag to clear the main search field.
+
 ## Search Top Buttons
 
 ![Dashboard navigator for Obsidian - save search](images/dn_top_buttons_explained.png)
