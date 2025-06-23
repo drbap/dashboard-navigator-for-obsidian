@@ -10,7 +10,7 @@
 ![Dashboard navigator for Obsidian - search](images/dn_top_buttons.png)
 
 - **Vault stats and graph**: Gain insightful statistics about your vault, including:
-  - Number of notes, images, audios, videos, PDF and other file formats.
+  - Number of notes, images, audio files, videos, PDF and other file formats.
     - When you click on the dashboard file type buttons (desired file type) you will enter the navigator mode with the results only showing the desired file type. 
   - Total files, 
   - Total folders, 
