@@ -39,6 +39,7 @@ export class DNModal extends Modal {
 	private _sort_order = 'desc';
 	private _sort_column = 'modified';
 
+	private _thThumb: HTMLTableCellElement;
 	private _th1: HTMLTableCellElement;
 	private _th2: HTMLTableCellElement;
 	private _th3: HTMLTableCellElement;
@@ -53,11 +54,12 @@ export class DNModal extends Modal {
 	private _SELECT_TABLE_LAYOUT: HTMLSelectElement;
 
 	private _selected_category = '';
-	private _TABLE_LAYOUTS: string[] = ['dn-tbl-default', 'dn-tbl-row', 'dn-tbl-column', 'dn-tbl-bordered'];
+	private _TABLE_LAYOUTS: string[] = ['dn-tbl-default', 'dn-tbl-row', 'dn-tbl-column', 'dn-tbl-bordered', 'dn-tbl-cards'];
 
 	selected_table_layout = 'dn-tbl-default';
 	selected_sort_value = 'modified-desc';
 
+	current_page = 1;
 	num_recent_files = 5;
 	files_per_page = 20;
 	date_format = 'YYYY-MM-DD HH:mm';
@@ -76,6 +78,10 @@ export class DNModal extends Modal {
 
 	// Hide columns
 	hide_columns: string[] = [];
+
+	image_thumbnail = false;
+
+	onclose_search = '';
 
 	labelLayout: HTMLSpanElement;
 	labelSort: HTMLSpanElement;
@@ -109,6 +115,10 @@ export class DNModal extends Modal {
 
 		this._previewComponent.load();
 		this._hoverDiv = this.contentEl.createEl('div', { cls: 'dn-preview' });
+		this._hoverDiv.addEventListener('click', (evt: MouseEvent) => {
+			evt.stopPropagation();
+			evt.stopImmediatePropagation();
+		});
 
 		await this.updateModalData();
 
@@ -130,6 +140,12 @@ export class DNModal extends Modal {
 		this._isDraggingPreview = false;
 		this._hoverDivLeft = '';
 		this._hoverDivTop = '';
+
+		await this.dnLoadSearchOnClose();
+
+		if (this.INPUT_SEARCH.value !== '') {
+			this.dnModalSearchVault(this.INPUT_SEARCH.value);
+		}
 
 	}
 
@@ -215,6 +231,7 @@ export class DNModal extends Modal {
 		this._SELECT_TABLE_LAYOUT.createEl('option', { text: 'Row striped', value: 'dn-tbl-row' });
 		this._SELECT_TABLE_LAYOUT.createEl('option', { text: 'Column striped', value: 'dn-tbl-column' });
 		this._SELECT_TABLE_LAYOUT.createEl('option', { text: 'Bordered', value: 'dn-tbl-bordered' });
+		this._SELECT_TABLE_LAYOUT.createEl('option', { text: 'Cards', value: 'dn-tbl-cards' });
 		this._SELECT_TABLE_LAYOUT.addEventListener('change', () => { this.dnSelectTableLayout(); });
 
 		// Select sort
@@ -249,7 +266,7 @@ export class DNModal extends Modal {
 
 		this._divSearchResults = this._VIEW_NAVIGATOR.createEl('div', { cls: 'dn-div-table' });
 
-		this.dnShowModalSearchResults({ f: this._files_results, el: this._divSearchResults, leaf: this._leaf })
+		this.dnShowModalSearchResults({ f: this._files_results, el: this._divSearchResults, leaf: this._leaf });
 
 		// Vault Stats container
 		const divVaultStats = this._VIEW_DASHBOARD.createEl('div');
@@ -431,12 +448,20 @@ export class DNModal extends Modal {
 			this.plugin.DN_SAVED_SEARCHES_MODAL.open();
 		});
 
+		// Navigator view columns btn
+		const topBtnQuickDisplayOptions = searchRightDiv.createEl('button', { cls: 'dn-top-btns-search' })
+		topBtnQuickDisplayOptions.setAttribute('id', 'dn-top-btn-table-columns');
+		topBtnQuickDisplayOptions.onClickEvent((evt: MouseEvent) => {
+			this.plugin.DN_QUICK_DISPLAY_OPTIONS_MODAL.open();
+		});
+
 		// Help/Info btn
 		const topBtnInfo = searchRightDiv.createEl('button', { cls: 'dn-top-btns-search' })
 		topBtnInfo.setAttribute('id', 'dn-top-btn-info');
 		topBtnInfo.onClickEvent((evt: MouseEvent) => {
 			this.plugin.DN_INFO_MODAL.open();
 		});
+
 
 		// Keyup event listener with debounce
 		this.INPUT_SEARCH.addEventListener('input', debounce(() => this.dnModalSearchVault(this.INPUT_SEARCH.value), 300, true));
@@ -594,19 +619,33 @@ export class DNModal extends Modal {
 		// Thead
 		const thead = table.createEl('thead');
 		const tr = thead.createEl('tr');
-		this._th1 = tr.createEl('th', { text: 'Name' });
-		this._th2 = tr.createEl('th', { text: 'Ext' });
-		this._th3 = tr.createEl('th', { text: 'Path' });
-		this._th4 = tr.createEl('th', { text: 'Size' });
-		this._th5 = tr.createEl('th', { text: 'Date' });
-		this._th6 = tr.createEl('th', { text: 'Tags' });
-		this._th7 = tr.createEl('th', { text: 'Frontmatter' });
+
+		thead.addEventListener('contextmenu', (evt) => {
+			const clickedHeader = (evt.target as HTMLElement).closest('th');
+
+			if (clickedHeader) {
+				evt.preventDefault();
+				evt.stopPropagation();
+				this.plugin.DN_QUICK_DISPLAY_OPTIONS_MODAL.open();
+			}
+		});
+
+		this._thThumb = tr.createEl('th', { text: '■', cls: 'dn-th-thumbnail' });
+
+		this._th1 = tr.createEl('th', { text: 'Name', cls: 'dn-th-name' });
+		this._th2 = tr.createEl('th', { text: 'Ext', cls: 'dn-th-ext' });
+		this._th3 = tr.createEl('th', { text: 'Path', cls: 'dn-th-path' });
+		this._th4 = tr.createEl('th', { text: 'Size', cls: 'dn-th-size' });
+		this._th5 = tr.createEl('th', { text: 'Date', cls: 'dn-th-date' });
+		this._th6 = tr.createEl('th', { text: 'Tags', cls: 'dn-th-tags' });
+		this._th7 = tr.createEl('th', { text: 'Frontmatter', cls: 'dn-th-frontmatter' });
 
 		this._th1.addEventListener('dblclick', () => this.dnAlternateSortColumn('name'));
 		this._th2.addEventListener('dblclick', () => this.dnAlternateSortColumn('ext'));
 		this._th3.addEventListener('dblclick', () => this.dnAlternateSortColumn('path'));
 		this._th4.addEventListener('dblclick', () => this.dnAlternateSortColumn('size'));
 		this._th5.addEventListener('dblclick', () => this.dnAlternateSortColumn('modified'));
+
 
 		// Tbody
 		const tbody = table.createEl('tbody');
@@ -633,7 +672,17 @@ export class DNModal extends Modal {
 
 				tr.removeEventListener('mouseover', async (evt: MouseEvent) => { this.dnHandleHoverPreview(evt, file); });
 
-				const td1 = tr.createEl('td');
+				const tdThumbnail = tr.createEl('td', { title: file.path });
+				this.setThumbnail(tdThumbnail, file);
+
+				tdThumbnail.onClickEvent((evt: MouseEvent) => {
+					if (leaf !== null && file !== null) {
+						this.dnOpenFileAlt(file, evt);
+					}
+				});
+
+
+				const td1 = tr.createEl('td', { cls: 'dn-td-name' });
 				td1.createEl('a', { cls: this.dnSetFileIconClass(file.extension), text: file.name }).onClickEvent((evt: MouseEvent) => {
 					if (leaf !== null && file !== null) {
 						this.dnOpenFileAlt(file, evt);
@@ -645,7 +694,7 @@ export class DNModal extends Modal {
 				const fMTime = moment(file.stat.mtime).format(this.date_format);
 				const fCTime = moment(file.stat.ctime).format(this.date_format);
 
-				const td2 = tr.createEl('td');
+				const td2 = tr.createEl('td', { cls: 'dn-td-ext' });
 
 				td2.createEl('a', { cls: 'dn-ext', text: fExt, title: fExt }).onClickEvent((evt: MouseEvent) => {
 					if (evt.button === 2) {
@@ -656,7 +705,7 @@ export class DNModal extends Modal {
 					}
 				});
 
-				const td3 = tr.createEl('td');
+				const td3 = tr.createEl('td', { cls: 'dn-td-path' });
 				const folder_path = getFolderStructure(file.path);
 				td3.createEl('a', { cls: 'dn-folder-path', text: folder_path, title: file.path }).onClickEvent((evt: MouseEvent) => {
 					if (evt.button === 2) {
@@ -667,13 +716,13 @@ export class DNModal extends Modal {
 					}
 				});
 
-				tr.createEl('td', { text: fSize, title: fSize + ' bytes' });
-				tr.createEl('td', { text: fMTime, title: fCTime + ' - Created\n' + fMTime + ' - Modified' });
+				tr.createEl('td', { text: fSize, title: fSize + ' bytes', cls: 'dn-td-size' });
+				tr.createEl('td', { text: fMTime, title: fCTime + ' - Created\n' + fMTime + ' - Modified', cls: 'dn-td-date' });
 
 				const tags_per_file = getTagsPerFile(file);
 				const props_per_file = getPropsPerFile(file);
 
-				const td6 = tr.createEl('td', { title: tags_per_file });
+				const td6 = tr.createEl('td', { title: tags_per_file, cls: 'dn-td-tags' });
 				if (tags_per_file !== '') {
 					const fTags = tags_per_file.split(' ');
 					fTags.forEach((tag) => {
@@ -683,7 +732,7 @@ export class DNModal extends Modal {
 					});
 				}
 
-				const td7 = tr.createEl('td');
+				const td7 = tr.createEl('td', { cls: 'dn-td-frontmatter' });
 				if (props_per_file !== '') {
 					const fProps = props_per_file.split('\n');
 					fProps.forEach((prop) => {
@@ -752,6 +801,63 @@ export class DNModal extends Modal {
 			paginationContainer.createEl('div', { cls: 'dn-pagination-total-results', text: `File(s): 0 ` });
 			this._divSearchResults.createEl('p', { cls: 'dn-no-results-found', text: 'No files found.' });
 		}
+		this.current_page = currentPage;
+	}
+
+	setThumbnail(tdThumbnail: HTMLTableCellElement, file: TFile) {
+		const file_extension = file.extension.toLowerCase();
+
+		const extensions: Record<string, string> = {
+			'md': 'note',
+			// Images
+			'avif': 'image',
+			'bmp': 'image',
+			'gif': 'image',
+			'ico': 'image',
+			'jpeg': 'image',
+			'jpg': 'image',
+			'png': 'image',
+			'raw': 'image',
+			'svg': 'image',
+			'tif': 'image',
+			'tiff': 'image',
+			'webp': 'image',
+			// Audio files
+			'aac': 'audio',
+			'aif': 'audio',
+			'aifc': 'audio',
+			'aiff': 'audio',
+			'flac': 'audio',
+			'm4a': 'audio',
+			'mp3': 'audio',
+			'ogg': 'audio',
+			'wav': 'audio',
+			'webm': 'audio',
+			// Videos
+			'avi': 'video',
+			'mov': 'video',
+			'mkv': 'video',
+			'mp4': 'video',
+			// PDF and other formats
+			'pdf': 'pdf',
+			'canvas': 'canvas'
+		};
+
+		if (extensions[file_extension] === 'image') {
+			tdThumbnail.setAttribute('class', 'dn-thumbnail-image');
+			if (this.image_thumbnail) {
+				const imgThumb = tdThumbnail.createEl('img');
+				imgThumb.setAttribute('src', this.app.vault.adapter.getResourcePath(normalizePath(file.path)));
+				imgThumb.setAttribute('loading', 'lazy');
+			}
+
+		} else if (extensions[file_extension] !== 'image' && file_extension in extensions) {
+			tdThumbnail.setAttribute('class', 'dn-thumbnail-' + extensions[file_extension]);
+		}
+		else {
+			tdThumbnail.setAttribute('class', 'dn-thumbnail-' + extensions[file_extension]);
+		}
+
 	}
 
 	async dnSortFilteredFiles(toggle: boolean) {
@@ -1548,11 +1654,12 @@ export class DNModal extends Modal {
 	dnShowPreviewFile(evt: MouseEvent, file: TFile) {
 		this._hoverDiv.empty();
 
+		this.modalEl.addEventListener('click', () => { this.dnHidePreview() });
+
 		const topBar = this._hoverDiv.createEl('div', { cls: 'dn-preview-top-bar' });
 		const btnClosePreview = topBar.createEl('div', { cls: 'modal-close-button' });
 
-		btnClosePreview.onClickEvent((evt) => {
-			evt.stopPropagation();
+		btnClosePreview.onClickEvent(() => {
 			this.dnHidePreview();
 		});
 
@@ -1621,7 +1728,7 @@ export class DNModal extends Modal {
 		}
 
 		previewTop.removeEventListener('mousedown', (evt) => this.dnHoverDragOnMouseDown(evt));
-
+		this.modalEl.removeEventListener('click', (evt) => { this.dnHidePreview() });
 	}
 
 	private dnHidePreview() {
@@ -1839,6 +1946,20 @@ export class DNModal extends Modal {
 		this.dnModalSearchVault(this.INPUT_SEARCH.value);
 	}
 
+	async dnLoadSearchOnClose() {
+		this.INPUT_SEARCH.value = this.plugin.settings.onclose_search;
+		this.plugin.saveSettings();
+	}
+
+	dnSaveSearchOnClose() {
+		this.plugin.settings.onclose_search = this.INPUT_SEARCH.value;
+		this.plugin.saveSettings();
+	}
+
+	async dnRedrawResultsTable() {
+		await this.dnShowModalSearchResults({ f: this._files_results, el: this._divSearchResults, leaf: this._leaf, currentPage: this.current_page });
+	}
+
 	onClose() {
 		const { contentEl } = this;
 		contentEl.empty();
@@ -1860,10 +1981,16 @@ export class DNModal extends Modal {
 		this._hoverDiv.removeEventListener('mousemove', (evt) => this.dnHoverDragOnMouseMove(evt));
 		this._hoverDiv.removeEventListener('mouseup', (evt) => this.dnHoverDragOnMouseUp(evt));
 
+		this._hoverDiv.removeEventListener('click', (evt: MouseEvent) => {
+			evt.stopPropagation();
+			evt.stopImmediatePropagation();
+		});
 
 		if (this.intersectionObserver) {
 			this.intersectionObserver.disconnect();
 		}
+
+		this.dnSaveSearchOnClose();
 	}
 
 }

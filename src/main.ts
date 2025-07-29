@@ -4,6 +4,7 @@ import { DNModal } from './dn';
 import { DNSaveSearchModal, DNSaveSearchItem } from './modals/dnsavesearchmodal';
 import { DNSavedSearchesModal } from './modals/dnsavedsearchesmodal';
 import { DNInfoModal } from './modals/dninfomodal';
+import { DNQuickDisplayOptionsModal } from './modals/dnquickdisplayoptionsmodal';
 
 interface DNSettings {
 	default_view: number;
@@ -29,6 +30,8 @@ interface DNSettings {
 	hide_tags: boolean;
 	hide_frontmatter: boolean;
 	hide_columns: string[];
+	image_thumbnail: boolean;
+	onclose_search: string,
 	saved_searches: DNSaveSearchItem[];
 }
 
@@ -56,6 +59,8 @@ export const DEFAULT_SETTINGS: DNSettings = {
 	hide_tags: false,
 	hide_frontmatter: false,
 	hide_columns: [],
+	image_thumbnail: true,
+	onclose_search: '',
 	saved_searches: []
 }
 
@@ -65,6 +70,7 @@ export default class DNPlugin extends Plugin {
 	DN_SAVE_SEARCH_MODAL: DNSaveSearchModal;
 	DN_SAVED_SEARCHES_MODAL: DNSavedSearchesModal;
 	DN_INFO_MODAL: DNInfoModal;
+	DN_QUICK_DISPLAY_OPTIONS_MODAL: DNQuickDisplayOptionsModal;
 
 	settings: DNSettings;
 
@@ -74,6 +80,8 @@ export default class DNPlugin extends Plugin {
 		await this.loadSettings();
 
 		this.DN_MODAL = new DNModal(this.app, this);
+
+		this.DN_QUICK_DISPLAY_OPTIONS_MODAL = new DNQuickDisplayOptionsModal(this.app, this);
 
 		this.DN_SAVE_SEARCH_MODAL = new DNSaveSearchModal(this.app, this);
 		this.DN_SAVED_SEARCHES_MODAL = new DNSavedSearchesModal(this.app, this);
@@ -99,6 +107,8 @@ export default class DNPlugin extends Plugin {
 		this.DN_MODAL.color_other = this.settings.color_other;
 
 		this.DN_MODAL.hide_columns = this.dnSetHiddenColumns(this.settings.hide_columns);
+
+		this.DN_MODAL.image_thumbnail = this.settings.image_thumbnail;
 
 		this.addRibbonIcon('gauge', 'Open dashboard navigator', (evt: MouseEvent) => {
 			this.DN_MODAL.default_view = this.settings.default_view;

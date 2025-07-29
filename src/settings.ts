@@ -27,6 +27,7 @@ export class DNSettingTab extends PluginSettingTab {
     toggleHideDateColumn: ToggleComponent;
     toggleHideTagsColumn: ToggleComponent;
     toggleHideFrontmatterColumn: ToggleComponent;
+    toggleImageThumbnail: ToggleComponent;
 
     constructor(app: App, plugin: DNPlugin) {
         super(app, plugin);
@@ -50,8 +51,8 @@ export class DNSettingTab extends PluginSettingTab {
 
         // Default DN view: Dashboard or Navigator
         new Setting(containerEl)
-            .setName('Default view')
-            .setDesc('Select view when opening window')
+            .setName('Default modal view')
+            .setDesc('Select the initial view for this plugin\'s modal when it opens using its primary ribbon icon.')
             .addDropdown(sel => {
                 this.dropdownDefaultView = sel;
                 sel.addOption('1', 'Dashboard');
@@ -78,14 +79,15 @@ export class DNSettingTab extends PluginSettingTab {
 
         // Table layout
         new Setting(containerEl)
-            .setName('Navigator table layout')
-            .setDesc('Select table results layout')
+            .setName('Navigator search layout')
+            .setDesc('Navigator: Select search results layout.')
             .addDropdown(sel => {
                 this.dropdownTableLayout = sel;
                 sel.addOption('dn-tbl-default', 'Default');
                 sel.addOption('dn-tbl-row', 'Row striped');
                 sel.addOption('dn-tbl-column', 'Column striped');
                 sel.addOption('dn-tbl-bordered', 'Bordered');
+                sel.addOption('dn-tbl-cards', 'Cards');
                 sel.onChange(async (val: string) => {
 
                     this.plugin.settings.selected_table_layout = val;
@@ -109,7 +111,7 @@ export class DNSettingTab extends PluginSettingTab {
         // Date format
         new Setting(containerEl)
             .setName('Date format')
-            .setDesc('Select date format')
+            .setDesc('Select date format.')
             .addDropdown(sel => {
                 this.dropdownDateFormat = sel;
                 sel.addOption('YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD HH:mm:ss');
@@ -141,7 +143,7 @@ export class DNSettingTab extends PluginSettingTab {
         // Font size
         new Setting(containerEl)
             .setName('Font size')
-            .setDesc('Select font size in pixels for results and links')
+            .setDesc('Select font size in pixels for results and links.')
             .addSlider((sli) => {
                 this.sliderFontSize = sli;
                 let slider_val: number;
@@ -173,7 +175,7 @@ export class DNSettingTab extends PluginSettingTab {
         // Results/files per page
         new Setting(containerEl)
             .setName('Files per page')
-            .setDesc('Number of results per page')
+            .setDesc('Navigator: Number of results per page.')
             .addDropdown(sel => {
                 this.dropdownFilesPerPage = sel;
                 sel.addOption('10', '10');
@@ -204,7 +206,7 @@ export class DNSettingTab extends PluginSettingTab {
         // Recent files by type
         new Setting(containerEl)
             .setName('Recent files')
-            .setDesc('Number of recent files per category')
+            .setDesc('Dashboard: Number of recent files per category.')
             .addDropdown(sel => {
                 this.dropdownRecentFiles = sel;
                 sel.addOption('3', '3');
@@ -233,12 +235,12 @@ export class DNSettingTab extends PluginSettingTab {
 
         const headingColumns1 = containerEl.createEl('div', { cls: 'setting-item setting-item-heading' });
         const headingColumns2 = headingColumns1.createEl('div', { cls: 'setting-item setting-item-info' });
-        headingColumns2.createEl('div', { text: 'Columns', cls: 'setting-item-name' });
+        headingColumns2.createEl('div', { text: 'Hidden columns', cls: 'setting-item-name' });
 
         // Navigator: Hide column - ext
         new Setting(containerEl)
-            .setName('Hide column: Ext')
-            .setDesc('Navigator: Hide file extension column')
+            .setName('Hide: Ext')
+            .setDesc('Navigator: Hide file extension column.')
             .addToggle((toggle) => {
                 this.toggleHideExtColumn = toggle;
                 toggle
@@ -261,8 +263,8 @@ export class DNSettingTab extends PluginSettingTab {
 
         // Navigator: Hide column - path
         new Setting(containerEl)
-            .setName('Hide column: Path')
-            .setDesc('Navigator: Hide path column')
+            .setName('Hide: Path')
+            .setDesc('Navigator: Hide path column.')
             .addToggle((toggle) => {
                 this.toggleHidePathColumn = toggle;
                 toggle
@@ -285,8 +287,8 @@ export class DNSettingTab extends PluginSettingTab {
 
         // Navigator: Hide column - size
         new Setting(containerEl)
-            .setName('Hide column: Size')
-            .setDesc('Navigator: Hide size column')
+            .setName('Hide: Size')
+            .setDesc('Navigator: Hide size column.')
             .addToggle((toggle) => {
                 this.toggleHideSizeColumn = toggle;
                 toggle
@@ -309,8 +311,8 @@ export class DNSettingTab extends PluginSettingTab {
 
         // Navigator: Hide column - date
         new Setting(containerEl)
-            .setName('Hide column: Date')
-            .setDesc('Navigator: Hide date column')
+            .setName('Hide: Date')
+            .setDesc('Navigator: Hide date column.')
             .addToggle((toggle) => {
                 this.toggleHideDateColumn = toggle;
                 toggle
@@ -333,8 +335,8 @@ export class DNSettingTab extends PluginSettingTab {
 
         // Navigator: Hide column - tags
         new Setting(containerEl)
-            .setName('Hide column: Tags')
-            .setDesc('Navigator: Hide tags column')
+            .setName('Hide: Tags')
+            .setDesc('Navigator: Hide tags column.')
             .addToggle((toggle) => {
                 this.toggleHideTagsColumn = toggle;
                 toggle
@@ -357,8 +359,8 @@ export class DNSettingTab extends PluginSettingTab {
 
         // Navigator: Hide column - frontmatter
         new Setting(containerEl)
-            .setName('Hide column: Frontmatter')
-            .setDesc('Navigator: Hide frontmatter properties column')
+            .setName('Hide: Frontmatter')
+            .setDesc('Navigator: Hide frontmatter properties column.')
             .addToggle((toggle) => {
                 this.toggleHideFrontmatterColumn = toggle;
                 toggle
@@ -379,6 +381,35 @@ export class DNSettingTab extends PluginSettingTab {
                 });
             });
 
+        // Image thumbnails
+        const headingImageThumbnails1 = containerEl.createEl('div', { cls: 'setting-item setting-item-heading' });
+        const headingImageThumbnails2 = headingImageThumbnails1.createEl('div', { cls: 'setting-item setting-item-info' });
+        headingImageThumbnails2.createEl('div', { text: 'Image thumbnails', cls: 'setting-item-name' });
+
+        new Setting(containerEl)
+            .setName('Show image thumbnails')
+            .setDesc('Navigator: Activate to show image thumbnails. Deactivate to show image icons.')
+            .addToggle((toggle) => {
+                this.toggleImageThumbnail = toggle;
+                toggle
+                    .setValue(this.plugin.settings.image_thumbnail)
+                    .onChange(async (val) => {
+                        this.plugin.settings.image_thumbnail = val;
+                        this.plugin.DN_MODAL.image_thumbnail = this.plugin.settings.image_thumbnail;
+                        await this.plugin.saveSettings();
+                        await this.plugin.DN_MODAL.dnRedrawResultsTable();
+                    });
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.toggleImageThumbnail.setValue(DEFAULT_SETTINGS.image_thumbnail);
+                    this.plugin.settings.image_thumbnail = DEFAULT_SETTINGS.image_thumbnail;
+                    this.plugin.DN_MODAL.image_thumbnail = this.plugin.settings.image_thumbnail;
+                    this.plugin.saveSettings();
+                });
+            });
+
         const headingExcludedFilesFolders1 = containerEl.createEl('div', { cls: 'setting-item setting-item-heading' });
         const headingExcludedFilesFolders2 = headingExcludedFilesFolders1.createEl('div', { cls: 'setting-item setting-item-info' });
         headingExcludedFilesFolders2.createEl('div', { text: 'Excluded files and folders', cls: 'setting-item-name' });
@@ -386,7 +417,7 @@ export class DNSettingTab extends PluginSettingTab {
         // Excluded file extensions
         new Setting(containerEl)
             .setName('Excluded file extensions')
-            .setDesc('File extensions to exclude, separated by commas')
+            .setDesc('File extensions to exclude, separated by commas.')
             .addText((text) => {
                 this.textExcludedExtensions = text;
                 text
@@ -411,7 +442,7 @@ export class DNSettingTab extends PluginSettingTab {
         // Excluded folders
         new Setting(containerEl)
             .setName('Excluded folders')
-            .setDesc('List of folder paths to exclude, separated by commas')
+            .setDesc('List of folder paths to exclude, separated by commas.')
             .addText((text) => {
                 this.textExcludedFolders = text;
                 text
@@ -439,7 +470,7 @@ export class DNSettingTab extends PluginSettingTab {
         // Toggle colored files
         new Setting(containerEl)
             .setName('Toggle colored files')
-            .setDesc('Turn on/off colored files')
+            .setDesc('Turn on/off colored files.')
             .addToggle((toggle) => {
                 this.toggleColoredFiles = toggle;
                 toggle
@@ -465,7 +496,7 @@ export class DNSettingTab extends PluginSettingTab {
         // 1 Color -> Notes
         new Setting(containerEl)
             .setName('Color: Notes')
-            .setDesc('Color of notes')
+            .setDesc('Color of notes.')
             .addColorPicker((color) => {
                 this.colorCompNotes = color;
                 color
@@ -491,7 +522,7 @@ export class DNSettingTab extends PluginSettingTab {
         // 2 Color -> Canvas
         new Setting(containerEl)
             .setName('Color: Canvas')
-            .setDesc('Color of canvas')
+            .setDesc('Color of canvas.')
             .addColorPicker((color) => {
                 this.colorCompCanvas = color;
                 color
@@ -519,7 +550,7 @@ export class DNSettingTab extends PluginSettingTab {
         // 3 Color -> Images
         new Setting(containerEl)
             .setName('Color: Images')
-            .setDesc('Color of images')
+            .setDesc('Color of images.')
             .addColorPicker((color) => {
                 this.colorCompImages = color;
                 color
@@ -547,7 +578,7 @@ export class DNSettingTab extends PluginSettingTab {
         // 4 Color -> Videos
         new Setting(containerEl)
             .setName('Color: Videos')
-            .setDesc('Color of videos')
+            .setDesc('Color of videos.')
             .addColorPicker((color) => {
                 this.colorCompVideos = color;
                 color
@@ -603,7 +634,7 @@ export class DNSettingTab extends PluginSettingTab {
         // 6 Color -> PDF
         new Setting(containerEl)
             .setName('Color: PDF')
-            .setDesc('Color of PDF files')
+            .setDesc('Color of PDF files.')
             .addColorPicker((color) => {
                 this.colorCompPdf = color;
                 color
@@ -631,7 +662,7 @@ export class DNSettingTab extends PluginSettingTab {
         // 7 Color -> Other files
         new Setting(containerEl)
             .setName('Color: Other files')
-            .setDesc('Color of other files')
+            .setDesc('Color of other files.')
             .addColorPicker((color) => {
                 this.colorCompOther = color;
                 color
