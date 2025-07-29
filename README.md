@@ -181,6 +181,15 @@ You can quickly filter your search results by interacting with **tags** directly
 - **Left-click on the selected saved search** in order to search in Navigator view.
 - **Double-click the left mouse button** on the selected search to seach in Navigator view and also close the saved search modal.
 
+## Navigator View: Quick Display Options Modal
+
+![Dashboard navigator for Obsidian - quick display options gif](images/dn_quick_display_options_001.gif)
+
+![Dashboard navigator for Obsidian - quick display options](images/dn_quick_display_options_modal.png)
+
+A new modal provides quick display options for Navigator view. Changes made here will update plugin settings. You can show/hide columns and toggle image thumbnails directly from this modal.
+
+- **Tip:** **Right-clicking on any table header** will open this modal.
 
 ## Sort Files
 
@@ -190,11 +199,23 @@ You can quickly filter your search results by interacting with **tags** directly
  
 ## Display Results
 
-- You can select 4 types of layouts to display the search results:
+- You can select 5 types of layouts to display the search results:
   - Default
   - Row striped
   - Column striped
   - Bordered
+  - Cards
+ 
+## Navigator View: Cards Layout
+
+![Dashboard navigator for Obsidian - cards layout](images/dn_cards_001.gif)
+
+A new '**Cards**' layout option is now available in Navigator view. You can select this layout from the **layout dropdown menu** or within the **plugin settings**. This layout is also recommended for mobile devices.
+
+## Image Thumbnails
+![Dashboard navigator for Obsidian - image thumbnails](images/dn_thumbnails_001.gif)
+
+**Image thumbnails** are now displayed as previews in table and Cards layouts. You can deactivate image previews in settings or through the **Navigator view's quick display options** (it will show image icons when deactivated).
 
 ## Preview Files (Hover and Context Menu)
 
