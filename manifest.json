@@ -1,7 +1,7 @@
 {
 	"id": "dashboard-navigator",
 	"name": "Dashboard navigator",
-	"version": "6.0.0",
+	"version": "7.0.0",
 	"minAppVersion": "1.1.0",
 	"description": "Vault dashboard and navigator. Show recent files by type, files per day, week, month, search files by name, date, tags and more.",
 	"author": "Bernardo Pires",
