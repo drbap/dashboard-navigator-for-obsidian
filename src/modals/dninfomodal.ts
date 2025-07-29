@@ -146,11 +146,12 @@ You can quickly filter your search results by interacting with **tags** directly
 
 ### Display results
 
-You can select 4 types of layouts to display the search results:
+You can select 5 types of layouts to display the search results:
 - Default
 - Row striped
 - Column striped
 - Bordered
+- Cards
 
 ### Preview files (hover and context menu)
 
