@@ -1,5 +1,33 @@
 # Changelog
 
+## [7.0.0] - 2025-07-29
+**New Features**
+
+- **Cards layout** for Navigator view: A new 'Cards' layout option is now available in Navigator view. You can select this layout from the layout dropdown menu or within the plugin settings. This layout is also recommended for mobile devices.
+
+- **Image thumbnails:** Image thumbnails are now displayed as previews in table and Cards layouts. You can deactivate image previews in settings or through the **Navigator view's quick display options** (a new modal, described below) to show file icons instead.
+
+- **Recent search query** storage: The plugin now stores the most recent search query when the main window closes. This allows the last search result to be retained for subsequent openings.
+
+- **Quick display options modal:** A new modal provides quick display options for Navigator view. Changes made here will update plugin settings. You can show/hide columns and toggle image thumbnails directly from this modal.
+
+    - **Tip:** Right-clicking on any table header will open this modal.
+
+- **Dedicated button for quick display options (Navigator view):** A new top button has been added to access the quick display options modal (Navigator view).
+
+- **Icon hover details:** In Navigator view, hovering over an icon now displays the filename and its full path.
+
+**Improvements**
+
+- **Icon adjustments:** Navigator view icons have received adjustments for improved appearance.
+
+- **Preview window close behavior:** The draggable preview window can now be closed by clicking outside of it, but within the Dashboard Navigator modal.
+
+- **Plugin settings descriptions:** Adjustments have been made to plugin setting descriptions for enhanced clarity.
+
+- **Mobile experience:** Various adjustments have been implemented to improve the plugin's usability on mobile devices. The Cards layout is strongly recommended for mobile users.
+
+
 ## [6.0.0] - 2025-06-21
 - *New* **Save search** feature:
   - You can now **save your search queries** directly from the Navigator view! This feature lets you store **complex** or **frequently used searches**, along with a helpful description, so you can easily find and reuse them later.
