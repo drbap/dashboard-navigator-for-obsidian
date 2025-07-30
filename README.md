@@ -179,7 +179,7 @@ You can quickly filter your search results by interacting with **tags** directly
 
 - Just click on any saved search within the modal, and it'll instantly run that search in your Navigator view. No more re-typing complex queries! You can also filter your saved searches.
 - **Left-click on the selected saved search** in order to search in Navigator view.
-- **Double-click the left mouse button** on the selected search to seach in Navigator view and also close the saved search modal.
+"- **Double-click** the selected search to run it in Navigator view and close the saved search modal.
 
 ## Navigator View: Quick Display Options Modal
 
