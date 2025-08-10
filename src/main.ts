@@ -13,6 +13,7 @@ interface DNSettings {
 	date_format: string;
 	files_per_page: number;
 	num_recent_files: number;
+	num_bookmarked_files: number;
 	excluded_ext: string;
 	excluded_path: string;
 	color_notes: string;
@@ -30,6 +31,7 @@ interface DNSettings {
 	hide_tags: boolean;
 	hide_frontmatter: boolean;
 	hide_columns: string[];
+	show_dashboard_piechart: boolean;
 	image_thumbnail: boolean;
 	onclose_search: string,
 	saved_searches: DNSaveSearchItem[];
@@ -42,6 +44,7 @@ export const DEFAULT_SETTINGS: DNSettings = {
 	date_format: 'YYYY-MM-DD HH:mm',
 	files_per_page: 20,
 	num_recent_files: 5,
+	num_bookmarked_files: 10,
 	excluded_ext: '',
 	excluded_path: '',
 	color_notes: '#bf48ff',
@@ -59,6 +62,7 @@ export const DEFAULT_SETTINGS: DNSettings = {
 	hide_tags: false,
 	hide_frontmatter: false,
 	hide_columns: [],
+	show_dashboard_piechart: true,
 	image_thumbnail: true,
 	onclose_search: '',
 	saved_searches: []
@@ -90,8 +94,11 @@ export default class DNPlugin extends Plugin {
 		// Set modal settings
 		this.DN_MODAL.default_view = this.settings.default_view;
 		this.DN_MODAL.date_format = this.settings.date_format;
+
 		this.DN_MODAL.num_recent_files = this.settings.num_recent_files;
+		this.DN_MODAL.num_bookmarked_files = this.settings.num_bookmarked_files;
 		this.DN_MODAL.files_per_page = this.settings.files_per_page;
+
 		this.DN_MODAL.selected_table_layout = this.settings.selected_table_layout;
 		this.DN_MODAL.excluded_extensions = this.dnGetExcludedExtensions(this.settings.excluded_ext);
 		this.DN_MODAL.excluded_folders = this.dnGetExcludedFolders(this.settings.excluded_path);
@@ -109,6 +116,7 @@ export default class DNPlugin extends Plugin {
 		this.DN_MODAL.hide_columns = this.dnSetHiddenColumns(this.settings.hide_columns);
 
 		this.DN_MODAL.image_thumbnail = this.settings.image_thumbnail;
+		this.DN_MODAL.show_dashboard_piechart = this.settings.show_dashboard_piechart;
 
 		this.addRibbonIcon('gauge', 'Open dashboard navigator', (evt: MouseEvent) => {
 			this.DN_MODAL.default_view = this.settings.default_view;

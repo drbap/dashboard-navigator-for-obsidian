@@ -10,6 +10,7 @@ export class DNSettingTab extends PluginSettingTab {
     dropdownDefaultView: DropdownComponent;
     dropdownTableLayout: DropdownComponent;
     dropdownRecentFiles: DropdownComponent;
+    dropdownBookmarkedFiles: DropdownComponent;
     sliderFontSize: SliderComponent;
     textExcludedExtensions: TextComponent;
     textExcludedFolders: TextComponent;
@@ -28,6 +29,7 @@ export class DNSettingTab extends PluginSettingTab {
     toggleHideTagsColumn: ToggleComponent;
     toggleHideFrontmatterColumn: ToggleComponent;
     toggleImageThumbnail: ToggleComponent;
+    togglePieChartModule: ToggleComponent;
 
     constructor(app: App, plugin: DNPlugin) {
         super(app, plugin);
@@ -73,37 +75,6 @@ export class DNSettingTab extends PluginSettingTab {
                     this.dropdownDefaultView.setValue(DEFAULT_SETTINGS.default_view.toString());
                     this.plugin.settings.default_view = DEFAULT_SETTINGS.default_view;
                     this.plugin.DN_MODAL.default_view = this.plugin.settings.default_view;
-                    this.plugin.saveSettings();
-                });
-            });
-
-        // Table layout
-        new Setting(containerEl)
-            .setName('Navigator search layout')
-            .setDesc('Navigator: Select search results layout.')
-            .addDropdown(sel => {
-                this.dropdownTableLayout = sel;
-                sel.addOption('dn-tbl-default', 'Default');
-                sel.addOption('dn-tbl-row', 'Row striped');
-                sel.addOption('dn-tbl-column', 'Column striped');
-                sel.addOption('dn-tbl-bordered', 'Bordered');
-                sel.addOption('dn-tbl-cards', 'Cards');
-                sel.onChange(async (val: string) => {
-
-                    this.plugin.settings.selected_table_layout = val;
-
-                    this.plugin.DN_MODAL.selected_table_layout = this.plugin.settings.selected_table_layout;
-
-                    await this.plugin.saveSettings();
-                }),
-                    sel.setValue(this.plugin.settings.selected_table_layout.toString());
-            }).addExtraButton((btn) => {
-                btn.setIcon('rotate-ccw');
-                btn.setTooltip('Restore default')
-                btn.onClick(() => {
-                    this.dropdownTableLayout.setValue(DEFAULT_SETTINGS.selected_table_layout.toString());
-                    this.plugin.settings.selected_table_layout = DEFAULT_SETTINGS.selected_table_layout;
-                    this.plugin.DN_MODAL.selected_table_layout = this.plugin.settings.selected_table_layout;
                     this.plugin.saveSettings();
                 });
             });
@@ -172,6 +143,122 @@ export class DNSettingTab extends PluginSettingTab {
                 });
             });
 
+
+        // Recent files by type
+        new Setting(containerEl)
+            .setName('Recent files')
+            .setDesc('Dashboard: Number of recent files per category.')
+            .addDropdown(sel => {
+                this.dropdownRecentFiles = sel;
+                sel.addOption('3', '3');
+                sel.addOption('4', '4');
+                sel.addOption('5', '5');
+                sel.addOption('10', '10');
+                sel.onChange(async (val: string) => {
+
+                    this.plugin.settings.num_recent_files = parseInt(val);
+
+                    this.plugin.DN_MODAL.num_recent_files = this.plugin.settings.num_recent_files;
+
+                    await this.plugin.saveSettings();
+                }),
+                    sel.setValue(this.plugin.settings.num_recent_files.toString());
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.dropdownRecentFiles.setValue(DEFAULT_SETTINGS.num_recent_files.toString());
+                    this.plugin.settings.num_recent_files = DEFAULT_SETTINGS.num_recent_files;
+                    this.plugin.DN_MODAL.num_recent_files = this.plugin.settings.num_recent_files;
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // Bookmarks
+        new Setting(containerEl)
+            .setName('Bookmarks')
+            .setDesc('Dashboard: Number of bookmarks to display.')
+            .addDropdown(sel => {
+                this.dropdownBookmarkedFiles = sel;
+                sel.addOption('3', '3');
+                sel.addOption('4', '4');
+                sel.addOption('5', '5');
+                sel.addOption('10', '10');
+                sel.onChange(async (val: string) => {
+
+                    this.plugin.settings.num_bookmarked_files = parseInt(val);
+
+                    this.plugin.DN_MODAL.num_bookmarked_files = this.plugin.settings.num_bookmarked_files;
+
+                    await this.plugin.saveSettings();
+                }),
+                    sel.setValue(this.plugin.settings.num_bookmarked_files.toString());
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.dropdownBookmarkedFiles.setValue(DEFAULT_SETTINGS.num_bookmarked_files.toString());
+                    this.plugin.settings.num_bookmarked_files = DEFAULT_SETTINGS.num_bookmarked_files;
+                    this.plugin.DN_MODAL.num_bookmarked_files = this.plugin.settings.num_bookmarked_files;
+                    this.plugin.saveSettings();
+                });
+            });
+
+        new Setting(containerEl)
+            .setName('Show pie chart panel')
+            .setDesc('Dashboard: Displays a pie chart of file types and a count of all files and folders.')
+            .addToggle((toggle) => {
+                this.togglePieChartModule = toggle;
+                toggle
+                    .setValue(this.plugin.settings.show_dashboard_piechart)
+                    .onChange(async (val) => {
+                        this.plugin.settings.show_dashboard_piechart = val;
+                        this.plugin.DN_MODAL.show_dashboard_piechart = this.plugin.settings.show_dashboard_piechart;
+                        await this.plugin.saveSettings();
+                    });
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.togglePieChartModule.setValue(DEFAULT_SETTINGS.show_dashboard_piechart);
+                    this.plugin.settings.show_dashboard_piechart = DEFAULT_SETTINGS.show_dashboard_piechart;
+                    this.plugin.DN_MODAL.show_dashboard_piechart = this.plugin.settings.show_dashboard_piechart;
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // Navigator results layout
+        new Setting(containerEl)
+            .setName('Search results layout')
+            .setDesc('Navigator: Select search results layout.')
+            .addDropdown(sel => {
+                this.dropdownTableLayout = sel;
+                sel.addOption('dn-tbl-default', 'Default');
+                sel.addOption('dn-tbl-row', 'Row striped');
+                sel.addOption('dn-tbl-column', 'Column striped');
+                sel.addOption('dn-tbl-bordered', 'Bordered');
+                sel.addOption('dn-tbl-cards', 'Cards');
+                sel.onChange(async (val: string) => {
+
+                    this.plugin.settings.selected_table_layout = val;
+
+                    this.plugin.DN_MODAL.selected_table_layout = this.plugin.settings.selected_table_layout;
+
+                    await this.plugin.saveSettings();
+                }),
+                    sel.setValue(this.plugin.settings.selected_table_layout.toString());
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.dropdownTableLayout.setValue(DEFAULT_SETTINGS.selected_table_layout.toString());
+                    this.plugin.settings.selected_table_layout = DEFAULT_SETTINGS.selected_table_layout;
+                    this.plugin.DN_MODAL.selected_table_layout = this.plugin.settings.selected_table_layout;
+                    this.plugin.saveSettings();
+                });
+            });
+
+
         // Results/files per page
         new Setting(containerEl)
             .setName('Files per page')
@@ -203,35 +290,6 @@ export class DNSettingTab extends PluginSettingTab {
                 });
             });
 
-        // Recent files by type
-        new Setting(containerEl)
-            .setName('Recent files')
-            .setDesc('Dashboard: Number of recent files per category.')
-            .addDropdown(sel => {
-                this.dropdownRecentFiles = sel;
-                sel.addOption('3', '3');
-                sel.addOption('4', '4');
-                sel.addOption('5', '5');
-                sel.addOption('10', '10');
-                sel.onChange(async (val: string) => {
-
-                    this.plugin.settings.num_recent_files = parseInt(val);
-
-                    this.plugin.DN_MODAL.num_recent_files = this.plugin.settings.num_recent_files;
-
-                    await this.plugin.saveSettings();
-                }),
-                    sel.setValue(this.plugin.settings.num_recent_files.toString());
-            }).addExtraButton((btn) => {
-                btn.setIcon('rotate-ccw');
-                btn.setTooltip('Restore default')
-                btn.onClick(() => {
-                    this.dropdownRecentFiles.setValue(DEFAULT_SETTINGS.num_recent_files.toString());
-                    this.plugin.settings.num_recent_files = DEFAULT_SETTINGS.num_recent_files;
-                    this.plugin.DN_MODAL.num_recent_files = this.plugin.settings.num_recent_files;
-                    this.plugin.saveSettings();
-                });
-            });
 
         const headingColumns1 = containerEl.createEl('div', { cls: 'setting-item setting-item-heading' });
         const headingColumns2 = headingColumns1.createEl('div', { cls: 'setting-item setting-item-info' });
@@ -519,10 +577,10 @@ export class DNSettingTab extends PluginSettingTab {
                 });
             });
 
-        // 2 Color -> Canvas
+        // 2 Color -> Canvases
         new Setting(containerEl)
-            .setName('Color: Canvas')
-            .setDesc('Color of canvas.')
+            .setName('Color: Canvases')
+            .setDesc('Color of canvases.')
             .addColorPicker((color) => {
                 this.colorCompCanvas = color;
                 color
@@ -605,8 +663,8 @@ export class DNSettingTab extends PluginSettingTab {
 
         // 5 Color -> Audios
         new Setting(containerEl)
-            .setName('Color: Audios')
-            .setDesc('Color of audios')
+            .setName('Color: Audio files')
+            .setDesc('Color of audio files.')
             .addColorPicker((color) => {
                 this.colorCompAudios = color;
                 color

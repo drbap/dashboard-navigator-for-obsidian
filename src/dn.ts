@@ -5,6 +5,8 @@ import { DNPieChart } from './utils/dnpiechart';
 import { DNTableManager } from './utils/dntablemanager';
 import { moment } from 'obsidian';
 import DNPlugin from './main';
+import { dnGetBookmarkedFiles } from './utils/dnbookmarks';
+
 
 export class DNModal extends Modal {
 
@@ -12,6 +14,7 @@ export class DNModal extends Modal {
 	private _folders: TFolder[];
 	private _recent: TFile[];
 	private _last_opened: TFile[];
+	private _bookmarks: TFile[];
 
 	//Categories
 	private _notes: TFile[];
@@ -61,6 +64,7 @@ export class DNModal extends Modal {
 
 	current_page = 1;
 	num_recent_files = 5;
+	num_bookmarked_files = 10;
 	files_per_page = 20;
 	date_format = 'YYYY-MM-DD HH:mm';
 	default_view = 1;
@@ -80,6 +84,8 @@ export class DNModal extends Modal {
 	hide_columns: string[] = [];
 
 	image_thumbnail = false;
+
+	show_dashboard_piechart = true;
 
 	onclose_search = '';
 
@@ -101,6 +107,7 @@ export class DNModal extends Modal {
 	previousY: number;
 
 	plugin: DNPlugin;
+
 
 	constructor(app: App, plugin: DNPlugin) {
 		super(app);
@@ -154,6 +161,7 @@ export class DNModal extends Modal {
 		this._folders = [];
 		this._recent = [];
 		this._last_opened = [];
+		this._bookmarks = [];
 		this._notes = [];
 		this._images = [];
 		this._canvas = [];
@@ -192,6 +200,19 @@ export class DNModal extends Modal {
 				this._last_opened.push(f_temp);
 			}
 		});
+
+		const bookmarksJsonContent = await this.app.vault.adapter.read('.obsidian/bookmarks.json');
+		const arrBookmarks = dnGetBookmarkedFiles(bookmarksJsonContent);
+		if (Array.isArray(arrBookmarks) && arrBookmarks.length > 0) {
+			arrBookmarks.forEach(async file => {
+				const f_bookmarked = await this.app.vault.getAbstractFileByPath(file);
+				if (f_bookmarked instanceof TFile) {
+					this._bookmarks.push(f_bookmarked);
+				}
+			});
+		}
+
+
 	}
 
 	async dnCreateMainUI(el: HTMLElement) {
@@ -272,8 +293,38 @@ export class DNModal extends Modal {
 		const divVaultStats = this._VIEW_DASHBOARD.createEl('div');
 		divVaultStats.setAttribute('id', 'dn-vault-stats');
 
-		const divVaultGraph = this._VIEW_DASHBOARD.createEl('div');
-		divVaultGraph.setAttribute('id', 'dn-vault-graph');
+		if (this.show_dashboard_piechart) {
+			const divVaultGraph = this._VIEW_DASHBOARD.createEl('div');
+			divVaultGraph.setAttribute('id', 'dn-vault-graph');
+
+			const canvasPieChart1 = divVaultGraph.createEl('canvas');
+			canvasPieChart1.setAttribute('id', 'dashboard-canvas');
+
+			const styles = getComputedStyle(document.body);
+
+			const labelColor = styles.getPropertyValue('--text-muted');
+
+			const pieChart1 = new DNPieChart(canvasPieChart1, 10, 12, 50, labelColor);
+
+			pieChart1.addData(this._notes.length, this.color_notes, 'Notes');
+			pieChart1.addData(this._images.length, this.color_images, 'Images');
+			pieChart1.addData(this._canvas.length, this.color_canvas, 'Canvases');
+			pieChart1.addData(this._videos.length, this.color_videos, 'Videos');
+			pieChart1.addData(this._audios.length, this.color_audios, 'Audio files');
+			pieChart1.addData(this._pdf.length, this.color_pdf, 'PDFs');
+			pieChart1.addData(this._other.length, this.color_other, 'Other files');
+			pieChart1.draw();
+
+			// Total files
+			const divStatsFrame = divVaultGraph.createEl('div', { cls: 'dn-stats-files-folders' });
+			divStatsFrame.createEl('div', { cls: 'dn-stats-files', text: 'Files: ' + this._files_excluded_filters.length });
+
+			// Total folders
+			divStatsFrame.createEl('div', { cls: 'dn-stats-folders', text: 'Folders: ' + this._folders.length });
+		}
+
+		const divBookmarkedFiles = this._VIEW_DASHBOARD.createEl('div');
+		divBookmarkedFiles.setAttribute('id', 'dn-bookmarked-files');
 
 		const divLastOpenedFiles = this._VIEW_DASHBOARD.createEl('div');
 		divLastOpenedFiles.setAttribute('id', 'dn-last-opened-files');
@@ -353,33 +404,9 @@ export class DNModal extends Modal {
 			this._divSearchResults,
 			this._leaf);
 
-		// Pie chart
-		const canvasPieChart1 = divVaultGraph.createEl('canvas');
-		canvasPieChart1.setAttribute('id', 'dashboard-canvas');
-
-		const styles = getComputedStyle(document.body);
-
-		const labelColor = styles.getPropertyValue('--text-muted');
-
-		const pieChart1 = new DNPieChart(canvasPieChart1, 10, 12, 50, labelColor);
-
-		pieChart1.addData(this._notes.length, this.color_notes, 'Notes');
-		pieChart1.addData(this._images.length, this.color_images, 'Images');
-		pieChart1.addData(this._canvas.length, this.color_canvas, 'Canvases');
-		pieChart1.addData(this._videos.length, this.color_videos, 'Videos');
-		pieChart1.addData(this._audios.length, this.color_audios, 'Audio files');
-		pieChart1.addData(this._pdf.length, this.color_pdf, 'PDFs');
-		pieChart1.addData(this._other.length, this.color_other, 'Other files');
-		pieChart1.draw();
-
-		// Total files
-		const divStatsFrame = divVaultGraph.createEl('div', { cls: 'dn-stats-files-folders' });
-		divStatsFrame.createEl('div', { cls: 'dn-stats-files', text: 'Files: ' + this._files_excluded_filters.length });
-
-		// Total folders
-		divStatsFrame.createEl('div', { cls: 'dn-stats-folders', text: 'Folders: ' + this._folders.length });
 
 		// Recent files by type/category
+		await this.dnCreateRecentFiles('Bookmarks', divBookmarkedFiles, this._bookmarks, this.num_bookmarked_files);
 		await this.dnCreateRecentFiles('Recently opened', divLastOpenedFiles, this._last_opened, this.num_recent_files);
 		await this.dnCreateRecentFiles('Recent files', divRecentFiles, this._recent, this.num_recent_files);
 		await this.dnCreateRecentFiles('Recent notes', divRecentNotes, this._notes, this.num_recent_files);
@@ -1081,6 +1108,8 @@ export class DNModal extends Modal {
 			let sortedFiles: TFile[] = [];
 			if (title === 'Recently opened') {
 				sortedFiles = files.slice(0, this.num_recent_files);
+			} else if (title === 'Bookmarks') {
+				sortedFiles = files.slice(0, this.num_bookmarked_files);
 			} else {
 				sortedFiles = await this.dnGetRecentFiles(files);
 
