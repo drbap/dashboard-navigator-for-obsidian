@@ -20,6 +20,8 @@
 
 - **Recently opened files**: Quickly access your recently opened files. To see a file in the list, simply close its tab or open another file.
 
+- **Bookmarks**: Easily access your top bookmarked files. The number you set here is independent of other dashboard sections. The order of these bookmarks will match the order you've set in your bookmarks sidebar.
+
 ![Dashboard navigator for Obsidian - search](images/dn_navigator_01.png)
 
 - **Advanced file search**: Find your files quickly with powerful **search** and **sort** functionalities. More information below.
