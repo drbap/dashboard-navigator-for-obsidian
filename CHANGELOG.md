@@ -1,5 +1,17 @@
 # Changelog
 
+## [7.1.0] - 2025-08-10
+**New Features**
+
+- Top **Bookmarks** in the Dashboard view.
+  - You can choose the number of bookmarks to display, a setting that's independent of the number of recent files displayed in other dashboard sections. The order of these bookmarks always matches the order you've set in your bookmarks sidebar. By default, ten bookmarks will be shown.
+
+- Settings: **Show pie chart panel** (dashboard view). You can show/hide the pie chart panel.
+
+**Improvements**
+
+- Settings adjustments.
+
 ## [7.0.0] - 2025-07-29
 **New Features**
 
