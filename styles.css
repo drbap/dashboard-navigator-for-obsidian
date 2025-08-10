@@ -587,6 +587,7 @@ a.dn-fproperties:hover {
 #dn-canvas,
 #dn-recent-notes,
 #dn-recent-files,
+#dn-bookmarked-files,
 #dn-last-opened-files {
 	padding: var(--size-4-2);
 	background-color: var(--background-primary);
