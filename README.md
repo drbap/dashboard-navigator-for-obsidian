@@ -7,7 +7,7 @@
 
 ## Features
 
-![Dashboard navigator for Obsidian - search](images/dn_top_buttons.png)
+![Dashboard navigator for Obsidian - search](images/dn_v8_001.png)
 
 - **Vault stats and graph**: Gain insightful statistics about your vault, including:
   - Number of notes, images, audio files, videos, PDF and other file formats.
@@ -20,9 +20,7 @@
 
 - **Recently opened files**: Quickly access your recently opened files. To see a file in the list, simply close its tab or open another file.
 
-- **Bookmarks**: Easily access your top bookmarked files. The number you set here is independent of other dashboard sections. The order of these bookmarks will match the order you've set in your bookmarks sidebar.
-
-![Dashboard navigator for Obsidian - search](images/dn_navigator_01.png)
+- **Bookmarks**: Easily access your bookmarked files. The number you set here is independent of other dashboard sections. The order of these bookmarks will match the order you've set in your bookmarks sidebar. You can view bookmarked files in Navigator view.
 
 - **Advanced file search**: Find your files quickly with powerful **search** and **sort** functionalities. More information below.
 
@@ -40,6 +38,8 @@ The Dashboard navigator search allows you to quickly access and filter specific 
 - `@videos`: Lists all **video** files.
 - `@pdf` or `@pdfs`: Lists all **PDF** files.
 - `@other`: Lists all **other** file types.
+- `@bases`: Lists all **.base** files.
+- `@bookmarks`: Lists all **bookmarked** files.
 
 ### Advanced Filtering with Search Terms
 
@@ -57,6 +57,8 @@ You can combine the basic commands with search terms to narrow down your results
   - `@v` = `@videos`
   - `@p` = `@pdf`or `@pdfs`
   - `@o` = `@other`or `@others`
+  - `@bb` = `@bases`
+  - `@bm` = `@bookmarks`
 
 ### Date Filters and Shorthands
 
@@ -145,6 +147,12 @@ To search for specific frontmatter metadata, use the following syntax:
 - Use single quotes (`'`) to enclose when searching for specific metadata.
 
 - You can use the context menu (navigator view or dashboard view to open the **Frontmatter** or **File Properties** modal). Click on the desired frontmatter metadata to quickly search for an exact match within your notes.
+
+### Bookmarks
+
+New **@bookmarks** command (Navigator view - search): `@bookmarks` or `@bm` as its shorthand. This command will **list all bookmarked files** in Navigator view, so you can sort them by file name, extension, path, date, search for tags and frontmatter.
+
+- You can search for the file categories using the additional `@bookmarks`or `@bm` filter to identify which ones are bookmarked, e.g. `@notes @bm` (notes that are bookmarked) or `@images @bm`(images in your bookmarks).
 
 ### Tag actions
 
@@ -250,11 +258,11 @@ A new '**Cards**' layout option is now available in Navigator view. You can sele
 
 ![Dashboard navigator for Obsidian - file properties](images/dn_navigator_file_properties.png)
 
-## Frontmatter Modal
+## File Frontmatter Modal
 
 ![Dashboard navigator for Obsidian - frontmatter modal](images/dn_navigator_frontmatter_modal.png)
 
-## Tags Modal
+## File Tags Modal
 
 ![Dashboard navigator for Obsidian - tags modal](images/dn_tags_modal.png)
 
@@ -270,12 +278,46 @@ You can hide the following columns:
 - **Tags**: Lists the tags associated with the note, making it easier to categorize and search for notes.
 - **Frontmatter**: Lists the frontmatter/metadata associated with the note.
 
+## Tags Dashboard View
+
+![Dashboard navigator for Obsidian - Tags](images/dn_v8_tags_001.png)
+
+![Dashboard navigator for Obsidian - Tags](images/dn_v8_tags_002.png)
+
+![Dashboard navigator for Obsidian - Tags](images/dn_v8_tags_003.png)
+
+- **Advanced tag(s) search**: This feature uses secondary tags as cross-references to help you navigate your notes like a dynamic map. By revealing which tags are used together, you can discover hidden associations and see how different ideas and topics are implicitly connected in your vault.
+
+- The tags dashboard's initial state shows a list of your most recently created or modified notes along with their corresponding tags. This gives you a quick overview of your recent activity.
+
+- The `@tags` command (top search bar) to search directly in **Tags** dashboard view:
+
+  - **Beginning of the query**: When you start a search with `@tags`, it acts as a shortcut. It immediately switches your view to the Tags dashboard and focuses the cursor in the Tags dashboard's search bar, allowing you to start a new tag-focused search right away.
+
+  - **End of the query**: When you place `@tags` at the end of a tag(s) search (e.g., `#tag1 #tag2 @tags`), it opens the Tags dashboard and shows you all the secondary tags that are used in conjunction with the tag(s) you've already searched for (primary tag or tags query). This helps you find related topics and discover connections between your notes.
+
+- You can also save the tags search using `@tags` with a description (saved searches window). When clicking on the saved search option it will open the saved query directly in **Tags** dashboard view.
+
+### **Tags dashboard commands**
+
+![Dashboard navigator for Obsidian - Tags](images/dn_v8_tags_004.png)
+
+These commands work on the tags displayed in the **recent notes & tags** section, the **secondary tags** displayed in the main **Tags** dashboard, and within the tags list in the **tags sidebar**.
+
+  - `Left-click`: Change the selected secondary tag into a primary tag, making it the main focus of your view.
+
+  - `Shift + click`: Add this tag to your current search using an AND condition. For example, if your search is \`#article\`, holding \`Shift\` and \`clicking\` on \`#status\` will change your search to \`#article #status\`(notes with tags **#article** AND **#status**).
+
+  - `Ctrl + click`: Exclude this clicked secondary tag. This is useful for filtering out results that contain a specific tag.
+
+  - `Ctrl + middle-click`: Quickly clear your tag search and start fresh. This removes all tags from your search query, allowing you to reset your view with a single click.
+
+
 ## Excluded File Extensions
 
 - Open **plugin settings** and select the file extensions that you don't want to display (extensions separated by commas).
 
 - Enter file extensions: In the provided text field, list the file extensions you want to exclude, separated by commas. For example: `txt, docx, js`.
-
 
 ## Excluded Folders
 
@@ -330,6 +372,8 @@ The Dashboard navigator icon (ribbon icon) and file icons are from [Lucide](http
 I'd like to express my sincere gratitude to everyone who has contributed suggestions and feature requests to improve this project. Your input is really valuable to me. Whether it's a new feature idea, a bug report, or a suggestion for improvement, I'll do my best to implement or fix it as soon as possible.
 
 * A special thanks to @merlinuwe for his ongoing support and constructive feedback since version 1.0.0. His suggestions and testing, including Issues #1, #5, #10, #11, and #12, have helped to improve the plugin's functionality and user experience. Some suggestions I hope to implement in future updates.
+
+* Special thanks to @FelipeRearden for the great insights and suggestions on the new Tags dashboard. This feature is inspired by the excellent [obsidian-tag-navigator for Obsidian](https://github.com/alexobenauer/obsidian-tag-navigator) by Alexander Obenauer. This is a completely independent implementation, a new take on a similar concept. You can follow the development and conversation in Issue #25.
 
 * Thanks to @Minus10Celcius for suggesting the custom colors pie chart and the ability to hide columns in the navigator view (Issue #2).
 
