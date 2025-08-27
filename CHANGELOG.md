@@ -1,5 +1,59 @@
 # Changelog
 
+## [8.0.0] - 2025-08-27
+
+**New Features**
+
+- New **Tags** dashboard view. Cross-reference tags dashboard view.
+
+- New `@tags` command (top search bar) to search directly in Tags dashboard view (please check README). 
+
+- The main search bar now provides **tag autocomplete**.
+
+- **Tag autocomplete** for the search in **Tags** dashboard view. The autocomplete makes it easy to quickly find and select the tags you need, without having to remember the exact tag name.
+
+- Tags dashboard view shows the **recent notes & tags**. You will see a list of the most recently created/modified notes with the corresponding tags.
+
+- **Tags dashboard commands**: These commands work both in the main **Tags** dashboard and within the tags list in the tags sidebar (of Tags dashboard).
+
+  - **Left-click**: Change the selected secondary tag into a primary tag, making it the main focus of your view.
+
+  - **Shift + Click**: Add this tag to your current search using an AND condition. For example, if your search is `#article`, holding `Shift` and `clicking` on `#status` will change your search to `#article #status`(notes with tags #article AND #status).
+
+  - **Ctrl + Click**: Exclude this clicked secondary tag. This is useful for filtering out results that contain a specific tag.
+
+  - **Ctrl + Middle-Click**: Quickly clear your tag search and start fresh. This removes all tags from your search query, allowing you to reset your view with a single click.
+
+- New **Bases** dashboard button count.
+
+- New **Bases** recent files (Dashboard view).
+
+- New **Bases command** (Navigator view - search): `@bases` (shorthand: `@bb`) - Lists all `.base` files.
+
+- New **bookmarks** command (Navigator view - search): `@bookmarks` or `@bm` as its shorthand. This command will **list all bookmarked files** in Navigator view, so you can sort them by file name, extension, folder, date, search for tags and frontmatter.
+  - You can search for the file categories using the additional `@bookmarks`or `@bm` filter to identify which ones are bookmarked, e.g. `@notes @bm` (notes that are bookmarked) or `@images @bm`(images in your bookmarks).
+  This command lists your bookmarks directly in the Navigator view, allowing you to sort them by file name, extension, folder, or date. You can also apply your usual search filters, including tags and frontmatter, to narrow down your bookmarked files.
+
+
+- Default view can be **Dashboard**, **Navigator** or **Tags**.
+
+- **Command Palette: Open tags** -> `Dashboard navigator: Open tags`. Open Tags Dashboard. A new command to open the Tags dashboard. You can assign a custom hotkey to quickly access it from anywhere.
+
+- Main plugin buttons tooltips.
+
+**Improvements**
+
+- **Cache**: The plugin now utilizes an in-memory data cache to eliminate redundant processing. The cache ensures that subsequent dashboard views and searches are nearly instantaneous. The system intelligently rebuilds this data only when the vault's file structure or content has genuinely changed.
+
+- **Saved searches modal**: search icon (filter input).
+
+**Fixes**
+
+- Version >= 1.9: Preview window padding fix.
+
+- Other files category thumbnail icon fix (Navigator view).
+
+
 ## [7.1.0] - 2025-08-10
 **New Features**
 
