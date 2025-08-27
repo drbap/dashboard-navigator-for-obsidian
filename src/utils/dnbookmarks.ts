@@ -10,7 +10,7 @@ export interface BookmarksJson {
 	items: BookmarkItem[];
 }
 
-export function dnGetBookmarkedFiles(bookmarksJson: string): string[] {
+export function getBookmarkedFiles(bookmarksJson: string): string[] {
 	const bookmarksPaths = new Set<string>();
 	const stack: BookmarkItem[] = [];
 

@@ -1,5 +1,5 @@
 // Helper function to sanitize description input
-export function DNSanitizeInput(txt: string): string {
+export function sanitizeInput(txt: string): string {
 	return txt
 		.replace(/<[^>]*>/g, '')
 		.replace(/&nbsp;/g, ' ')

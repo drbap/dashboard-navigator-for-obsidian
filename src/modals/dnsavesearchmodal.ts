@@ -1,6 +1,6 @@
 import { App, debounce, Modal, Notice } from 'obsidian';
 import DNPlugin from 'src/main';
-import { DNSanitizeInput } from 'src/utils/helper';
+import { sanitizeInput } from 'src/utils/helper';
 
 export interface DNSaveSearchItem {
 	id: number;
@@ -57,7 +57,7 @@ export class DNSaveSearchModal extends Modal {
 		}, 300, true));
 
 		btnSaveSearch.onclick = async () => {
-			const sanitizedDescription = DNSanitizeInput(descriptionInput.value);
+			const sanitizedDescription = sanitizeInput(descriptionInput.value);
 			const query = current_search;
 
 			if (!query) {

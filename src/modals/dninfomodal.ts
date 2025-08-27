@@ -15,6 +15,8 @@ The **Dashboard navigator** search allows you to quickly access and filter speci
 - \`@video\` or \`@videos\`: Lists all **video** files.
 - \`@pdf\` or \`@pdfs\`: Lists all **PDF** files.
 - \`@other\`: Lists all **other** file types.
+- \`@bases\`: Lists all **.base** files.
+- \`@bookmarks\`: Lists all **bookmarked** files.
 
 #### Advanced filtering with search terms
 
@@ -32,6 +34,8 @@ You can combine the basic commands with search terms to narrow down your results
 - \`@v\` = \`@video\` or \`@videos\`
 - \`@p\` = \`@pdf\` or \`@pdfs\`
 - \`@o\` = \`@other\`
+- \`@bb\` = \`@bases\`
+- \`@bm\` = \`@bookmarks\`
 
 #### Date filters and shorthands
 
@@ -122,6 +126,12 @@ Example: \`'topic: javascript'\`
 
 - You can use the context menu (navigator view or dashboard view to open the **Frontmatter** or **File properties** modal). Click on the desired frontmatter metadata to quickly search for an exact match within your notes.
 
+#### Bookmarks
+
+New **bookmarks** command (Navigator view - search): \`@bookmarks\` or \`@bm\` as its shorthand. This command will **list all bookmarked files** in Navigator view, so you can sort them by file name, extension, folder, date, search for tags and frontmatter.
+
+- You can search for the file categories using the additional \`@bookmarks\`or \`@bm\` filter to identify which ones are bookmarked, e.g. \`@notes @bm\` (notes that are bookmarked) or \`@images @bm\`(images in your bookmarks).
+
 #### Tag actions
 
 You can quickly filter your search results by interacting with **tags** directly within the **Navigator view**, **File Properties modal**, or **Tags modal**. These actions let you include or exclude tags from your current search query.
@@ -189,6 +199,32 @@ You can hide the following columns:
 - **Date**: Indicates the modification date of the file.
 - **Tags**: Lists the tags associated with the note, making it easier to categorize and search for notes.
 - **Frontmatter**: Lists the frontmatter/metadata associated with the note.
+
+### Tags dashboard view
+
+- **Advanced tag(s) search**: This feature uses secondary tags as cross-references to help you navigate your notes like a dynamic map. By revealing which tags are used together, you can discover hidden associations and see how different ideas and topics are implicitly connected in your vault.
+
+- The tags dashboard's initial state shows a list of your most recently created or modified notes along with their corresponding tags. This gives you a quick overview of your recent activity.
+
+- The \`@tags\` command (top search bar) to search directly in **Tags** dashboard view:
+
+  - **Beginning of the query**: When you start a search with \`@tags\`, it acts as a shortcut. It immediately switches your view to the Tags dashboard and focuses the cursor in the Tags dashboard's search bar, allowing you to start a new tag-focused search right away.
+
+  - **End of the query**: When you place \`@tags\` at the end of a tag(s) search (e.g., \`#tag1 #tag2 @tags\`), it opens the Tags dashboard and shows you all the secondary tags that are used in conjunction with the tag(s) you've already searched for. This helps you find related topics and discover connections between your notes.
+
+- You can also save the tags search using \`@tags\` with a description (saved searches window). When clicking on the saved search option it will open the saved query directly in **Tags** dashboard view.
+
+#### **Tags dashboard commands**
+
+These commands work on the tags displayed in the **recent notes & tags** section, the **secondary tags** displayed in the main **Tags** dashboard, and within the tags list in the **tags sidebar**.
+
+  - \`Left-click\`: Change the selected secondary tag into a primary tag, making it the main focus of your view.
+
+  - \`Shift + click\`: Add this tag to your current search using an AND condition. For example, if your search is \`#article\`, holding \`Shift\` and \`clicking\` on \`#status\` will change your search to \`#article #status\`(notes with tags **#article** AND **#status**).
+
+  - \`Ctrl + click\`: Exclude this clicked secondary tag. This is useful for filtering out results that contain a specific tag.
+
+  - \`Ctrl + middle-click\`: Quickly clear your tag search and start fresh. This removes all tags from your search query, allowing you to reset your view with a single click.
 
 ### Excluded file extensions
 

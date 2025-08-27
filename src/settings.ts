@@ -20,6 +20,7 @@ export class DNSettingTab extends PluginSettingTab {
     colorCompVideos: ColorComponent;
     colorCompAudios: ColorComponent;
     colorCompPdf: ColorComponent;
+    colorCompBases: ColorComponent;
     colorCompOther: ColorComponent;
     toggleColoredFiles: ToggleComponent;
     toggleHideExtColumn: ToggleComponent;
@@ -51,7 +52,7 @@ export class DNSettingTab extends PluginSettingTab {
                     })
             });
 
-        // Default DN view: Dashboard or Navigator
+        // Default DN view: Dashboard, Navigator or Tags
         new Setting(containerEl)
             .setName('Default modal view')
             .setDesc('Select the initial view for this plugin\'s modal when it opens using its primary ribbon icon.')
@@ -59,6 +60,7 @@ export class DNSettingTab extends PluginSettingTab {
                 this.dropdownDefaultView = sel;
                 sel.addOption('1', 'Dashboard');
                 sel.addOption('2', 'Navigator');
+                sel.addOption('3', 'Tags');
                 sel.onChange(async (val: string) => {
 
                     this.plugin.settings.default_view = parseInt(val);
@@ -717,7 +719,35 @@ export class DNSettingTab extends PluginSettingTab {
                 });
             });
 
-        // 7 Color -> Other files
+        // 7 Color -> Base files
+        new Setting(containerEl)
+            .setName('Color: Bases')
+            .setDesc('Color of Base files.')
+            .addColorPicker((color) => {
+                this.colorCompBases = color;
+                color
+                    .setValue(this.plugin.settings.color_bases)
+                    .onChange(async (val) => {
+                        this.plugin.settings.color_bases = val;
+                        this.plugin.DN_MODAL.color_bases = val;
+                        this.plugin.DN_MODAL.dnSetCustomColors();
+
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.colorCompBases.setValue(DEFAULT_SETTINGS.color_bases);
+                    this.plugin.settings.color_bases = DEFAULT_SETTINGS.color_bases;
+                    this.plugin.DN_MODAL.color_bases = DEFAULT_SETTINGS.color_bases;
+                    this.plugin.DN_MODAL.dnSetCustomColors();
+
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // 8 Color -> Other files
         new Setting(containerEl)
             .setName('Color: Other files')
             .setDesc('Color of other files.')

@@ -5,6 +5,7 @@ import { DNSaveSearchModal, DNSaveSearchItem } from './modals/dnsavesearchmodal'
 import { DNSavedSearchesModal } from './modals/dnsavedsearchesmodal';
 import { DNInfoModal } from './modals/dninfomodal';
 import { DNQuickDisplayOptionsModal } from './modals/dnquickdisplayoptionsmodal';
+import { DNDataManager } from 'src/data/dndatamanager';
 
 interface DNSettings {
 	default_view: number;
@@ -22,6 +23,7 @@ interface DNSettings {
 	color_videos: string;
 	color_audios: string;
 	color_pdf: string;
+	color_bases: string;
 	color_other: string;
 	colored_files: boolean;
 	hide_ext: boolean;
@@ -33,6 +35,7 @@ interface DNSettings {
 	hide_columns: string[];
 	show_dashboard_piechart: boolean;
 	image_thumbnail: boolean;
+	tags_sidebar: boolean;
 	onclose_search: string,
 	saved_searches: DNSaveSearchItem[];
 }
@@ -53,6 +56,7 @@ export const DEFAULT_SETTINGS: DNSettings = {
 	color_videos: '#d34848',
 	color_audios: '#bfbf00',
 	color_pdf: '#00a300',
+	color_bases: '#00a3a3',
 	color_other: '#828282',
 	colored_files: false,
 	hide_ext: false,
@@ -64,6 +68,7 @@ export const DEFAULT_SETTINGS: DNSettings = {
 	hide_columns: [],
 	show_dashboard_piechart: true,
 	image_thumbnail: true,
+	tags_sidebar: true,
 	onclose_search: '',
 	saved_searches: []
 }
@@ -78,12 +83,18 @@ export default class DNPlugin extends Plugin {
 
 	settings: DNSettings;
 
+	private _DN_DATA_MANAGER: DNDataManager;
 
 	async onload() {
 
 		await this.loadSettings();
 
-		this.DN_MODAL = new DNModal(this.app, this);
+		this._DN_DATA_MANAGER = new DNDataManager();
+
+		const excludedExtensions = this.dnGetExcludedExtensions(this.settings.excluded_ext);
+		const excludedFolders = this.dnGetExcludedFolders(this.settings.excluded_path);
+
+		this.DN_MODAL = new DNModal(this.app, this, this._DN_DATA_MANAGER);
 
 		this.DN_QUICK_DISPLAY_OPTIONS_MODAL = new DNQuickDisplayOptionsModal(this.app, this);
 
@@ -100,8 +111,8 @@ export default class DNPlugin extends Plugin {
 		this.DN_MODAL.files_per_page = this.settings.files_per_page;
 
 		this.DN_MODAL.selected_table_layout = this.settings.selected_table_layout;
-		this.DN_MODAL.excluded_extensions = this.dnGetExcludedExtensions(this.settings.excluded_ext);
-		this.DN_MODAL.excluded_folders = this.dnGetExcludedFolders(this.settings.excluded_path);
+		this.DN_MODAL.excluded_extensions = excludedExtensions;
+		this.DN_MODAL.excluded_folders = excludedFolders;
 		this.dnSetFontSize(this.settings.font_size);
 		// Set colors
 		this.DN_MODAL.colored_files = this.settings.colored_files;
@@ -112,11 +123,13 @@ export default class DNPlugin extends Plugin {
 		this.DN_MODAL.color_audios = this.settings.color_audios;
 		this.DN_MODAL.color_pdf = this.settings.color_pdf;
 		this.DN_MODAL.color_other = this.settings.color_other;
+		this.DN_MODAL.color_bases = this.settings.color_bases;
 
 		this.DN_MODAL.hide_columns = this.dnSetHiddenColumns(this.settings.hide_columns);
 
 		this.DN_MODAL.image_thumbnail = this.settings.image_thumbnail;
 		this.DN_MODAL.show_dashboard_piechart = this.settings.show_dashboard_piechart;
+		this.DN_MODAL.tags_sidebar = this.settings.tags_sidebar;
 
 		this.addRibbonIcon('gauge', 'Open dashboard navigator', (evt: MouseEvent) => {
 			this.DN_MODAL.default_view = this.settings.default_view;
@@ -142,7 +155,21 @@ export default class DNPlugin extends Plugin {
 
 		});
 
+		this.addCommand({
+			id: 'tags',
+			name: 'Open tags',
+			callback: () => {
+				this.DN_MODAL.default_view = 3;
+				this.DN_MODAL.open();
+			}
+
+		});
+
 		this.addSettingTab(new DNSettingTab(this.app, this));
+
+		this.app.workspace.onLayoutReady(async () => {
+			await this._DN_DATA_MANAGER.getDataCache(this.app, excludedExtensions, excludedFolders);
+		});
 
 	}
 
