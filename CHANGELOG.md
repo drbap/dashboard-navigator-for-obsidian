@@ -24,7 +24,7 @@
 
   - **Ctrl + Middle-Click**: Quickly clear your tag search and start fresh. This removes all tags from your search query, allowing you to reset your view with a single click.
 
-- New **Bases** dashboard button count.
+- New **Bases** dashboard button count (Dashboard view).
 
 - New **Bases** recent files (Dashboard view).
 
@@ -32,8 +32,6 @@
 
 - New **bookmarks** command (Navigator view - search): `@bookmarks` or `@bm` as its shorthand. This command will **list all bookmarked files** in Navigator view, so you can sort them by file name, extension, folder, date, search for tags and frontmatter.
   - You can search for the file categories using the additional `@bookmarks`or `@bm` filter to identify which ones are bookmarked, e.g. `@notes @bm` (notes that are bookmarked) or `@images @bm`(images in your bookmarks).
-  This command lists your bookmarks directly in the Navigator view, allowing you to sort them by file name, extension, folder, or date. You can also apply your usual search filters, including tags and frontmatter, to narrow down your bookmarked files.
-
 
 - Default view can be **Dashboard**, **Navigator** or **Tags**.
 
