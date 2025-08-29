@@ -20,7 +20,7 @@
 
   - **Shift + Click**: Add this tag to your current search using an AND condition. For example, if your search is `#article`, holding `Shift` and `clicking` on `#status` will change your search to `#article #status`(notes with tags #article AND #status).
 
-  - **Ctrl + Click**: Exclude this clicked secondary tag. This is useful for filtering out results that contain a specific tag.
+  - **Ctrl + Click**: Exclude this clicked secondary tag. This is useful for filtering out results that contain a specific tag. Excluded tag(s) will appear in red color.
 
   - **Ctrl + Middle-Click**: Quickly clear your tag search and start fresh. This removes all tags from your search query, allowing you to reset your view with a single click.
 
