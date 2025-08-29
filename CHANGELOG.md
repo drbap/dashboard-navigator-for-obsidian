@@ -10,9 +10,9 @@
 
 - The main search bar now provides **tag autocomplete**.
 
-- **Tag autocomplete** for the search in **Tags** dashboard view. The autocomplete makes it easy to quickly find and select the tags you need, without having to remember the exact tag name.
+- **Tag autocomplete** for the search in **Tags** dashboard view.
 
-- Tags dashboard view shows the **recent notes & tags**. You will see a list of the most recently created/modified notes with the corresponding tags.
+- **Recent notes & tags** in Tags dashboard view. You will see a list of the most recently created/modified notes with their corresponding tags.
 
 - **Tags dashboard commands**: These commands work both in the main **Tags** dashboard and within the tags list in the tags sidebar (of Tags dashboard).
 
