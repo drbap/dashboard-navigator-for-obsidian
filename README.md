@@ -1,9 +1,9 @@
 
 # Dashboard navigator plugin for Obsidian
 
-![Dashboard navigator for Obsidian](images/dashboard_navigator_plugin_intro.png)
+![Dashboard Navigator for Obsidian](images/dashboard_navigator_plugin_intro.png)
 
-**Dashboard navigator** was designed to help you manage and quickly navigate your knowledge base. You can get instant overview of key vault stats, categorized recent files, total number of files per category (notes, images, audios, videos and more) and powerful search to easily locate your vault files (navigator).
+**Dashboard Navigator** was designed to help you manage and quickly navigate your knowledge base. You can get instant overview of key vault stats, categorized recent files, total number of files per category (notes, images, audios, videos and more) and powerful search to easily locate your vault files (navigator).
 
 ## Features
 
@@ -298,7 +298,7 @@ You can hide the following columns:
 
 - You can also save the tags search using `@tags` with a description (saved searches window). When clicking on the saved search option it will open the saved query directly in **Tags** dashboard view.
 
-### **Tags dashboard commands**
+### **Tags Dashboard Commands**
 
 ![Dashboard navigator for Obsidian - Tags](images/dn_v8_tags_004.png)
 
