@@ -1,5 +1,5 @@
 
-# Dashboard navigator plugin for Obsidian
+# Dashboard Navigator plugin for Obsidian
 
 ![Dashboard Navigator for Obsidian](images/dashboard_navigator_plugin_intro.png)
 
@@ -26,7 +26,7 @@
 
 ## Intuitive Advanced Search
 
-The Dashboard navigator search allows you to quickly access and filter specific files within your vault. Quickly find notes, images, canvases, audios, videos, PDFs, and more with simple commands.
+The Dashboard Navigator search allows you to quickly access and filter specific files within your vault. Quickly find notes, images, canvases, audios, videos, PDFs, and more with simple commands.
 
 
 ### Basic Commands
