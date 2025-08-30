@@ -146,7 +146,7 @@ To search for specific frontmatter metadata, use the following syntax:
 
 - Use single quotes (`'`) to enclose when searching for specific metadata.
 
-- You can use the context menu (navigator view or dashboard view to open the **Frontmatter** or **File Properties** modal). Click on the desired frontmatter metadata to quickly search for an exact match within your notes.
+- You can use the context menu (Navigator view or Dashboard view to open the **Frontmatter** or **File Properties** modal). Click on the desired frontmatter metadata to quickly search for an exact match within your notes.
 
 ### Bookmarks
 
@@ -246,9 +246,9 @@ A new '**Cards**' layout option is now available in Navigator view. You can sele
 
 ### Drag-and-Drop Preview Window
 
-- **Drag-and-Drop Positioning**: You have the freedom to move the preview window to any desired location on the screen. The preview window's position is remembered for subsequent previews (till you close the Dashboard navigator window), ensuring consistency and reducing the need for constant readjustment.
+- **Drag-and-Drop Positioning**: You have the freedom to move the preview window to any desired location on the screen. The preview window's position is remembered for subsequent previews (till you close the Dashboard Navigator window), ensuring consistency and reducing the need for constant readjustment.
 
-- **Default Position**: If you close and reopen the Dashboard navigator window, the preview will automatically return to its default position.
+- **Default Position**: If you close and reopen the Dashboard Navigator window, the preview will automatically return to its default position.
  
 ## Context Menu
 
@@ -268,7 +268,7 @@ A new '**Cards**' layout option is now available in Navigator view. You can sele
 
 ## Navigator View: Hide Columns
 
-The column-hiding feature gives you the flexibility to customize the **navigator view** to suit your specific preferences and workflow. By **hiding unnecessary columns**, you can create a cleaner, more focused view that highlights the information most relevant to you.
+The column-hiding feature gives you the flexibility to customize the **Navigator view** to suit your specific preferences and workflow. By **hiding unnecessary columns**, you can create a cleaner, more focused view that highlights the information most relevant to you.
 
 You can hide the following columns:
 - **Ext**: Shows the file extension.
@@ -329,7 +329,7 @@ These commands work on the tags displayed in the **recent notes & tags** section
 
 ![Dashboard navigator for Obsidian - colored files](images/dashboard_navigator.gif)
 
-- Select custom colors for files in the dashboard and navigator views. 
+- Select custom colors for files in the Dashboard, Navigator and Tags views. 
 - These colors will be reflected in the piechart graph, making it easier to identify and track different file types. To activate this feature, go to **plugin settings** and **toggle colored files**.
 
 ## Colored Tags Support
