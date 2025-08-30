@@ -341,7 +341,7 @@ These commands work on the tags displayed in the **recent notes & tags** section
 1. Open **Obsidian Settings**.
 2. In the side menu, select **Community plugins**.
 3. Select **Browse** (button).
-4. Search for **Dashboard navigator**.
+4. Search for **Dashboard Navigator**.
 5. Select it and choose **Install**.
 6. **Enable** Dashboard navigator after installation.
 
@@ -361,7 +361,7 @@ Thanks.
 
 ## License and Acknowledgements
 
-Dashboard navigator plugin for Obsidian
+Dashboard Navigator plugin for Obsidian
 
 MIT License ⓒ Bernardo Pires
 
