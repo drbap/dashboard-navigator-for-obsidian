@@ -325,7 +325,7 @@ You can hide the following columns:
   - **End of the query**: When you place `@tags` at the end of a tag(s) search (e.g., `#tag1 #tag2 @tags`), it opens the Tags dashboard and shows you all the secondary tags that are used in conjunction with the tag(s) you've already searched for (primary tag or tags query). This helps you find related topics and discover connections between your notes.
 
 - You can also save the tags search using `@tags` with a description (saved searches window). When clicking on the saved search option it will open the saved query directly in **Tags** dashboard view.
-- 
+
 ### Tags Sidebar: Sort by Name or Frequency
 
 ![Dashboard navigator for Obsidian - Tags](images/dn_tags_sidebar_sort_001.png)
