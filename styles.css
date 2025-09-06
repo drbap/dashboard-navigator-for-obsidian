@@ -8,6 +8,7 @@ body {
 	--dn-border-color-hover: var(--background-modifier-border-hover);
 	--dn-file-property-color: #828282;
 	--dn-font-size: 16px;
+	--dn-thumbnail-size: 82px;
 
 	--dn-notes-color: #bf48ff;
 	--dn-images-color: #007fff;
@@ -118,7 +119,7 @@ body {
 	align-items: flex-start;
 	flex-direction: row;
 	flex-wrap: wrap;
-	gap: 1.8em;
+	gap: 1em;
 }
 
 .dn-flex>div {
@@ -331,7 +332,7 @@ table#dn-table th {
 	box-shadow: inset 0 -1px 0 var(--interactive-accent);
 }
 
-table#dn-table th:not(th:nth-child(1), th:nth-child(7), th:nth-child(8)):hover {
+table#dn-table th:not(th.dn-th-thumbnail, th.dn-th-tags, th.dn-th-frontmatter):hover {
 	background-color: var(--background-secondary);
 }
 
@@ -358,11 +359,18 @@ table#dn-table th.dn-th-ext,
 table#dn-table th.dn-th-path,
 table#dn-table th.dn-th-size,
 table#dn-table th.dn-th-date,
+table#dn-table th.dn-th-backlinks,
+table#dn-table th.dn-th-outgoing-links,
 table#dn-table th.dn-th-tags,
 table#dn-table th.dn-th-frontmatter {
 	resize: horizontal;
 }
 
+table#dn-table tr th.dn-th-outgoing-links,
+table#dn-table tr td.dn-td-outgoing-links,
+table#dn-table tr th.dn-th-backlinks,
+table#dn-table tr td.dn-td-backlinks,
+table#dn-table tr th.dn-th-size,
 table#dn-table tr td.dn-td-size {
 	text-align: right;
 	padding-right: 1em;
@@ -372,6 +380,13 @@ table#dn-table th.dn-th-thumbnail,
 table#dn-table th.dn-th-tags,
 table#dn-table th.dn-th-frontmatter {
 	cursor: default;
+}
+
+table#dn-table:not(.dn-tbl-cards) .dn-th-outgoing-links,
+table#dn-table:not(.dn-tbl-cards) .dn-td-outgoing-links,
+table#dn-table:not(.dn-tbl-cards) .dn-th-backlinks,
+table#dn-table:not(.dn-tbl-cards) .dn-td-backlinks {
+	width: 8%;
 }
 
 table#dn-table tr:hover td {
@@ -764,6 +779,12 @@ table#dn-table.dn-tbl-default td {
 	font-family: var(--font-monospace);
 }
 
+.modal:has(.dn-modal-sticky)>.modal-close-button,
+.modal:has(.dn-modal-sticky)>.modal-header {
+	display: none;
+}
+
+.modal:has(.dn-modal-sticky),
 .modal:has(.dn-info-modal),
 .modal:has(.dn-tags-modal),
 .modal:has(.dn-properties-modal),
@@ -771,9 +792,17 @@ table#dn-table.dn-tbl-default td {
 	min-width: 30%;
 	width: 60%;
 	max-width: 100%;
+	height: auto;
+	max-height: 90%;
 	resize: both;
 	overflow: auto;
 }
+
+.modal:has(.dn-modal-sticky) {
+	padding-top: 0;
+	background-color: var(--background-primary);
+}
+
 
 .dn-tags-modal,
 .dn-properties-modal,
@@ -813,6 +842,7 @@ table#dn-table.dn-tbl-default td {
 	padding-top: 0;
 }
 
+.dn-modal-sticky,
 .dn-preview-top-bar {
 	background-color: var(--background-primary);
 	position: sticky;
@@ -820,6 +850,12 @@ table#dn-table.dn-tbl-default td {
 	left: 0;
 	padding: var(--size-4-2);
 	z-index: 10;
+}
+
+.dn-modal-sticky {
+	padding-left: 0;
+	padding-right: 0;
+	padding-bottom: 0;
 }
 
 .dn-preview-titlebar {
@@ -924,6 +960,10 @@ table#dn-table.dn-tbl-default td {
 
 .dn-property-value span.nav-file-tag {
 	margin: 0;
+}
+
+.dn-font-semibold {
+	font-weight: var(--font-semibold);
 }
 
 /* Tags */
@@ -1152,7 +1192,7 @@ a.dn-tag:hover {
 }
 
 table#dn-table th.dn-th-thumbnail {
-	width: 72px;
+	width: var(--dn-thumbnail-size);
 	min-width: 30px;
 	max-width: 1000px;
 	text-align: center;
@@ -1368,6 +1408,12 @@ td.dn-thumbnail-base {
 	width: 48px;
 }
 
+.dn-tags-sidebar-label {
+	color: var(--text-faint);
+	font-size: .8em;
+	padding: 0 12px;
+}
+
 .dn-flex:has(.dn-td-second-col.dn-hidden) #dn-tags-btn-sidebar {
 	background-image: var(--dn-btn-sidebar-open-icon);
 }
@@ -1418,6 +1464,23 @@ td.dn-thumbnail-base {
 	border-radius: var(--radius-s);
 }
 
+.dn-td-sidebar-sort-buttons {
+	display: flex;
+	flex-wrap: wrap;
+	text-align: right;
+	padding: 0 8px;
+	margin-bottom: 8px;
+	gap: 8px;
+}
+
+.dn-td-sidebar-sort-buttons button {
+	flex-grow: 1;
+}
+
+.dn-td-sidebar-sort-buttons button.tags-sort-active {
+	border: 1px solid var(--interactive-accent) !important;
+}
+
 .dn-td-tag-search-results {
 	width: 100%;
 }
@@ -1430,6 +1493,30 @@ td.dn-thumbnail-base {
 	justify-content: space-between;
 	width: 100%;
 	height: 100%;
+}
+
+.dn-td-primary-tags-results {
+	display: flex;
+	flex-direction: column;
+}
+
+.dn-td-primary-tags-results.dn-hidden {
+	display: none;
+}
+
+.dn-td-primary-tags-results a {
+	width: fit-content;
+}
+
+button.btn-td-toggle-primary-tags {
+	height: 20px;
+	width: 56px;
+	padding: 8px;
+	cursor: pointer;
+}
+
+.dn-td-sidebar-sort-buttons button {
+	cursor: pointer;
 }
 
 .dn-td-tag-group-card {
@@ -1561,6 +1648,85 @@ span.dn-td-excluded-tags {
 	color: var(--text-faint);
 }
 
+/* Backlinks */
+.dn-links-list-container {
+	background-color: var(--background-primary);
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+}
+
+.dn-links-list-container .dn-links-list-item {
+	min-width: 300px;
+	width: 30%;
+	flex-grow: 1;
+	background-color: var(--background-primary);
+	border: 1px solid var(--dn-border-color);
+	padding: 0;
+	margin-bottom: 16px;
+	min-height: 120px;
+	height: 300px;
+	max-height: 1000px;
+	overflow: auto;
+	resize: both;
+	border-radius: var(--radius-s);
+}
+
+.dn-links-list-item .internal-embed {
+	border: 0;
+}
+
+.dn-links-list-item .internal-embed .markdown-embed-title {
+	display: none;
+}
+
+.dn-modal-sticky-pagination {
+	padding: var(--size-4-1) var(--size-4-2);
+	text-align: right;
+	font-size: .9em;
+}
+
+.dn-modal-sticky-pagination button.dn-btn-prev {
+	margin-left: 16px;
+}
+
+.dn-modal-sticky-pagination .pagination-status {
+	margin-left: 8px;
+}
+
+.dn-link-file-header {
+	width: 100%;
+	position: sticky;
+	top: 0;
+	padding: var(--p-spacing);
+	padding-top: 8px;
+	padding-bottom: 8px;
+	background-color: var(--background-secondary);
+	border-left: 1px solid var(--interactive-accent);
+	color: var(--text-normal);
+	z-index: 1;
+}
+
+.dn-link-file-header:hover {
+	color: var(--text-accent);
+	cursor: pointer;
+}
+
+.dn-link-preview {
+	padding: var(--p-spacing);
+}
+
+.dn-link-file-header>a.dn-f-note {
+	text-decoration: none;
+	color: var(--dn-notes-color);
+}
+
+.dn-colored-files .dn-link-file-header>a.dn-f-note {
+	color: var(--dn-notes-color);
+}
+
+
 @media (min-width: 768px) {
 
 	.dn-td-second-col {
@@ -1646,6 +1812,10 @@ span.dn-td-excluded-tags {
 	table#dn-table:not(.dn-tbl-cards) .dn-td-size,
 	table#dn-table:not(.dn-tbl-cards) .dn-th-date,
 	table#dn-table:not(.dn-tbl-cards) .dn-td-date,
+	table#dn-table:not(.dn-tbl-cards) .dn-th-backlinks,
+	table#dn-table:not(.dn-tbl-cards) .dn-td-backlinks,
+	table#dn-table:not(.dn-tbl-cards) .dn-th-outgoing-links,
+	table#dn-table:not(.dn-tbl-cards) .dn-td-outgoing-links,
 	table#dn-table:not(.dn-tbl-cards) .dn-th-tags,
 	table#dn-table:not(.dn-tbl-cards) .dn-td-tags,
 	table#dn-table:not(.dn-tbl-cards) .dn-th-frontmatter,
