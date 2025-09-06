@@ -12,6 +12,7 @@ export class DNSettingTab extends PluginSettingTab {
     dropdownRecentFiles: DropdownComponent;
     dropdownBookmarkedFiles: DropdownComponent;
     sliderFontSize: SliderComponent;
+    sliderImageThumbnail: SliderComponent;
     textExcludedExtensions: TextComponent;
     textExcludedFolders: TextComponent;
     colorCompNotes: ColorComponent;
@@ -29,6 +30,8 @@ export class DNSettingTab extends PluginSettingTab {
     toggleHideDateColumn: ToggleComponent;
     toggleHideTagsColumn: ToggleComponent;
     toggleHideFrontmatterColumn: ToggleComponent;
+    toggleHideBLColumn: ToggleComponent;
+    toggleHideOLColumn: ToggleComponent;
     toggleImageThumbnail: ToggleComponent;
     togglePieChartModule: ToggleComponent;
 
@@ -441,6 +444,54 @@ export class DNSettingTab extends PluginSettingTab {
                 });
             });
 
+        // Navigator: Hide column - backlinks
+        new Setting(containerEl)
+            .setName('Hide: BL (Backlinks)')
+            .setDesc('Navigator: Hide backlinks column.')
+            .addToggle((toggle) => {
+                this.toggleHideBLColumn = toggle;
+                toggle
+                    .setValue(this.plugin.settings.hide_backlinks)
+                    .onChange(async (val) => {
+                        this.plugin.settings.hide_backlinks = val;
+                        this.plugin.dnUpdateHideColumn("backlinks", val);
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.toggleHideBLColumn.setValue(DEFAULT_SETTINGS.hide_backlinks);
+                    this.plugin.settings.hide_backlinks = DEFAULT_SETTINGS.hide_backlinks;
+                    this.plugin.dnUpdateHideColumn("backlinks", DEFAULT_SETTINGS.hide_backlinks);
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // Navigator: Hide column - outgoing links
+        new Setting(containerEl)
+            .setName('Hide: OL (Outgoing links)')
+            .setDesc('Navigator: Hide outgoing links column.')
+            .addToggle((toggle) => {
+                this.toggleHideOLColumn = toggle;
+                toggle
+                    .setValue(this.plugin.settings.hide_outgoing)
+                    .onChange(async (val) => {
+                        this.plugin.settings.hide_outgoing = val;
+                        this.plugin.dnUpdateHideColumn("outgoing", val);
+                        await this.plugin.saveSettings();
+                    })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.toggleHideOLColumn.setValue(DEFAULT_SETTINGS.hide_outgoing);
+                    this.plugin.settings.hide_outgoing = DEFAULT_SETTINGS.hide_outgoing;
+                    this.plugin.dnUpdateHideColumn("outgoing", DEFAULT_SETTINGS.hide_outgoing);
+                    this.plugin.saveSettings();
+                });
+            });
+
         // Image thumbnails
         const headingImageThumbnails1 = containerEl.createEl('div', { cls: 'setting-item setting-item-heading' });
         const headingImageThumbnails2 = headingImageThumbnails1.createEl('div', { cls: 'setting-item setting-item-info' });
@@ -469,6 +520,39 @@ export class DNSettingTab extends PluginSettingTab {
                     this.plugin.saveSettings();
                 });
             });
+
+        // Thumbnail size
+        new Setting(containerEl)
+            .setName('Image thumbnails size')
+            .setDesc('Navigator: Adjust image thumbnails size')
+            .addSlider((sliderThumbnail) => {
+                this.sliderImageThumbnail = sliderThumbnail;
+                let slider_val: number;
+                if (this.plugin.settings.thumbnail_size) {
+                    slider_val = this.plugin.settings.thumbnail_size;
+                } else {
+                    slider_val = DEFAULT_SETTINGS.thumbnail_size;
+                }
+                sliderThumbnail.setDynamicTooltip();
+                sliderThumbnail.setLimits(50, 500, 1);
+                sliderThumbnail.setValue(slider_val);
+                sliderThumbnail.onChange((val: number) => {
+
+                    this.plugin.settings.thumbnail_size = val;
+                    this.plugin.dnSetThumbnailSize(val);
+                    this.plugin.saveSettings();
+                })
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.sliderImageThumbnail.setValue(DEFAULT_SETTINGS.thumbnail_size);
+                    this.plugin.settings.thumbnail_size = DEFAULT_SETTINGS.thumbnail_size;
+                    this.plugin.dnSetThumbnailSize(this.plugin.settings.thumbnail_size);
+                    this.plugin.saveSettings();
+                });
+            });
+
 
         const headingExcludedFilesFolders1 = containerEl.createEl('div', { cls: 'setting-item setting-item-heading' });
         const headingExcludedFilesFolders2 = headingExcludedFilesFolders1.createEl('div', { cls: 'setting-item setting-item-info' });
@@ -722,7 +806,7 @@ export class DNSettingTab extends PluginSettingTab {
         // 7 Color -> Base files
         new Setting(containerEl)
             .setName('Color: Bases')
-            .setDesc('Color of Base files.')
+            .setDesc('Color of .base files.')
             .addColorPicker((color) => {
                 this.colorCompBases = color;
                 color

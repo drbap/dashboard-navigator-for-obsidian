@@ -1,4 +1,4 @@
-import { App, Modal, Setting, ToggleComponent } from 'obsidian';
+import { App, Modal, Setting, SliderComponent, ToggleComponent } from 'obsidian';
 import DNPlugin from 'src/main';
 
 export class DNQuickDisplayOptionsModal extends Modal {
@@ -10,7 +10,9 @@ export class DNQuickDisplayOptionsModal extends Modal {
 	toggleHideTagsColumn: ToggleComponent;
 	toggleHideFrontmatterColumn: ToggleComponent;
 	toggleImageThumbnail: ToggleComponent;
-
+	toggleHideBLColumn: ToggleComponent;
+	toggleHideOLColumn: ToggleComponent;
+	sliderImageThumbnail: SliderComponent;
 
 	constructor(app: App, plugin: DNPlugin) {
 		super(app);
@@ -115,14 +117,47 @@ export class DNQuickDisplayOptionsModal extends Modal {
 						await this.plugin.DN_MODAL.dnRedrawResultsTable();
 					})
 			});
+
+		// Navigator: Hide column - backlinks
+		new Setting(contentEl)
+			.setName('Hide: BL (backlinks)')
+			.addToggle((toggle) => {
+				this.toggleHideBLColumn = toggle;
+				toggle
+					.setValue(this.plugin.settings.hide_backlinks)
+					.onChange(async (val) => {
+						this.plugin.settings.hide_backlinks = val;
+						this.plugin.dnUpdateHideColumn("backlinks", val);
+						await this.plugin.saveSettings();
+						await this.plugin.DN_MODAL.dnRedrawResultsTable();
+					});
+			});
+
+		// Navigator: Hide column - outgoing links
+		new Setting(contentEl)
+			.setName('Hide: OL (outgoing links)')
+			.addToggle((toggle) => {
+				this.toggleHideOLColumn = toggle;
+				toggle
+					.setValue(this.plugin.settings.hide_outgoing)
+					.onChange(async (val) => {
+						this.plugin.settings.hide_outgoing = val;
+						this.plugin.dnUpdateHideColumn("outgoing", val);
+						await this.plugin.saveSettings();
+						await this.plugin.DN_MODAL.dnRedrawResultsTable();
+					});
+			});
 		// Description
 		contentEl.createEl('div', { text: 'Activate toggles to hide columns. Deactivate to show.', cls: 'dn-table-column-description' });
+
+		contentEl.createEl('br');
 
 		// Image thumbnails
 		contentEl.createEl('div', { text: 'Image thumbnails', cls: 'setting-item setting-item-heading' });
 
 		new Setting(contentEl)
 			.setName('Show image thumbnails')
+			.setDesc('Activate to show image thumbnails. Deactivate to show image icons.')
 			.addToggle((toggle) => {
 				this.toggleImageThumbnail = toggle;
 				toggle
@@ -134,8 +169,29 @@ export class DNQuickDisplayOptionsModal extends Modal {
 						await this.plugin.DN_MODAL.dnRedrawResultsTable();
 					});
 			});
-		// Description
-		contentEl.createEl('div', { text: 'Activate to show image thumbnails. Deactivate to show image icons.', cls: 'dn-table-column-description' });
+
+		// Thumbnail size
+		new Setting(contentEl)
+			.setName('Image thumbnails size')
+			.setDesc('Adjust image thumbnails size in pixels.')
+			.addSlider((sli) => {
+				this.sliderImageThumbnail = sli;
+				let slider_val: number;
+				if (this.plugin.settings.thumbnail_size) {
+					slider_val = this.plugin.settings.thumbnail_size;
+				} else {
+					slider_val = 82;
+				}
+				sli.setDynamicTooltip();
+				sli.setLimits(50, 500, 1);
+				sli.setValue(slider_val);
+				sli.onChange((val: number) => {
+
+					this.plugin.settings.thumbnail_size = val;
+					this.plugin.dnSetThumbnailSize(val);
+					this.plugin.saveSettings();
+				})
+			});
 
 	}
 

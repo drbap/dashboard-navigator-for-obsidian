@@ -32,10 +32,15 @@ interface DNSettings {
 	hide_date: boolean;
 	hide_tags: boolean;
 	hide_frontmatter: boolean;
+	hide_backlinks: boolean;
+	hide_outgoing: boolean;
 	hide_columns: string[];
 	show_dashboard_piechart: boolean;
 	image_thumbnail: boolean;
+	thumbnail_size: number;
+	primary_tags_results_visible: boolean;
 	tags_sidebar: boolean;
+	tags_sidebar_sorted_by_frequency: boolean;
 	onclose_search: string,
 	saved_searches: DNSaveSearchItem[];
 }
@@ -65,10 +70,15 @@ export const DEFAULT_SETTINGS: DNSettings = {
 	hide_date: false,
 	hide_tags: false,
 	hide_frontmatter: false,
+	hide_backlinks: false,
+	hide_outgoing: false,
 	hide_columns: [],
 	show_dashboard_piechart: true,
 	image_thumbnail: true,
+	thumbnail_size: 82,
+	primary_tags_results_visible: true,
 	tags_sidebar: true,
+	tags_sidebar_sorted_by_frequency: false,
 	onclose_search: '',
 	saved_searches: []
 }
@@ -114,6 +124,7 @@ export default class DNPlugin extends Plugin {
 		this.DN_MODAL.excluded_extensions = excludedExtensions;
 		this.DN_MODAL.excluded_folders = excludedFolders;
 		this.dnSetFontSize(this.settings.font_size);
+		this.dnSetThumbnailSize(this.settings.thumbnail_size);
 		// Set colors
 		this.DN_MODAL.colored_files = this.settings.colored_files;
 		this.DN_MODAL.color_notes = this.settings.color_notes;
@@ -129,7 +140,11 @@ export default class DNPlugin extends Plugin {
 
 		this.DN_MODAL.image_thumbnail = this.settings.image_thumbnail;
 		this.DN_MODAL.show_dashboard_piechart = this.settings.show_dashboard_piechart;
+
+		// Tags dashboard preferences
+		this.DN_MODAL.primary_tags_results_visible = this.settings.primary_tags_results_visible;
 		this.DN_MODAL.tags_sidebar = this.settings.tags_sidebar;
+		this.DN_MODAL.tags_sidebar_sorted_by_frequency = this.settings.tags_sidebar_sorted_by_frequency;
 
 		this.addRibbonIcon('gauge', 'Open dashboard navigator', (evt: MouseEvent) => {
 			this.DN_MODAL.default_view = this.settings.default_view;
@@ -173,17 +188,27 @@ export default class DNPlugin extends Plugin {
 
 	}
 
+	dnSetThumbnailSize(val: number) {
+		if (val >= 50 || val <= 500) {
+			document.body.style.setProperty('--dn-thumbnail-size', val.toString() + 'px');
+		} else {
+			document.body.style.setProperty('--dn-thumbnail-size', '82px');
+		}
+	}
+
 	dnSetFontSize(val: number) {
 		if (val >= 12 || val <= 24) {
 			document.body.style.setProperty('--dn-font-size', val.toString() + 'px');
+		} else {
+			document.body.style.setProperty('--dn-font-size', '16px');
 		}
 	}
 
 	dnSetHiddenColumns(arrCols: string[]): string[] {
-		const allowedCols = ['ext', 'path', 'size', 'date', 'tags', 'frontmatter'];
+		const allowedCols = ['ext', 'path', 'size', 'date', 'tags', 'frontmatter', 'backlinks', 'outgoing'];
 		arrCols = arrCols.filter(col => allowedCols.includes(col));
 
-		if (arrCols.length <= 6 && arrCols.some(col => ['ext', 'path', 'size', 'date', 'tags', 'frontmatter'].includes(col))) {
+		if (arrCols.length <= 8 && arrCols.some(col => ['ext', 'path', 'size', 'date', 'tags', 'frontmatter', 'backlinks', 'outgoing'].includes(col))) {
 			return arrCols;
 		} else {
 			this.settings.hide_columns = [];
@@ -193,13 +218,15 @@ export default class DNPlugin extends Plugin {
 			this.settings.hide_date = false;
 			this.settings.hide_tags = false;
 			this.settings.hide_frontmatter = false;
+			this.settings.hide_backlinks = false;
+			this.settings.hide_outgoing = false;
 			this.saveSettings();
 			return [];
 		}
 	}
 
 	dnUpdateHideColumn(col: string, val: boolean): void {
-		const allowedCols = ['ext', 'path', 'size', 'date', 'tags', 'frontmatter'];
+		const allowedCols = ['ext', 'path', 'size', 'date', 'tags', 'frontmatter', 'backlinks', 'outgoing'];
 		if (allowedCols.includes(col) && val === true) {
 			if (!this.settings.hide_columns.includes(col)) {
 				this.settings.hide_columns.push(col);

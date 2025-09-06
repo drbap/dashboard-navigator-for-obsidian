@@ -43,6 +43,6 @@ export class DNTableManager {
 	}
 
 	getColumnNames(): string[] {
-		return ['thumbnail', 'name', 'ext', 'path', 'size', 'date', 'tags', 'frontmatter'];
+		return ['thumbnail', 'name', 'ext', 'path', 'size', 'date', 'tags', 'frontmatter', 'backlinks', 'outgoing'];
 	}
 }

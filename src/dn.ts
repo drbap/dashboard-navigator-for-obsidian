@@ -7,6 +7,9 @@ import { moment } from 'obsidian';
 import DNPlugin from './main';
 import { DNData, DNDataManager } from './data/dndatamanager';
 import { DNTagSuggestions } from './utils/dntagsuggestions';
+import { getBacklinksToFile, getOutgoingLinks } from './utils/dnlinks';
+import { DNSpecialBacklinksModal } from './modals/dnspecialbacklinksmodal';
+import { DNSpecialOutgoingLinksModal } from './modals/dnspecialoutgoinglinksmodal';
 
 export class DNModal extends Modal {
 
@@ -57,6 +60,8 @@ export class DNModal extends Modal {
 	private _th5: HTMLTableCellElement;
 	private _th6: HTMLTableCellElement;
 	private _th7: HTMLTableCellElement;
+	private _th_bl: HTMLTableCellElement;
+	private _th_ol: HTMLTableCellElement;
 
 	private _total_pages: number;
 
@@ -121,12 +126,21 @@ export class DNModal extends Modal {
 	TAGS_INPUT_SEARCH: HTMLInputElement;
 	TAGS_FIRST_COL_EL: HTMLElement;
 	TAGS_RECENT_FILES_EL: HTMLElement;
+
 	TAGS_RESULTS_EL: HTMLElement;
+	PRIMARY_TAGS_RESULTS_DIV: HTMLDivElement;
+
 	TAGS_SIDEBAR_EL: HTMLDivElement;
+	TAGS_SIDEBAR_LIST_DIV: HTMLDivElement;
+
+
+	tags_sidebar_sorted_by_frequency = false;
 
 	tagsCurrentPage = 0;
 	filteredPrimaryTagNotes: TFile[] = [];
+
 	tags_sidebar = true;
+	primary_tags_results_visible = true;
 
 	private _dnTagSuggestions: DNTagSuggestions;
 	private _dnMainSearchTagSuggestions: DNTagSuggestions;
@@ -289,6 +303,11 @@ export class DNModal extends Modal {
 		this._SELECT_SORT.createEl('option', { text: 'Size (largest to smallest)', value: 'size-desc' });
 		this._SELECT_SORT.createEl('option', { text: 'Date/time (oldest to newest)', value: 'modified-asc' });
 		this._SELECT_SORT.createEl('option', { text: 'Date/time (newest to oldest)', value: 'modified-desc' });
+		this._SELECT_SORT.createEl('option', { text: 'Backlinks (lowest to highest)', value: 'backlinks-asc' });
+		this._SELECT_SORT.createEl('option', { text: 'Backlinks (highest to lowest)', value: 'backlinks-desc' });
+		this._SELECT_SORT.createEl('option', { text: 'Outgoing links (lowest to highest)', value: 'outgoing-asc' });
+		this._SELECT_SORT.createEl('option', { text: 'Outgoing links (highest to lowest)', value: 'outgoing-desc' });
+
 
 		// Containers
 		this._VIEW_DASHBOARD = mainContainer.createEl('div', { cls: 'dn-flex' });
@@ -297,7 +316,7 @@ export class DNModal extends Modal {
 
 		this._divSearchResults = this._VIEW_NAVIGATOR.createEl('div', { cls: 'dn-div-table' });
 
-		this.dnShowModalSearchResults({ f: this._files_results, el: this._divSearchResults, leaf: this._leaf });
+		await this.dnShowModalSearchResults({ f: this._files_results, el: this._divSearchResults, leaf: this._leaf });
 
 		// Vault Stats container
 		const divVaultStats = this._VIEW_DASHBOARD.createEl('div');
@@ -813,12 +832,16 @@ export class DNModal extends Modal {
 		this._th5 = tr.createEl('th', { text: 'Date', cls: 'dn-th-date' });
 		this._th6 = tr.createEl('th', { text: 'Tags', cls: 'dn-th-tags' });
 		this._th7 = tr.createEl('th', { text: 'Frontmatter', cls: 'dn-th-frontmatter' });
+		this._th_bl = tr.createEl('th', { text: 'BL', cls: 'dn-th-backlinks' });
+		this._th_ol = tr.createEl('th', { text: 'OL', cls: 'dn-th-outgoing-links' });
 
 		this._th1.addEventListener('dblclick', () => this.dnAlternateSortColumn('name'));
 		this._th2.addEventListener('dblclick', () => this.dnAlternateSortColumn('ext'));
 		this._th3.addEventListener('dblclick', () => this.dnAlternateSortColumn('path'));
 		this._th4.addEventListener('dblclick', () => this.dnAlternateSortColumn('size'));
 		this._th5.addEventListener('dblclick', () => this.dnAlternateSortColumn('modified'));
+		this._th_bl.addEventListener('dblclick', () => this.dnAlternateSortColumn('backlinks'));
+		this._th_ol.addEventListener('dblclick', () => this.dnAlternateSortColumn('outgoing'));
 
 
 		// Tbody
@@ -921,6 +944,15 @@ export class DNModal extends Modal {
 					});
 				}
 
+				const backlinks = getBacklinksToFile(file);
+				const num_of_backlinks = backlinks.length.toString();
+				tr.createEl('td', { text: num_of_backlinks, cls: 'dn-td-backlinks' });
+
+
+				const outgoing_links = getOutgoingLinks(file);
+				const num_of_outgoing_links = outgoing_links.length.toString();
+				tr.createEl('td', { text: num_of_outgoing_links, cls: 'dn-td-outgoing-links' });
+
 
 			}
 
@@ -938,9 +970,9 @@ export class DNModal extends Modal {
 			} else {
 				btnPrev.disabled = false;
 			}
-			btnPrev.addEventListener('click', () => {
+			btnPrev.addEventListener('click', async () => {
 				if (currentPage > 1) {
-					this.dnShowModalSearchResults({ f, el, leaf, currentPage: currentPage - 1 });
+					await this.dnShowModalSearchResults({ f, el, leaf, currentPage: currentPage - 1 });
 				}
 			});
 
@@ -952,9 +984,9 @@ export class DNModal extends Modal {
 				btnNext.disabled = false;
 			}
 
-			btnNext.addEventListener('click', () => {
+			btnNext.addEventListener('click', async () => {
 				if (currentPage < this._total_pages) {
-					this.dnShowModalSearchResults({ f, el, leaf, currentPage: currentPage + 1 });
+					await this.dnShowModalSearchResults({ f, el, leaf, currentPage: currentPage + 1 });
 				}
 			});
 
@@ -964,7 +996,9 @@ export class DNModal extends Modal {
 				this._th2,
 				this._th3,
 				this._th4,
-				this._th5);
+				this._th5,
+				this._th_bl,
+				this._th_ol);
 
 			const dnTableManager = new DNTableManager('#dn-table');
 			// Hide columns
@@ -1044,12 +1078,14 @@ export class DNModal extends Modal {
 				break;
 			case 'size':
 			case 'modified':
+			case 'backlinks':
+			case 'outgoing':
 				this.dnSortColumnNumber(this._sort_column, this._sort_order, toggle);
 				break;
 		}
 	}
 
-	dnSortColumnWithSelect(): void {
+	async dnSortColumnWithSelect(): Promise<void> {
 		const val = this._SELECT_SORT.value;
 		if (this.dnIsValidSort(val)) {
 			const selSort = val.split('-');
@@ -1064,18 +1100,25 @@ export class DNModal extends Modal {
 					break;
 				case 'size':
 				case 'modified':
+				case 'backlinks':
+				case 'outgoing':
 					this.dnSortColumnNumber(this._sort_column, this._sort_order, false);
 					break;
 			}
 
-			this.dnShowModalSearchResults({ f: this._files_results, el: this._divSearchResults, leaf: this._leaf });
+			await this.dnShowModalSearchResults({ f: this._files_results, el: this._divSearchResults, leaf: this._leaf });
 
 		}
 	}
 
 	dnIsValidSort(val: string): boolean {
-		if (['name-asc', 'name-desc', 'path-asc', 'path-desc', 'ext-asc', 'ext-desc',
-			'size-asc', 'size-desc', 'modified-asc', 'modified-desc'].includes(val)) {
+		if (['name-asc', 'name-desc',
+			'path-asc', 'path-desc',
+			'ext-asc', 'ext-desc',
+			'size-asc', 'size-desc',
+			'modified-asc', 'modified-desc',
+			'backlinks-asc', 'backlinks-desc',
+			'outgoing-asc', 'outgoing-desc'].includes(val)) {
 			return true;
 		} else {
 			return false;
@@ -1090,7 +1133,7 @@ export class DNModal extends Modal {
 		}
 	}
 
-	dnAlternateSortColumn(colName: string) {
+	async dnAlternateSortColumn(colName: string) {
 		switch (colName) {
 			case 'name':
 				this.dnSortColumnString('name', this._sort_order, true);
@@ -1107,16 +1150,31 @@ export class DNModal extends Modal {
 			case 'modified':
 				this.dnSortColumnNumber('modified', this._sort_order, true);
 				break;
+			case 'backlinks':
+				this.dnSortColumnNumber('backlinks', this._sort_order, true);
+				break;
+			case 'outgoing':
+				this.dnSortColumnNumber('outgoing', this._sort_order, true);
+				break;
 		}
-		this.dnShowModalSearchResults({ f: this._files_results, el: this._divSearchResults, leaf: this._leaf });
+		await this.dnShowModalSearchResults({ f: this._files_results, el: this._divSearchResults, leaf: this._leaf });
 	}
 
-	dnUpdateSortIndicators(activeColumn: string, sortOrder: string, col1: HTMLTableCellElement, col2: HTMLTableCellElement, col3: HTMLTableCellElement, col4: HTMLTableCellElement, col5: HTMLTableCellElement) {
+	dnUpdateSortIndicators(activeColumn: string, sortOrder: string,
+		col1: HTMLTableCellElement,
+		col2: HTMLTableCellElement,
+		col3: HTMLTableCellElement,
+		col4: HTMLTableCellElement,
+		col5: HTMLTableCellElement,
+		col_bl: HTMLTableCellElement,
+		col_ol: HTMLTableCellElement) {
 		col1.classList.remove('sort-active', 'sort-asc', 'sort-desc');
 		col2.classList.remove('sort-active', 'sort-asc', 'sort-desc');
 		col3.classList.remove('sort-active', 'sort-asc', 'sort-desc');
 		col4.classList.remove('sort-active', 'sort-asc', 'sort-desc');
 		col5.classList.remove('sort-active', 'sort-asc', 'sort-desc');
+		col_bl.classList.remove('sort-active', 'sort-asc', 'sort-desc');
+		col_ol.classList.remove('sort-active', 'sort-asc', 'sort-desc');
 		let activeThCell = col5;
 		switch (activeColumn) {
 			case 'name':
@@ -1133,6 +1191,12 @@ export class DNModal extends Modal {
 				break;
 			case 'modified':
 				activeThCell = col5;
+				break;
+			case 'backlinks':
+				activeThCell = col_bl;
+				break;
+			case 'outgoing':
+				activeThCell = col_ol;
 				break;
 		}
 		activeThCell.classList.add('sort-active');
@@ -1196,7 +1260,7 @@ export class DNModal extends Modal {
 	}
 
 	dnSortColumnNumber(sortColumn: string, sortOrder: string, toggleSortOrder: boolean) {
-		const supportedColumns = ['size', 'modified'];
+		const supportedColumns = ['size', 'modified', 'backlinks', 'outgoing'];
 
 		if (!supportedColumns.includes(sortColumn)) {
 			return;
@@ -1228,6 +1292,14 @@ export class DNModal extends Modal {
 				case 'modified':
 					sortA = fileA.stat.mtime;
 					sortB = fileB.stat.mtime;
+					break;
+				case 'backlinks':
+					sortA = getBacklinksToFile(fileA).length;
+					sortB = getBacklinksToFile(fileB).length;
+					break;
+				case 'outgoing':
+					sortA = getOutgoingLinks(fileA).length;
+					sortB = getOutgoingLinks(fileB).length;
 					break;
 			}
 
@@ -1506,6 +1578,30 @@ export class DNModal extends Modal {
 				.setIcon('eye')
 				.onClick((evt: MouseEvent) => {
 					this.dnShowPreviewFile(evt, file);
+				})
+		);
+
+
+		this._DN_CTX_MENU.addSeparator();
+
+		// Backlinks
+		this._DN_CTX_MENU.addItem((item) =>
+			item
+				.setTitle('Backlinks')
+				.setIcon('links-coming-in')
+				.onClick(() => {
+					const backlinksModal = new DNSpecialBacklinksModal(this.app, this, file);
+					backlinksModal.open();
+				})
+		);
+
+		this._DN_CTX_MENU.addItem((item) =>
+			item
+				.setTitle('Outgoing links')
+				.setIcon('links-going-out')
+				.onClick(() => {
+					const outgoingLinksModal = new DNSpecialOutgoingLinksModal(this.app, this, file);
+					outgoingLinksModal.open();
 				})
 		);
 
@@ -2135,7 +2231,9 @@ export class DNModal extends Modal {
 	}
 
 	dnSaveStateOnClose() {
+		this.plugin.settings.primary_tags_results_visible = this.primary_tags_results_visible;
 		this.plugin.settings.tags_sidebar = this.tags_sidebar;
+		this.plugin.settings.tags_sidebar_sorted_by_frequency = this.tags_sidebar_sorted_by_frequency;
 		this.plugin.settings.onclose_search = this.INPUT_SEARCH.value;
 		this.plugin.saveSettings();
 	}
@@ -2225,6 +2323,31 @@ export class DNModal extends Modal {
 			});
 		}
 
+		const btnTogglePrimaryTagsResults = primaryTagsDiv.createEl('button', { cls: 'btn-td-toggle-primary-tags' });
+		btnTogglePrimaryTagsResults.setAttribute('aria-label', 'Toggle primary tags results');
+		btnTogglePrimaryTagsResults.setAttribute('data-tooltip-position', 'bottom');
+		// Primary tags results container
+		this.PRIMARY_TAGS_RESULTS_DIV = primaryTagsDiv.createEl('div', { cls: 'dn-td-primary-tags-results' });
+
+		if (this.primary_tags_results_visible) {
+			btnTogglePrimaryTagsResults.textContent = '-';
+			this.PRIMARY_TAGS_RESULTS_DIV.classList.remove('dn-hidden');
+		} else {
+			btnTogglePrimaryTagsResults.textContent = '+';
+			this.PRIMARY_TAGS_RESULTS_DIV.classList.add('dn-hidden');
+		}
+
+		btnTogglePrimaryTagsResults.onClickEvent(() => {
+
+			this.primary_tags_results_visible = !this.primary_tags_results_visible;
+			this.PRIMARY_TAGS_RESULTS_DIV.classList.toggle('dn-hidden', !this.primary_tags_results_visible);
+			if (this.primary_tags_results_visible) {
+				btnTogglePrimaryTagsResults.textContent = '-';
+			} else {
+				btnTogglePrimaryTagsResults.textContent = '+';
+			}
+		});
+
 		const primaryTagNotes: TFile[] = [];
 		const secondaryTagGroups = new Map<string, TFile[]>();
 
@@ -2271,7 +2394,7 @@ export class DNModal extends Modal {
 			primaryTagsDiv.createEl('p', { text: 'No notes found matching the specified tag(s).', cls: 'dn-td-no-notes-message' });
 		} else {
 			// Create the pagination section
-			const paginationDiv = primaryTagsDiv.createEl('div', { cls: 'dn-td-pagination' });
+			const paginationDiv = this.PRIMARY_TAGS_RESULTS_DIV.createEl('div', { cls: 'dn-td-pagination' });
 
 			// Add the total results count on the left
 			paginationDiv.createEl('div', {
@@ -2296,7 +2419,7 @@ export class DNModal extends Modal {
 			});
 
 			for (const note of displayPrimaryNotes) {
-				const linkPrimaryTag = primaryTagsDiv.createEl('a', {
+				const linkPrimaryTag = this.PRIMARY_TAGS_RESULTS_DIV.createEl('a', {
 					text: note.basename,
 					href: note.path,
 					title: `${note.path}\n\n${moment(note.stat.mtime).format(this.date_format)} - Modified\n${moment(note.stat.ctime).format(this.date_format)} - Created`,
@@ -2309,7 +2432,6 @@ export class DNModal extends Modal {
 					}
 				});
 				linkPrimaryTag.addEventListener('mouseover', (evt: MouseEvent) => this.dnHandleHoverPreview(evt, note));
-				primaryTagsDiv.createEl('br');
 			}
 		}
 
@@ -2376,35 +2498,94 @@ export class DNModal extends Modal {
 	}
 
 	generateTagsSidebar(el: HTMLDivElement, tags: Map<string, TFile[]>) {
+
 		el.empty();
 
-		// Check if the tags Map is empty
-		if (this.TAGS_INPUT_SEARCH.value === '') {
-			tags = this._data.tags;
+		const container = el.createEl('div', { cls: 'dn-td-sidebar-container' });
+
+		// Add sidebar title
+		container.createEl('div', { text: 'Sort tags by:', cls: 'dn-tags-sidebar-label' });
+
+		const sortButtonsContainer = container.createEl('div', { cls: 'dn-td-sidebar-sort-buttons' });
+
+		const btnAlphaSort = sortButtonsContainer.createEl('button', {
+			text: 'Tag name (A-Z)',
+			cls: 'dn-td-sidebar-sort-button'
+		});
+		btnAlphaSort.setAttribute('aria-label', 'Sort sidebar tags by name (A-Z) ');
+		btnAlphaSort.setAttribute('data-tooltip-position', 'bottom');
+
+		const btnFrequencySort = sortButtonsContainer.createEl('button', {
+			text: 'Frequency (high to low)',
+			cls: 'dn-td-sidebar-sort-button'
+		});
+
+		btnFrequencySort.setAttribute('aria-label', 'Sort sidebar tags by frequency (high to low) ');
+		btnFrequencySort.setAttribute('data-tooltip-position', 'bottom');
+
+		if (this.tags_sidebar_sorted_by_frequency) {
+			btnFrequencySort.classList.add('tags-sort-active');
+			btnAlphaSort.classList.remove('tags-sort-active');
+		} else {
+			btnAlphaSort.classList.add('tags-sort-active');
+			btnFrequencySort.classList.remove('tags-sort-active');
 		}
 
-		// Check if the tags Map is empty
-		if (tags.size === 0) {
-			el.createEl('div', {
-				text: 'No secondary tags found.',
+		btnAlphaSort.onClickEvent(() => {
+			this.tags_sidebar_sorted_by_frequency = false;
+			btnAlphaSort.classList.add('tags-sort-active');
+			btnFrequencySort.classList.remove('tags-sort-active');
+			this.renderTags(tags);
+		});
+
+		btnFrequencySort.onClickEvent(() => {
+			this.tags_sidebar_sorted_by_frequency = true;
+			btnFrequencySort.classList.add('tags-sort-active');
+			btnAlphaSort.classList.remove('tags-sort-active');
+			this.renderTags(tags);
+		});
+
+		this.TAGS_SIDEBAR_LIST_DIV = container.createEl('div', { cls: 'dn-td-sidebar-tags-list' });
+
+		this.renderTags(tags);
+
+	}
+
+	private renderTags(tags: Map<string, TFile[]>) {
+		this.TAGS_SIDEBAR_LIST_DIV.empty();
+
+		// Sort the tags array (alphabetically or by tag frequency)
+		const tagsToRender = Array.from(tags.entries());
+		if (this.tags_sidebar_sorted_by_frequency) {
+			tagsToRender.sort((a, b) => b[1].length - a[1].length);
+		} else {
+			tagsToRender.sort((a, b) => {
+				const tagNameA = a[0];
+				const tagNameB = b[0];
+				const lowerCaseTagNameA = tagNameA.toLowerCase();
+				const lowerCaseTagNameB = tagNameB.toLowerCase();
+				return lowerCaseTagNameA.localeCompare(lowerCaseTagNameB);
+			});
+
+		}
+
+		if (tagsToRender.length === 0) {
+			this.TAGS_SIDEBAR_LIST_DIV.createEl('div', {
+				text: 'No matching tags found.',
 				cls: 'dn-td-sidebar-tag-div'
 			});
 			return;
 		}
 
-		// If secondary tags are found -> render them
-		for (const [tag, files] of tags.entries()) {
-			const tagEl = el.createEl('div', { cls: 'dn-td-sidebar-tag-div' });
+		for (const [tag, files] of tagsToRender) {
+			const tagEl = this.TAGS_SIDEBAR_LIST_DIV.createEl('div', { cls: 'dn-td-sidebar-tag-div' });
 			tagEl.createEl('a', { cls: 'tag', text: tag.replace('#', ''), href: tag });
 			tagEl.onClickEvent((evt: MouseEvent) => {
 				this.handleTagActionsTagsDashboard(evt, tag);
 			});
-
 			tagEl.createEl('span', { text: files.length.toString(), cls: 'dn-tag-count' });
 		}
 	}
-
-
 
 	onClose() {
 		const { contentEl } = this;

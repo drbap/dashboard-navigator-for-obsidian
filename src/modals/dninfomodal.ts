@@ -199,6 +199,8 @@ You can hide the following columns:
 - **Date**: Indicates the modification date of the file.
 - **Tags**: Lists the tags associated with the note, making it easier to categorize and search for notes.
 - **Frontmatter**: Lists the frontmatter/metadata associated with the note.
+- **BL (backlinks)**: The total number of notes that link to this file.
+- **OL (outgoing links)**: The total number of links from this note to other files.
 
 ### Tags dashboard view
 
