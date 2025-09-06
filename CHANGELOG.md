@@ -1,5 +1,35 @@
 # Changelog
 
+## [9.0.0] - 2025-09-05
+
+**New Features**
+
+- **Backlinks** modal.
+
+- **Outgoing links** modal.
+
+- Navigator Column: **BL** (total of backlinks -> file).
+
+- Navigator Column: **OL** (total of outgoing links from note).
+
+- Navigator view: Control **Image thumbnail size** (slider in plugin settings).
+
+- Navigator view: Control **Image thumbnail size** (slider in quick display options).
+
+- Navigator view: **Sort by backlinks** ascending or descending.
+
+- Navigator view: **Sort by outgoing links** ascending or descending.
+
+- Tags dashboard view: **Hide primary tags results** (toggle button).
+
+- Tags dashboard view: tags sidebar **sort tags by frequency**.
+
+**Hide new columns**
+- hide BL (Backlinks) column (settings).
+- hide BL (Backlinks) column (quick display options).
+- hide OL (Outgoing links) column (settings).
+- hide OL (Outgoing links) column (quick display options).
+
 ## [8.0.0] - 2025-08-27
 
 **New Features**
