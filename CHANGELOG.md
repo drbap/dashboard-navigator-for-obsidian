@@ -4,9 +4,9 @@
 
 **New Features**
 
-- **Backlinks** modal.
+- **Backlinks** modal (backlinks with preview).
 
-- **Outgoing links** modal.
+- **Outgoing links** modal (outgoing links with preview).
 
 - Navigator Column: **BL** (total of backlinks -> file).
 
