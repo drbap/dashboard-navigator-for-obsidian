@@ -7,7 +7,7 @@
 
 ## Features
 
-![Dashboard navigator for Obsidian - search](images/dn_v8_001.png)
+![Dashboard navigator for Obsidian - search](images/dn_v9_001.png)
 
 - **Vault stats and graph**: Gain insightful statistics about your vault, including:
   - Number of notes, images, audio files, videos, PDF and other file formats.
@@ -22,7 +22,13 @@
 
 - **Bookmarks**: Easily access your bookmarked files. The number you set here is independent of other dashboard sections. The order of these bookmarks will match the order you've set in your bookmarks sidebar. You can view bookmarked files in Navigator view.
 
+- **Backlinks**: The total number of notes that link to this file.
+
+- **Outgoing links**: The total number of links from this note to other files.
+
 - **Advanced file search**: Find your files quickly with powerful **search** and **sort** functionalities. More information below.
+
+![Dashboard navigator for Obsidian - search](images/dn_backlinks.png)
 
 ## Intuitive Advanced Search
 
@@ -227,6 +233,12 @@ A new '**Cards**' layout option is now available in Navigator view. You can sele
 
 **Image thumbnails** are now displayed as previews in table and Cards layouts. You can deactivate image previews in settings or through the **Navigator view's quick display options** (it will show image icons when deactivated).
 
+## Image Thumbnails Size
+
+![Dashboard navigator for Obsidian - image thumbnails size](images/dn_v9_image_thumbnails_size_001.png)
+
+- You can control the thumbnail size using the plugin settings and the quick display options modal (slider).
+
 ## Preview Files (Hover and Context Menu)
 
 ![Dashboard navigator for Obsidian - context menu](images/dn_show_preview.png)
@@ -266,6 +278,20 @@ A new '**Cards**' layout option is now available in Navigator view. You can sele
 
 ![Dashboard navigator for Obsidian - tags modal](images/dn_tags_modal.png)
 
+## Backlinks Modal
+
+![Dashboard navigator for Obsidian - backlinks modal](images/dn_backlinks_001.png)
+
+- Shows **backlinks** to the current note (target file) with a preview of each.
+
+## Outgoing Links Modal
+
+![Dashboard navigator for Obsidian - outgoing links modal](images/dn_outgoing_links_001.png)
+
+- Shows the outgoing **links from the current note (origin file)**, with preview.
+
+- Displays a preview for each outgoing link from the current note.
+
 ## Navigator View: Hide Columns
 
 The column-hiding feature gives you the flexibility to customize the **Navigator view** to suit your specific preferences and workflow. By **hiding unnecessary columns**, you can create a cleaner, more focused view that highlights the information most relevant to you.
@@ -277,6 +303,8 @@ You can hide the following columns:
 - **Date**: Indicates the modification date of the file.
 - **Tags**: Lists the tags associated with the note, making it easier to categorize and search for notes.
 - **Frontmatter**: Lists the frontmatter/metadata associated with the note.
+- **BL (backlinks)**: The total number of notes that link to this file.
+- **OL (outgoing links)**: The total number of links from this note to other files.
 
 ## Tags Dashboard View
 
@@ -297,6 +325,10 @@ You can hide the following columns:
   - **End of the query**: When you place `@tags` at the end of a tag(s) search (e.g., `#tag1 #tag2 @tags`), it opens the Tags dashboard and shows you all the secondary tags that are used in conjunction with the tag(s) you've already searched for (primary tag or tags query). This helps you find related topics and discover connections between your notes.
 
 - You can also save the tags search using `@tags` with a description (saved searches window). When clicking on the saved search option it will open the saved query directly in **Tags** dashboard view.
+- 
+### Tags Sidebar: Sort by Name or Frequency
+
+![Dashboard navigator for Obsidian - Tags](images/dn_tags_sidebar_sort_001.png)
 
 ### **Tags Dashboard Commands**
 
@@ -311,7 +343,6 @@ These commands work on the tags displayed in the **recent notes & tags** section
   - `Ctrl + click`: Exclude this clicked secondary tag. This is useful for filtering out results that contain a specific tag.
 
   - `Ctrl + middle-click`: Quickly clear your tag search and start fresh. This removes all tags from your search query, allowing you to reset your view with a single click.
-
 
 ## Excluded File Extensions
 
