@@ -3,7 +3,7 @@
 
 ![Dashboard Navigator for Obsidian](images/dashboard_navigator_plugin_intro.png)
 
-**Dashboard Navigator** was designed to help you manage and quickly navigate your knowledge base. You can get instant overview of key vault stats, categorized recent files, total number of files per category (notes, images, audios, videos and more) and powerful search to easily locate your vault files (navigator).
+**Dashboard Navigator** was designed to help you manage and quickly navigate your knowledge base. You can get instant overview of key vault stats, categorized recent files, total number of files per category (notes, images, audios, videos and more), tags dashboard and powerful search to easily locate your vault files (navigator).
 
 ## Features
 
@@ -25,6 +25,8 @@
 - **Backlinks**: The total number of notes that link to this file.
 
 - **Outgoing links**: The total number of links from this note to other files.
+
+- **Tags dashboard**: Search your notes using an advanced tag system that lets you combine and exclude tags to navigate your knowledge like a dynamic map. This feature reveals how your tags are interconnected, helping you find hidden associations and related ideas across your notes. You can also easily check your recent notes and their associated tags.
 
 - **Advanced file search**: Find your files quickly with powerful **search** and **sort** functionalities. More information below.
 
