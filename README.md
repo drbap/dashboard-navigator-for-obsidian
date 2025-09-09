@@ -414,7 +414,7 @@ I'd like to express my sincere gratitude to everyone who has contributed suggest
 
 * Thanks to @mudnug for suggesting the display of the .jpeg file extension in images (Issue #7).
 
-* Thanks to @nanjingman for the suggestion to add a file extensions column to the navigator view (Issue #9).
+* Thanks to the suggestions/FR (check other issues).
 
 I'm also grateful to everyone who took the time to star this repository. It really gives me extra motivation to keep improving this project. I hope you find this plugin useful in your daily tasks.
 
