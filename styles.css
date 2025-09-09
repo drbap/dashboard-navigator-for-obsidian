@@ -420,8 +420,10 @@ table#dn-table tr:hover td {
 	max-width: 200px;
 }
 
+.dn-filter-container .search-input-clear-button,
 .dn-td-main-search-container .search-input-clear-button,
 .dn-search-input-container .search-input-clear-button {
+	display: none;
 	top: calc(var(--input-height) / 6);
 }
 
