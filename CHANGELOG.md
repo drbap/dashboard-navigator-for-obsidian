@@ -2,7 +2,7 @@
 
 ## [9.1.0] - 2025-09-08
 
-- Dynamic search input clear buttons: Clear buttons in all search fields will now only appear when you start typing and will disappear when the field is empty. This follows modern UI/UX practices to create a cleaner interface. The clear button also now includes a tooltip .
+- Dynamic search input clear buttons: Clear buttons in all search fields will now only appear when you start typing and will disappear when the field is empty. This follows modern UI/UX practices to create a cleaner interface. The clear button now also includes a tooltip.
 
 - Saved searches buttons tooltips (delete search buttons).
 
