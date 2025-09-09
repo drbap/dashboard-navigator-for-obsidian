@@ -144,6 +144,8 @@ export class DNModal extends Modal {
 
 	private _dnTagSuggestions: DNTagSuggestions;
 	private _dnMainSearchTagSuggestions: DNTagSuggestions;
+	BTN_CLEAR_TAGS_INPUT_SEARCH: HTMLDivElement;
+	BTN_CLEAR_INPUT_SEARCH: HTMLDivElement;
 
 
 
@@ -471,9 +473,12 @@ export class DNModal extends Modal {
 		this.TAGS_INPUT_SEARCH.spellcheck = false;
 
 		// Clear search
-		tagsSearchLeftDiv.createEl('div', { cls: 'search-input-clear-button' }).onClickEvent((evt: MouseEvent) => {
+		this.BTN_CLEAR_TAGS_INPUT_SEARCH = tagsSearchLeftDiv.createEl('div', { cls: 'search-input-clear-button' });
+		this.BTN_CLEAR_TAGS_INPUT_SEARCH.setAttribute('aria-label', 'Clear search');
+		this.BTN_CLEAR_TAGS_INPUT_SEARCH.onClickEvent((evt: MouseEvent) => {
 			this.clearTagsSearchField();
 		});
+
 
 		const tagsSearchRightDiv = tagsMainSearchContainer.createEl('div', { cls: 'dn-search-input-container-right-div' });
 
@@ -603,7 +608,9 @@ export class DNModal extends Modal {
 
 
 		// Clear search
-		searchLeftDiv.createEl('div', { cls: 'search-input-clear-button' }).onClickEvent((evt: MouseEvent) => {
+		this.BTN_CLEAR_INPUT_SEARCH = searchLeftDiv.createEl('div', { cls: 'search-input-clear-button' });
+		this.BTN_CLEAR_INPUT_SEARCH.setAttribute('aria-label', 'Clear search');
+		this.BTN_CLEAR_INPUT_SEARCH.onClickEvent((evt: MouseEvent) => {
 			this.clearSearchField();
 		});
 
@@ -654,12 +661,14 @@ export class DNModal extends Modal {
 
 	clearSearchField() {
 		this.INPUT_SEARCH.value = '';
+		this.BTN_CLEAR_INPUT_SEARCH.style.display = 'none';
 		this.INPUT_SEARCH.focus();
 		this.dnModalSearchVault(this.INPUT_SEARCH.value);
 	}
 
 	clearTagsSearchField() {
 		this.TAGS_INPUT_SEARCH.value = '';
+		this.BTN_CLEAR_TAGS_INPUT_SEARCH.style.display = 'none';
 		this.TAGS_INPUT_SEARCH.focus();
 		this.modalEl.scrollTo({ top: 0, behavior: 'smooth' });
 		this.TAGS_SIDEBAR_EL.scrollTo({ top: 0, behavior: 'smooth' });
@@ -668,6 +677,12 @@ export class DNModal extends Modal {
 
 	async dnModalSearchVault(val: string) {
 		this.dnSetView(2);
+
+		if (val === '') {
+			this.BTN_CLEAR_INPUT_SEARCH.style.display = 'none'
+		} else {
+			this.BTN_CLEAR_INPUT_SEARCH.style.display = 'flex'
+		}
 
 		const search_raw_vals = /!(?:"(?:\\"|[^"])*"|'(?:\\'|[^'])*')|"(?:\\"|[^"])*"|'(?:\\'|[^'])*'|\S+/g
 
@@ -2277,8 +2292,10 @@ export class DNModal extends Modal {
 	private dnTDSearchTags(val: string) {
 		if (val === '') {
 			this.TAGS_RECENT_FILES_EL.classList.remove('dn-hidden');
+			this.BTN_CLEAR_TAGS_INPUT_SEARCH.style.display = 'none';
 		} else {
 			this.TAGS_RECENT_FILES_EL.classList.add('dn-hidden');
+			this.BTN_CLEAR_TAGS_INPUT_SEARCH.style.display = 'flex';
 		}
 
 		const tagSearchInput = val.trim();

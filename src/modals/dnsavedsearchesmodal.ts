@@ -6,7 +6,8 @@ import { DNConfirmModal } from './dnconfirmmodal';
 export class DNSavedSearchesModal extends Modal {
 	plugin: DNPlugin;
 	private savedSearchContainer: HTMLElement;
-	private INPUT_FILTER: HTMLInputElement;
+	private _INPUT_FILTER: HTMLInputElement;
+	CLEAR_INPUT_FILTER: HTMLDivElement;
 	private textToFilter = '';
 
 	constructor(app: App, plugin: DNPlugin) {
@@ -21,24 +22,25 @@ export class DNSavedSearchesModal extends Modal {
 		contentEl.createEl('div', { text: 'Saved searches', cls: 'setting-item setting-item-heading dn-modal-heading' });
 
 		const filterDiv = contentEl.createEl('div', { cls: 'dn-filter-container' });
-		this.INPUT_FILTER = filterDiv.createEl('input', {
+		this._INPUT_FILTER = filterDiv.createEl('input', {
 			type: 'text',
 			placeholder: 'Filter saved searches...',
 			cls: 'dn-filter-input'
 		});
-		this.INPUT_FILTER.spellcheck = false;
+		this._INPUT_FILTER.spellcheck = false;
 
-		const btnClearFilter = filterDiv.createEl('div', { cls: 'search-input-clear-button' });
-		btnClearFilter.addEventListener('click', () => {
-			this.INPUT_FILTER.value = '';
+		this.CLEAR_INPUT_FILTER = filterDiv.createEl('div', { cls: 'search-input-clear-button' });
+		this.CLEAR_INPUT_FILTER.setAttribute('aria-label', 'Clear search');
+		this.CLEAR_INPUT_FILTER.addEventListener('click', () => {
+			this._INPUT_FILTER.value = '';
 			this.textToFilter = '';
 			this.renderSavedSearches();
 		});
 
-		this.INPUT_FILTER.value = this.textToFilter;
+		this._INPUT_FILTER.value = this.textToFilter;
 
-		this.INPUT_FILTER.addEventListener('input', debounce(() => {
-			this.textToFilter = this.INPUT_FILTER.value.toLowerCase();
+		this._INPUT_FILTER.addEventListener('input', debounce(() => {
+			this.textToFilter = this._INPUT_FILTER.value.toLowerCase();
 			this.renderSavedSearches();
 		}, 300, true));
 
@@ -59,6 +61,12 @@ export class DNSavedSearchesModal extends Modal {
 
 	private renderSavedSearches() {
 		this.savedSearchContainer.empty();
+
+		if (this._INPUT_FILTER.value === '') {
+			this.CLEAR_INPUT_FILTER.style.display = 'none';
+		} else {
+			this.CLEAR_INPUT_FILTER.style.display = 'flex';
+		}
 
 		// Ensure the saved_searches array exists in settings, initialize if not
 		if (!this.plugin.settings.saved_searches) {
@@ -123,6 +131,7 @@ export class DNSavedSearchesModal extends Modal {
 		const divActions = divSearchItem.createEl('div', { cls: 'dn-saved-search-actions' });
 
 		const btnDeleteSearch = divActions.createEl('button', { cls: 'dn-action-button dn-delete-button' });
+		btnDeleteSearch.setAttribute('aria-label', 'Delete search');
 		btnDeleteSearch.onclick = async (evt) => {
 			evt.stopPropagation();
 
