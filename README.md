@@ -404,7 +404,7 @@ The Dashboard navigator icon (ribbon icon) and file icons are from [Lucide](http
 
 I'd like to express my sincere gratitude to everyone who has contributed suggestions and feature requests to improve this project. Your input is really valuable to me. Whether it's a new feature idea, a bug report, or a suggestion for improvement, I'll do my best to implement or fix it as soon as possible.
 
-* A special thanks to @merlinuwe for his ongoing support and constructive feedback from version 1.0.0 to 6.0.0. His suggestions and testing, particularly on Issues #1, #5, #10, #11, and #12, have significantly improved the plugin's functionality and user experience.
+* Special thanks to @merlinuwe for his valuable suggestions and testing from version 1.0.0 to 6.0.0. His contributions, especially on issues #1, #5, #10, #11, and #12, were particularly useful.
 
 * Special thanks to @FelipeRearden for the great insights and suggestions on the new Tags dashboard. This feature is inspired by the excellent [obsidian-tag-navigator](https://github.com/alexobenauer/obsidian-tag-navigator) by Alexander Obenauer. This is a completely independent implementation, a new take on a similar concept. You can follow the development and conversation in Issue #25.
 
