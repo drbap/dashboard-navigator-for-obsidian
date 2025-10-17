@@ -100,6 +100,8 @@ export class DNModal extends Modal {
 
 	show_dashboard_piechart = true;
 
+	remember_last_search = true;
+
 	onclose_search = '';
 
 	labelLayout: HTMLSpanElement;
@@ -2241,15 +2243,23 @@ export class DNModal extends Modal {
 	}
 
 	async dnLoadSearchOnClose() {
-		this.INPUT_SEARCH.value = this.plugin.settings.onclose_search;
-		this.plugin.saveSettings();
+		if (this.remember_last_search) {
+			this.INPUT_SEARCH.value = this.plugin.settings.onclose_search;
+			this.plugin.saveSettings();
+		} else {
+			this.INPUT_SEARCH.value = '';
+		}
 	}
 
 	dnSaveStateOnClose() {
 		this.plugin.settings.primary_tags_results_visible = this.primary_tags_results_visible;
 		this.plugin.settings.tags_sidebar = this.tags_sidebar;
 		this.plugin.settings.tags_sidebar_sorted_by_frequency = this.tags_sidebar_sorted_by_frequency;
-		this.plugin.settings.onclose_search = this.INPUT_SEARCH.value;
+		if (this.remember_last_search) {
+			this.plugin.settings.onclose_search = this.INPUT_SEARCH.value;
+		} else {
+			this.plugin.settings.onclose_search = '';
+		}
 		this.plugin.saveSettings();
 	}
 

@@ -34,6 +34,7 @@ export class DNSettingTab extends PluginSettingTab {
     toggleHideOLColumn: ToggleComponent;
     toggleImageThumbnail: ToggleComponent;
     togglePieChartModule: ToggleComponent;
+    toggleRememberLastSearch: ToggleComponent;
 
     constructor(app: App, plugin: DNPlugin) {
         super(app, plugin);
@@ -291,6 +292,30 @@ export class DNSettingTab extends PluginSettingTab {
                     this.dropdownFilesPerPage.setValue(DEFAULT_SETTINGS.files_per_page.toString());
                     this.plugin.settings.files_per_page = DEFAULT_SETTINGS.files_per_page;
                     this.plugin.DN_MODAL.files_per_page = this.plugin.settings.files_per_page;
+                    this.plugin.saveSettings();
+                });
+            });
+
+        // Remember last search
+        new Setting(containerEl)
+            .setName('Remember last search')
+            .setDesc('Keeps the search query in the main input field. Turn this off for a fresh, empty search every time.')
+            .addToggle((toggle) => {
+                this.toggleRememberLastSearch = toggle;
+                toggle
+                    .setValue(this.plugin.settings.remember_last_search)
+                    .onChange(async (val) => {
+                        this.plugin.settings.remember_last_search = val;
+                        this.plugin.DN_MODAL.remember_last_search = this.plugin.settings.remember_last_search;
+                        await this.plugin.saveSettings();
+                    });
+            }).addExtraButton((btn) => {
+                btn.setIcon('rotate-ccw');
+                btn.setTooltip('Restore default')
+                btn.onClick(() => {
+                    this.toggleRememberLastSearch.setValue(DEFAULT_SETTINGS.remember_last_search);
+                    this.plugin.settings.remember_last_search = DEFAULT_SETTINGS.remember_last_search;
+                    this.plugin.DN_MODAL.remember_last_search = this.plugin.settings.remember_last_search;
                     this.plugin.saveSettings();
                 });
             });

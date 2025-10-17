@@ -36,6 +36,7 @@ interface DNSettings {
 	hide_outgoing: boolean;
 	hide_columns: string[];
 	show_dashboard_piechart: boolean;
+	remember_last_search: boolean;
 	image_thumbnail: boolean;
 	thumbnail_size: number;
 	primary_tags_results_visible: boolean;
@@ -74,6 +75,7 @@ export const DEFAULT_SETTINGS: DNSettings = {
 	hide_outgoing: false,
 	hide_columns: [],
 	show_dashboard_piechart: true,
+	remember_last_search: true,
 	image_thumbnail: true,
 	thumbnail_size: 82,
 	primary_tags_results_visible: true,
@@ -140,6 +142,7 @@ export default class DNPlugin extends Plugin {
 
 		this.DN_MODAL.image_thumbnail = this.settings.image_thumbnail;
 		this.DN_MODAL.show_dashboard_piechart = this.settings.show_dashboard_piechart;
+		this.DN_MODAL.remember_last_search = this.settings.remember_last_search;
 
 		// Tags dashboard preferences
 		this.DN_MODAL.primary_tags_results_visible = this.settings.primary_tags_results_visible;
