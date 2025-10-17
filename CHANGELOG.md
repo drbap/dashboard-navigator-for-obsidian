@@ -1,5 +1,9 @@
 # Changelog
 
+## [9.2.0] - 2025-10-17
+
+- Setting: **Remember last search** (toggle). You can now toggle the "Remember last search" option in the plugin settings. **Turn this off** to ensure the main search field is always cleared when you close and reopen the plugin modal/window, providing a fresh start every time.
+
 ## [9.1.0] - 2025-09-08
 
 - Dynamic search input clear buttons: Clear buttons in all search fields will now only appear when you start typing and will disappear when the field is empty. This follows modern UI/UX practices to create a cleaner interface. The clear button now also includes a tooltip.
