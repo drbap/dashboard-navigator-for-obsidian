@@ -1,5 +1,102 @@
 # Changelog
 
+## [10.0.0] - 2026-02-17
+
+- *New* **Smart Date Range Filtering**. Advanced date filtering using the `@date(filter..)` or `@d(filter..)` syntax. There are really **many options available**.
+
+### Smart Date Range Filtering
+
+Dashboard Navigator supports advanced calendar-based filtering using the `@date(..)` or `@d(..)` syntax. This feature allows you to "zoom" into specific years, months, or custom time windows.
+
+#### **Specific Periods (Snapshots)**
+
+Target a specific block of time without needing ranges. The plugin intelligently adjusts its sensitivity based on your input:
+
+- **Yearly View**: `@d(2025)` — Filters all files modified in the year 2025.
+
+- **Monthly View**: `@d(2025-10)` — Filters files modified during October 2025.
+
+- **Daily View**: `@d(2026-02-15)` — Filters files modified on that specific day.
+
+#### **Custom Date Ranges**
+
+Use the `..` delimiter (`double-dot`) to define a **start** and **end** point. The parser is boundary-aware, expanding the dates to include the full period.
+
+- **Fixed Range**: `@d(2024..2025)`(Includes everything from **Jan 1st, 2024**, to **Dec 31st, 2025**)
+
+- **Mixed Precision**: `@d(2025-01..2025-06-15)` (From the **start of January** until the **end of June 15th**)
+
+
+#### **Open-Ended Ranges**
+
+Leave **one side of the delimiter empty** to create "infinite" boundaries:
+
+- **From Date until Today**: `@d(2025-01-01..)` (**Everything** from **Jan 1, 2025** until **today**)
+
+- **Archival View**: `@d(..2023)`(**Everything** modified **from the beginning** of time until the **final second of 2023**)
+
+#### **Format and Syntax**
+
+- **Date Format**: Use the ISO standard (YYYY-MM-DD) for specific dates.
+
+- **Strict Syntax**: **Exactly one range delimiter** `..` is required for ranges. Inputs like `@d(2024..2025..2026)` are **ignored**.
+
+**Pro Tip**: For relative offsets (like "Last 7 days"), continue using the standard shortcuts like `@d-7` or `@w` - no parentheses.
+
+#### **More Examples of Smart Date Filter**:
+
+**Syntax**:
+`@date(filter)` or `@d(filter)`
+
+- **Specific Year**: `@d(2022)` (Every file modified in **2022**).
+
+- **Specific Month**: `@d(2025-10)` (Files modified in **Oct 2025**).
+
+- **Specific Day**: `@d(2024-10-01)` (Files modified on **exactly** that day).
+
+- **Full Range**: `@d(2024..2025)`(Everything from **Jan 2024** to **Dec 2025**).
+
+- **Archival Cleanup**: `@d(..2023)` (Every old file modified before 2024).
+
+- **Until Today**: `@d(2025-06..)` (Files from June 2025 until now).
+
+**Special Date Filter Label:** When a **smart date range is active**, a clear indicator (label) appears in the Navigator view. This makes it easy to see exactly which time window is applied and quickly refine your search.
+
+#### Use Date Range Filter with Other Existing Filters
+
+- The smart date range filter works seamlessly with other **Dashboard Navigator filters**. You can combine it with `@notes` (to target only notes), `@images`, `@bases`, also add **Tags** and **Frontmatter** (multi-layered search). You can build simple to complex queries in order to easily find specific files in your vault. It allows for highly specific, multi-layered and incredibly fast searches.
+
+**Examples:**
+
+- Combine with **File Type**: `@notes @d(2024..)` or `@n @d(2024..)` (**All notes modified** from **2024** to **now**).
+
+- Combine with **Tags**: `#work #wip @d(2025-10)` (Notes with tags `#work` AND `#wip` modified during **Oct 2025**).
+
+
+---
+
+### More features & improvements:
+
+- *New* **keyboard navigation** (`Tab`, `Shift+Tab`, `Enter`, `Space`, `Contextmenu` keys).
+
+- **Refactor of all plugin modals/submodals** (with keyboard navigation support).
+
+- Context menu shows the filename -> `Open filename.md`.
+
+- Preview window can be closed using `Esc` AND/OR by clicking outside the preview (inside the Dashboard Navigator UI).
+
+- Plugin Settings: **Settings groups adjustments** (compatible with Obsidian >= 1.11.x).
+
+- Navigator view: quick display options settings adjustments (grouped similar items).
+
+- **Mobile plugin adjustments** (compatible with Obsidian version >= 1.11.x). Tested till Obsidian version 1.12.x.
+  
+  - Adjusted the search bar icon and buttons styles to match the modern Obsidian mobile look.
+  
+  - Tags dashboard view: **Tags sidebar** will display at the bottom of the screen (floating) for easier access (on phones).
+  
+  - Various adjustments to saved searches and layout consistency.
+
 ## [9.2.0] - 2025-10-17
 
 - Setting: **Remember last search** (toggle). You can now toggle the "Remember last search" option in the plugin settings. **Turn this off** to ensure the main search field is always cleared when you close and reopen the plugin modal/window, providing a fresh start every time.
