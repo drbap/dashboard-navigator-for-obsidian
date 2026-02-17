@@ -430,7 +430,7 @@ table#dn-table tr:hover td {
 #dn-input-filter {
 	background-image: var(--dn-search-icon);
 	background-color: var(--dn-search-background-color);
-	background-position: 8px 6px;
+	background-position: 8px center;
 	background-repeat: no-repeat;
 	width: 100%;
 	height: var(--input-height);
@@ -456,8 +456,14 @@ table#dn-table tr:hover td {
 	background-color: var(--background-secondary);
 	z-index: 900;
 	justify-content: space-between;
+	align-items: center;
 	border: 1px solid var(--dn-border-color);
 	opacity: .9;
+}
+
+.is-phone .dn-modal-container table#dn-table th,
+.is-phone .dn-modal-container .dn-pagination {
+	position: static;
 }
 
 .dn-btn-prev:disabled,
@@ -699,6 +705,7 @@ table#dn-table.dn-tbl-default td {
 	display: flex;
 	justify-content: left;
 	gap: 8px;
+	padding: 4px;
 }
 
 .dn-div-bottom-properties {
@@ -706,6 +713,7 @@ table#dn-table.dn-tbl-default td {
 	display: flex;
 	justify-content: space-between;
 	gap: 8px;
+	padding: 4px;
 }
 
 .dn-div-modal-bottom {
@@ -757,7 +765,7 @@ table#dn-table.dn-tbl-default td {
 
 .dn-properties-frontmatter-modal,
 .dn-tags-list {
-	margin-top: var(--size-4-1);
+	margin: var(--size-4-1);
 	flex-grow: 1;
 	overflow-y: auto;
 	min-height: 78px;
@@ -814,9 +822,37 @@ table#dn-table.dn-tbl-default td {
 	height: 100%;
 }
 
+.modal.dn-preview {
+	padding: 0;
+	margin: 0;
+}
+
+.modal.dn-preview .modal-header,
+.modal.dn-preview .modal-close-button {
+	display: none;
+}
+
+.modal.dn-preview .dn-preview-close-button {
+	position: absolute;
+	right: 8px;
+	top: 8px;
+	background-color: transparent;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: var(--size-2-2) var(--size-2-3);
+	border-radius: var(--clickable-icon-radius);
+	color: var(--icon-color);
+	font-size: 1.1em;
+}
+
+.modal.dn-preview .dn-preview-close-button:hover {
+	box-shadow: none;
+	color: var(--icon-color-hover);
+	background-color: var(--background-modifier-hover);
+}
 
 .dn-preview {
-	display: none;
 	position: fixed;
 	min-width: 400px;
 	min-height: 300px;
@@ -825,9 +861,8 @@ table#dn-table.dn-tbl-default td {
 	max-width: 100%;
 	max-height: 100%;
 	overflow: auto;
-	border: 2px solid var(--dn-border-color);
 	background: var(--background-primary);
-	padding: 0;
+	padding: 8px;
 
 	z-index: 90000;
 	border-radius: var(--radius-m);
@@ -835,14 +870,6 @@ table#dn-table.dn-tbl-default td {
 	resize: both;
 }
 
-.dn-preview:hover {
-	border: 2px solid var(--dn-border-color-hover);
-}
-
-.dn-preview .dn-pr-content .markdown-preview-view.markdown-rendered {
-	padding: var(--p-spacing);
-	padding-top: 0;
-}
 
 .dn-modal-sticky,
 .dn-preview-top-bar {
@@ -1038,6 +1065,7 @@ a.dn-tag:hover {
 .dn-modal-heading {
 	margin-bottom: var(--size-4-2);
 	border: 0 !important;
+	padding-left: 0;
 }
 
 
@@ -1088,18 +1116,20 @@ a.dn-tag:hover {
 .dn-saved-search-list {
 	height: 400px;
 	max-height: 400px;
-	overflow-y: auto;
-	border: 1px solid var(--dn-border-color);
+	overflow-y: visible;
 	margin-top: var(--size-4-2);
 	margin-bottom: 1em;
-	background-color: var(--background-primary);
+
 }
 
 .dn-saved-search-item {
 	display: flex;
 	flex-direction: column;
 	padding: 0.5em;
-	border-bottom: 1px solid var(--background-modifier-border);
+	border: 4px solid transparent;
+	margin: 4px;
+	background-color: var(--background-secondary);
+	border-radius: var(--radius-s);
 }
 
 .dn-saved-search-item:hover {
@@ -1114,6 +1144,7 @@ a.dn-tag:hover {
 	font-weight: var(--font-semibold);
 	white-space: pre-wrap;
 	word-break: break-word;
+	padding-top: 0.5em;
 	padding-bottom: 0.5em;
 	margin-bottom: 0.5em;
 	border-bottom: 1px solid var(--text-accent);
@@ -1170,14 +1201,14 @@ a.dn-tag:hover {
 
 .dn-filter-container input.dn-filter-input {
 	background-image: var(--dn-search-icon);
-	background-position: 8px 6px;
+	background-position: 8px center;
 	background-repeat: no-repeat;
 	width: 100%;
 	height: var(--input-height);
 	font-size: var(--font-size);
 	padding: 8px 18px 6px 32px;
 	border: 1px solid var(--dn-border-color);
-	margin-top: var(--size-4-1);
+	margin: var(--size-4-1);
 	border-radius: var(--input-radius);
 }
 
@@ -1380,7 +1411,7 @@ td.dn-thumbnail-base {
 .dn-flex .dn-td-tag-search-input {
 	background-image: var(--dn-search-icon);
 	background-color: var(--background-primary);
-	background-position: 8px 6px;
+	background-position: 8px center;
 	background-repeat: no-repeat;
 	width: 100%;
 	height: var(--input-height);
@@ -1449,6 +1480,23 @@ td.dn-thumbnail-base {
 
 .dn-td-second-col a {
 	font-size: var(--font-ui-small);
+}
+
+.is-phone .dn-td-second-col {
+	background-color: #000000c3;
+	position: fixed;
+	/* Overrides sticky position */
+	top: auto;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	width: 100%;
+	min-height: 200px;
+	max-height: 30%;
+	border: 2px solid var(--dn-border-color);
+	z-index: 5000;
+
+	box-sizing: border-box;
 }
 
 .dn-td-sidebar-tag-div {
@@ -1806,25 +1854,6 @@ span.dn-td-excluded-tags {
 		width: 70%;
 	}
 
-	table#dn-table:not(.dn-tbl-cards) .dn-th-ext,
-	table#dn-table:not(.dn-tbl-cards) .dn-td-ext,
-	table#dn-table:not(.dn-tbl-cards) .dn-th-path,
-	table#dn-table:not(.dn-tbl-cards) .dn-td-path,
-	table#dn-table:not(.dn-tbl-cards) .dn-th-size,
-	table#dn-table:not(.dn-tbl-cards) .dn-td-size,
-	table#dn-table:not(.dn-tbl-cards) .dn-th-date,
-	table#dn-table:not(.dn-tbl-cards) .dn-td-date,
-	table#dn-table:not(.dn-tbl-cards) .dn-th-backlinks,
-	table#dn-table:not(.dn-tbl-cards) .dn-td-backlinks,
-	table#dn-table:not(.dn-tbl-cards) .dn-th-outgoing-links,
-	table#dn-table:not(.dn-tbl-cards) .dn-td-outgoing-links,
-	table#dn-table:not(.dn-tbl-cards) .dn-th-tags,
-	table#dn-table:not(.dn-tbl-cards) .dn-td-tags,
-	table#dn-table:not(.dn-tbl-cards) .dn-th-frontmatter,
-	table#dn-table:not(.dn-tbl-cards) .dn-td-frontmatter {
-		display: none;
-	}
-
 	#dn-select-sort,
 	#dn-label-layout,
 	.dropdown.tbl-select {
@@ -1836,4 +1865,106 @@ span.dn-td-excluded-tags {
 		width: 100%;
 	}
 
+}
+
+span.dn-date-range-filter-label {
+	padding: 2px 8px;
+	margin-left: 8px;
+	background-color: #ffd700;
+	font-weight: var(--font-semibold);
+	color: #000;
+	font-size: 1em;
+	border-radius: var(--radius-s);
+}
+
+span.dn-date-range-filter-label:empty {
+	display: none;
+}
+
+.dn-modal-container :focus-visible {
+	outline: none !important;
+	box-shadow: 0 0 0 3px var(--background-modifier-border-focus) !important;
+}
+
+.dn-modal-container a:focus-visible {
+	outline: none !important;
+	box-shadow: 0 0 0 3px var(--background-modifier-border-focus) !important;
+	border-radius: var(--radius-s);
+}
+
+.dn-modal-container .dn-preview button:focus-visible,
+.dn-modal-container .dn-tags-modal :focus-visible,
+.dn-modal-container .dn-link-file-header:focus-visible {
+	outline: none !important;
+	box-shadow: inset 0 0 0 3px var(--background-modifier-border-focus) !important;
+}
+
+.dn-container h3:focus-visible {
+	background-color: var(--background-modifier-hover);
+}
+
+.dn-container .search-input-clear-button:focus-visible {
+	border-radius: var(--input-radius) !important;
+}
+
+.dn-preview .markdown-embed,
+.dn-preview .inline-embed,
+.dn-preview .markdown-embed-content,
+.dn-preview .markdown-embed-content .markdown-rendered {
+	height: 100% !important;
+	max-height: none !important;
+	overflow: visible !important;
+}
+
+.dn-preview .markdown-preview-view {
+	overflow: visible !important;
+}
+
+.dn-preview .dn-pr-content {
+	flex: 1;
+	overflow-y: auto !important;
+	overflow-x: hidden;
+}
+
+.is-mobile button.dn-action-button.dn-delete-button,
+.is-mobile button.dn-btn-next,
+.is-mobile button.dn-btn-prev,
+.is-mobile button.dn-top-btns-search {
+	height: var(--touch-size-m);
+	width: var(--touch-size-m);
+}
+
+.is-mobile button.dn-action-button.dn-delete-button {
+	border-radius: 50%;
+}
+
+.is-phone .dn-pagination-total-results {
+	text-align: left;
+}
+
+.is-phone span.dn-date-range-filter-label {
+	display: block;
+	margin-left: 0;
+	font-size: 0.82em;
+}
+
+.is-phone span.dn-date-range-filter-label:empty {
+	display: none;
+}
+
+
+.is-mobile #dn-container table#dn-table {
+	table-layout: auto;
+	width: 100%;
+}
+
+.is-mobile #dn-container table#dn-table th,
+.is-mobile #dn-container table#dn-table td {
+	max-width: 200px;
+	min-width: 56px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	padding: 8px;
+	border-bottom: 1px solid var(--background-modifier-border);
 }
