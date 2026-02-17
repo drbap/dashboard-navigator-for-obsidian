@@ -1,5 +1,5 @@
-import { App, Component, debounce, MarkdownRenderer, Menu, Modal, normalizePath, Notice, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
-import { formatFileSize, formatFileSizeKBMB, getFolderStructure } from './utils/format';
+import { App, debounce, Menu, normalizePath, Notice, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
+import { formatFileSize, getFolderStructure } from './utils/format';
 import { getPropsPerFile, getTagsPerFile } from './utils/tags';
 import { DNPieChart } from './utils/dnpiechart';
 import { DNTableManager } from './utils/dntablemanager';
@@ -8,10 +8,15 @@ import DNPlugin from './main';
 import { DNData, DNDataManager } from './data/dndatamanager';
 import { DNTagSuggestions } from './utils/dntagsuggestions';
 import { getBacklinksToFile, getOutgoingLinks } from './utils/dnlinks';
-import { DNSpecialBacklinksModal } from './modals/dnspecialbacklinksmodal';
-import { DNSpecialOutgoingLinksModal } from './modals/dnspecialoutgoinglinksmodal';
+import { DNSpecialBacklinksModal } from './modals/filemodals/dnspecialbacklinksmodal';
+import { DNSpecialOutgoingLinksModal } from './modals/filemodals/dnspecialoutgoinglinksmodal';
+import { DNFileTagsModal } from './modals/filemodals/dnfiletagsmodal.ts';
+import { DNBaseModal } from './modals/dnbasemodal';
+import { DNFileFrontmatterModal } from './modals/filemodals/dnfilefrontmattermodal';
+import { DNFilePropertiesModal } from './modals/filemodals/dnfilepropertiesmodal';
+import { DNPreviewModal } from './modals/filemodals/dnpreviewmodal';
 
-export class DNModal extends Modal {
+export class DNModal extends DNBaseModal {
 
 	private _files: TFile[];
 	private _folders: TFolder[];
@@ -108,18 +113,9 @@ export class DNModal extends Modal {
 	labelSort: HTMLSpanElement;
 
 	private readonly intersectionObserver: IntersectionObserver;
-	private _DN_CTX_MENU: Menu;
+	private _DN_CTX_MENU: Menu | null = null;
 
-	private _previewComponent: Component = new Component();
-	private _hoverDiv: HTMLElement;
-	private _hoverRender: HTMLElement;
-	private _isDraggingPreview: boolean;
-	private _hoverDivLeft: string;
-	private _hoverDivTop: string;
-	initialX: number;
-	initialY: number;
-	previousX: number;
-	previousY: number;
+	private activePreview: DNPreviewModal | null = null;
 
 	plugin: DNPlugin;
 	private _data: DNData;
@@ -149,7 +145,7 @@ export class DNModal extends Modal {
 	BTN_CLEAR_TAGS_INPUT_SEARCH: HTMLDivElement;
 	BTN_CLEAR_INPUT_SEARCH: HTMLDivElement;
 
-
+	labelDateRangeFilter: string;
 
 	constructor(app: App, plugin: DNPlugin, private _dataManager: DNDataManager) {
 		super(app);
@@ -158,20 +154,11 @@ export class DNModal extends Modal {
 		this.intersectionObserver = new IntersectionObserver(this.dnHandleIntersection);
 	}
 
-	async onOpen() {
-
-		const { contentEl } = this;
+	async render() {
 
 		this._data = await this._dataManager.getDataCache(
 			this.app, this.excluded_extensions, this.excluded_folders
 		);
-
-		this._previewComponent.load();
-		this._hoverDiv = this.contentEl.createEl('div', { cls: 'dn-preview' });
-		this._hoverDiv.addEventListener('click', (evt: MouseEvent) => {
-			evt.stopPropagation();
-			evt.stopImmediatePropagation();
-		});
 
 		await this.updateModalData();
 
@@ -183,19 +170,14 @@ export class DNModal extends Modal {
 			this._leaf = leaf;
 		}
 
-		await this.dnCreateMainUI(contentEl);
+		await this.dnCreateMainUI(this.contentEl);
+
 		this.dnSetView(this.default_view);
 
 		this.dnSetSelectLayoutValue(this.selected_table_layout);
 		this.dnSetSelectSortValue(this.selected_sort_value);
 
 		this.dnToggleColoredFiles();
-
-		// Preview window
-
-		this._isDraggingPreview = false;
-		this._hoverDivLeft = '';
-		this._hoverDivTop = '';
 
 		await this.dnLoadSearchOnClose();
 
@@ -204,6 +186,7 @@ export class DNModal extends Modal {
 		}
 
 	}
+
 
 	async updateModalData() {
 
@@ -477,6 +460,7 @@ export class DNModal extends Modal {
 		// Clear search
 		this.BTN_CLEAR_TAGS_INPUT_SEARCH = tagsSearchLeftDiv.createEl('div', { cls: 'search-input-clear-button' });
 		this.BTN_CLEAR_TAGS_INPUT_SEARCH.setAttribute('aria-label', 'Clear search');
+		this.BTN_CLEAR_TAGS_INPUT_SEARCH.setAttribute('tabindex', '0');
 		this.BTN_CLEAR_TAGS_INPUT_SEARCH.onClickEvent((evt: MouseEvent) => {
 			this.clearTagsSearchField();
 		});
@@ -544,9 +528,13 @@ export class DNModal extends Modal {
 						this.dnOpenFileAlt(file, evt);
 					}
 				});
+				tdRecentNoteLink.setAttribute('tabindex', '0');
 
 				tdRecentNoteLink.addEventListener('mouseover', (evt: MouseEvent) => this.dnHandleHoverPreview(evt, file));
+				tdRecentNoteLink.addEventListener('contextmenu', (evt: MouseEvent) => this.dnGenerateContextMenu(evt, file));
+
 				const tags_per_recent_file = getTagsPerFile(file);
+
 				tagsRecentNoteItem.createEl('br');
 
 				if (tags_per_recent_file !== '') {
@@ -555,9 +543,11 @@ export class DNModal extends Modal {
 
 					tdFileTags.forEach((tag) => {
 
-						tagsRecentNoteItem.createEl('a', { cls: 'tag', text: tag, href: tag }).onClickEvent((evt: MouseEvent) => {
+						const tagsDashBoardNoteTags = tagsRecentNoteItem.createEl('a', { cls: 'tag', text: tag, href: tag });
+						tagsDashBoardNoteTags.onClickEvent((evt: MouseEvent) => {
 							this.handleTagActionsTagsDashboard(evt, tag);
 						});
+						tagsDashBoardNoteTags.setAttribute('tabindex', '0');
 					});
 				} else {
 					tagsRecentNoteItem.createEl('span', { text: 'No tags' });
@@ -594,6 +584,8 @@ export class DNModal extends Modal {
 			this.dnModalSearchVault(this.INPUT_SEARCH.value);
 			this.INPUT_SEARCH.focus();
 		});
+		btn.setAttribute('tabindex', '0');
+		btn.setAttribute('role', 'button');
 
 		return btn;
 	}
@@ -612,6 +604,7 @@ export class DNModal extends Modal {
 		// Clear search
 		this.BTN_CLEAR_INPUT_SEARCH = searchLeftDiv.createEl('div', { cls: 'search-input-clear-button' });
 		this.BTN_CLEAR_INPUT_SEARCH.setAttribute('aria-label', 'Clear search');
+		this.BTN_CLEAR_INPUT_SEARCH.setAttribute('tabindex', '0');
 		this.BTN_CLEAR_INPUT_SEARCH.onClickEvent((evt: MouseEvent) => {
 			this.clearSearchField();
 		});
@@ -625,7 +618,7 @@ export class DNModal extends Modal {
 		topBtnAddSearch.setAttribute('aria-label', 'Save search');
 		topBtnAddSearch.setAttribute('data-tooltip-position', 'bottom');
 		topBtnAddSearch.onClickEvent((evt: MouseEvent) => {
-			this.plugin.DN_SAVE_SEARCH_MODAL.open();
+			this.openSubModal(this.plugin.DN_SAVE_SEARCH_MODAL);
 
 		});
 
@@ -635,7 +628,7 @@ export class DNModal extends Modal {
 		topBtnSaved.setAttribute('aria-label', 'Saved searches');
 		topBtnSaved.setAttribute('data-tooltip-position', 'bottom');
 		topBtnSaved.onClickEvent((evt: MouseEvent) => {
-			this.plugin.DN_SAVED_SEARCHES_MODAL.open();
+			this.openSubModal(this.plugin.DN_SAVED_SEARCHES_MODAL);
 		});
 
 		// Navigator view columns btn
@@ -644,7 +637,7 @@ export class DNModal extends Modal {
 		topBtnQuickDisplayOptions.setAttribute('aria-label', 'Quick display options');
 		topBtnQuickDisplayOptions.setAttribute('data-tooltip-position', 'bottom');
 		topBtnQuickDisplayOptions.onClickEvent((evt: MouseEvent) => {
-			this.plugin.DN_QUICK_DISPLAY_OPTIONS_MODAL.open();
+			this.openSubModal(this.plugin.DN_QUICK_DISPLAY_OPTIONS_MODAL);
 		});
 
 		// Help/Info btn
@@ -653,12 +646,13 @@ export class DNModal extends Modal {
 		topBtnInfo.setAttribute('aria-label', 'Quick reference/help');
 		topBtnInfo.setAttribute('data-tooltip-position', 'bottom');
 		topBtnInfo.onClickEvent((evt: MouseEvent) => {
-			this.plugin.DN_INFO_MODAL.open();
+			this.openSubModal(this.plugin.DN_INFO_MODAL);
 		});
 
 
 		// Keyup event listener with debounce
 		this.INPUT_SEARCH.addEventListener('input', debounce(() => this.dnModalSearchVault(this.INPUT_SEARCH.value), 300, true));
+		this.INPUT_SEARCH.focus();
 	}
 
 	clearSearchField() {
@@ -679,6 +673,7 @@ export class DNModal extends Modal {
 
 	async dnModalSearchVault(val: string) {
 		this.dnSetView(2);
+		this.labelDateRangeFilter = '';
 
 		if (val === '') {
 			this.BTN_CLEAR_INPUT_SEARCH.style.display = 'none'
@@ -877,7 +872,7 @@ export class DNModal extends Modal {
 			for (const file of paginatedData) {
 				const tr = tbody.createEl('tr');
 				// Events
-				tr.addEventListener('contextmenu', (evt: MouseEvent) => { this.dnHandleClick(evt, file); });
+				tr.addEventListener('contextmenu', (evt: MouseEvent) => { this.dnGenerateContextMenu(evt, file); });
 				tr.addEventListener('click', (evt: MouseEvent) => { this.dnHandleClick(evt, file); });
 				tr.addEventListener('dblclick', (evt: MouseEvent) => { this.dnHandleDblClick(evt, file); });
 				tr.addEventListener('mouseover', async (evt: MouseEvent) => { this.dnHandleHoverPreview(evt, file); });
@@ -897,11 +892,17 @@ export class DNModal extends Modal {
 
 
 				const td1 = tr.createEl('td', { cls: 'dn-td-name' });
-				td1.createEl('a', { cls: this.dnSetFileIconClass(file.extension), text: file.name }).onClickEvent((evt: MouseEvent) => {
+
+				const tdNameLink = td1.createEl('a', { cls: this.dnSetFileIconClass(file.extension), text: file.name });
+
+				tdNameLink.onClickEvent((evt: MouseEvent) => {
 					if (leaf !== null && file !== null) {
 						this.dnOpenFileAlt(file, evt);
 					}
 				});
+				tdNameLink.setAttribute('tabindex', '0');
+				tdNameLink.addEventListener('contextmenu', (evt: MouseEvent) => this.dnGenerateContextMenu(evt, file));
+
 
 				const fExt = file.extension;
 				const fSize = formatFileSize(file.stat.size);
@@ -910,7 +911,8 @@ export class DNModal extends Modal {
 
 				const td2 = tr.createEl('td', { cls: 'dn-td-ext' });
 
-				td2.createEl('a', { cls: 'dn-ext', text: fExt, title: fExt }).onClickEvent((evt: MouseEvent) => {
+				const tdExtLink = td2.createEl('a', { cls: 'dn-ext', text: fExt, title: fExt });
+				tdExtLink.onClickEvent((evt: MouseEvent) => {
 					if (evt.button === 2) {
 						evt.preventDefault();
 					} else {
@@ -919,9 +921,13 @@ export class DNModal extends Modal {
 					}
 				});
 
+				tdExtLink.setAttribute('tabindex', '-1');
+
 				const td3 = tr.createEl('td', { cls: 'dn-td-path' });
 				const folder_path = getFolderStructure(file.path);
-				td3.createEl('a', { cls: 'dn-folder-path', text: folder_path, title: file.path }).onClickEvent((evt: MouseEvent) => {
+
+				const tdPathLink = td3.createEl('a', { cls: 'dn-folder-path', text: folder_path, title: file.path });
+				tdPathLink.onClickEvent((evt: MouseEvent) => {
 					if (evt.button === 2) {
 						evt.preventDefault();
 					} else {
@@ -929,6 +935,7 @@ export class DNModal extends Modal {
 						this.dnModalSearchVault(this.INPUT_SEARCH.value + '$');
 					}
 				});
+				tdPathLink.setAttribute('tabindex', '-1');
 
 				tr.createEl('td', { text: fSize, title: fSize + ' bytes', cls: 'dn-td-size' });
 				tr.createEl('td', { text: fMTime, title: fCTime + ' - Created\n' + fMTime + ' - Modified', cls: 'dn-td-date' });
@@ -940,9 +947,11 @@ export class DNModal extends Modal {
 				if (tags_per_file !== '') {
 					const fTags = tags_per_file.split(' ');
 					fTags.forEach((tag) => {
-						td6.createEl('a', { cls: 'tag', text: tag, href: tag }).onClickEvent((evt: MouseEvent) => {
+						const tdTagLink = td6.createEl('a', { cls: 'tag', text: tag, href: tag });
+						tdTagLink.onClickEvent((evt: MouseEvent) => {
 							this.handleTagActions(evt, tag);
 						});
+						tdTagLink.setAttribute('tabindex', '-1');
 					});
 				}
 
@@ -950,7 +959,8 @@ export class DNModal extends Modal {
 				if (props_per_file !== '') {
 					const fProps = props_per_file.split('\n');
 					fProps.forEach((prop) => {
-						td7.createEl('a', { cls: 'dn-tag', text: prop, title: props_per_file }).onClickEvent((evt: MouseEvent) => {
+						const tdPropsLink = td7.createEl('a', { cls: 'dn-tag', text: prop, title: props_per_file });
+						tdPropsLink.onClickEvent((evt: MouseEvent) => {
 							if (evt.button === 2) {
 								evt.preventDefault();
 							} else {
@@ -958,6 +968,7 @@ export class DNModal extends Modal {
 								this.dnModalSearchVault(this.INPUT_SEARCH.value);
 							}
 						});
+						tdPropsLink.setAttribute('tabindex', '-1');
 					});
 				}
 
@@ -976,7 +987,11 @@ export class DNModal extends Modal {
 			// Add pagination
 			paginationContainer.empty();
 			// Results count
-			paginationContainer.createEl('div', { cls: 'dn-pagination-total-results', text: `File(s): ${f.length} ` });
+			const totalFilesLabel = paginationContainer.createEl('div', { cls: 'dn-pagination-total-results', text: `File(s): ${f.length} ` });
+
+			const dateFilterRangeLabel = totalFilesLabel.createEl('span', { cls: 'dn-date-range-filter-label' });
+			dateFilterRangeLabel.setText(this.labelDateRangeFilter ? `${this.labelDateRangeFilter}` : '');
+
 			// Current page
 			const rightPagDiv = paginationContainer.createEl('div', { cls: 'dn-pagination-current-page', text: `Page ${currentPage} of ${this._total_pages} ` });
 
@@ -1365,13 +1380,16 @@ export class DNModal extends Modal {
 					}
 				});
 
+				aLink.setAttribute('tabindex', '0');
+
 				if (sfile.extension !== 'md') {
 					divF.createEl('span', { cls: 'nav-file-tag', text: sfile.extension })
 				}
 
 				divF.createEl('br');
 
-				aLink.addEventListener('mouseover', (evt: MouseEvent) => this.dnHandleHoverPreview(evt, sfile));
+				aLink.addEventListener('mouseover', (evt: MouseEvent) => { this.dnHandleHoverPreview(evt, sfile); });
+				aLink.addEventListener('contextmenu', (evt: MouseEvent) => { this.dnGenerateContextMenu(evt, sfile); });
 			});
 		}
 	}
@@ -1488,6 +1506,7 @@ export class DNModal extends Modal {
 				this.dnHideTopRightNav();
 				this.INPUT_SEARCH.focus();
 		}
+
 	}
 
 	dnShowTopRightNav(): void {
@@ -1544,11 +1563,36 @@ export class DNModal extends Modal {
 	}
 
 	private dnGenerateContextMenu(evt: MouseEvent, file: TFile) {
+		evt.preventDefault();
+		evt.stopImmediatePropagation();
+		evt.stopPropagation();
+
+		if (this._DN_CTX_MENU) {
+			this._DN_CTX_MENU.hide();
+		}
+
+		const existingMenu = document.querySelector('.menu');
+		if (existingMenu) {
+			document.body.click();
+		}
+
 		this._DN_CTX_MENU = new Menu();
+
+		const extension = file.extension;
+		const totalLimit = 30;
+		let displayTitle = "";
+
+		if (file.name.length > totalLimit) {
+			const charsToKeep = Math.max(0, totalLimit - extension.length - 6);
+
+			displayTitle = `${file.basename.slice(0, charsToKeep)}... (${extension})`;
+		} else {
+			displayTitle = `${file.basename} (${extension})`;
+		}
 
 		this._DN_CTX_MENU.addItem((item) =>
 			item
-				.setTitle('Open')
+				.setTitle(`Open ${displayTitle}`)
 				.setIcon('mouse-pointer-2')
 				.onClick(() => {
 					this.app.workspace.getLeaf(false).openFile(file);
@@ -1608,7 +1652,7 @@ export class DNModal extends Modal {
 				.setIcon('links-coming-in')
 				.onClick(() => {
 					const backlinksModal = new DNSpecialBacklinksModal(this.app, this, file);
-					backlinksModal.open();
+					this.openSubModal(backlinksModal);
 				})
 		);
 
@@ -1618,7 +1662,7 @@ export class DNModal extends Modal {
 				.setIcon('links-going-out')
 				.onClick(() => {
 					const outgoingLinksModal = new DNSpecialOutgoingLinksModal(this.app, this, file);
-					outgoingLinksModal.open();
+					this.openSubModal(outgoingLinksModal);
 				})
 		);
 
@@ -1630,56 +1674,13 @@ export class DNModal extends Modal {
 				.setIcon('tags')
 				.onClick(() => {
 					// Tags modal
-					const tagsModal = new Modal(this.app);
-					tagsModal.contentEl.setAttribute('class', 'dn-tags-modal');
-					tagsModal.contentEl.createEl('div', { text: 'File tags', cls: 'setting-item setting-item-heading dn-modal-heading' });
-
-					const rowName = tagsModal.contentEl.createEl('div', { cls: 'dn-property-row' });
-					rowName.createEl('div', { text: 'Name: ', cls: 'dn-property-name-sm' });
-					rowName.createEl('div', { text: file.name, cls: 'dn-property-value' });
-
-
-					const rowPath = tagsModal.contentEl.createEl('div', { cls: 'dn-property-row' });
-					rowPath.createEl('div', { text: 'Path: ', cls: 'dn-property-name-sm' });
-					rowPath.createEl('div', { text: getFolderStructure(file.path), cls: 'dn-property-value' });
-
-					const tagsDiv = tagsModal.contentEl.createEl('div', { cls: 'dn-tags-list' });
-					tagsDiv.setAttribute('contenteditable', 'true');
-					tagsDiv.setAttribute('spellcheck', 'false');
-
-					const mTags = getTagsPerFile(file);
-					if (mTags) {
-						const tags_file = mTags.split(' ');
-						tags_file.forEach((tag) => {
-							const tagLineDiv = tagsDiv.createEl('div', { cls: 'dn-tag-line' });
-							tagLineDiv.createEl('a', { cls: 'tag', text: tag, href: tag }).onClickEvent((evt: MouseEvent) => {
-								this.handleTagActions(evt, tag);
-							});
-						});
-					} else {
-						tagsDiv.createEl('span', { text: 'No tags' });
-					}
-
-					tagsModal.contentEl.createEl('br');
-
-					const divBottom = tagsModal.contentEl.createEl('div', { cls: 'dn-div-bottom-properties' });
-
-					const btnPropsOpen = divBottom.createEl('button', { text: 'Open', cls: 'dn-btn-properties-open-file' });
-					btnPropsOpen.onClickEvent(() => {
-						tagsModal.close();
-						this.dnOpenFile(file);
+					const tagsModal = new DNFileTagsModal(this.app, file, {
+						handleTagActions: (evt, tag) => this.handleTagActions(evt, tag),
+						dnOpenFile: (file: TFile) => this.dnOpenFile(file)
 					});
-
-					const btnCloseProps = divBottom.createEl('button', { text: 'Close', cls: 'dn-btn-properties-close' });
-					btnCloseProps.onClickEvent(() => {
-						tagsModal.close();
-					});
-
-					tagsModal.open();
-					tagsDiv.blur();
+					this.openSubModal(tagsModal);
 				})
 		);
-
 
 		this._DN_CTX_MENU.addItem((item) =>
 			item
@@ -1687,59 +1688,12 @@ export class DNModal extends Modal {
 				.setIcon('text')
 				.onClick(() => {
 					// Frontmatter modal
-					const fmModal = new Modal(this.app);
-					fmModal.contentEl.setAttribute('class', 'dn-frontmatter-modal');
-					fmModal.contentEl.createEl('div', { text: 'File frontmatter', cls: 'setting-item setting-item-heading dn-modal-heading' });
-
-					const rowName = fmModal.contentEl.createEl('div', { cls: 'dn-property-row' });
-					rowName.createEl('div', { text: 'Name: ', cls: 'dn-property-name-sm' });
-					rowName.createEl('div', { text: file.name, cls: 'dn-property-value' });
-
-
-					const rowPath = fmModal.contentEl.createEl('div', { cls: 'dn-property-row' });
-					rowPath.createEl('div', { text: 'Path: ', cls: 'dn-property-name-sm' });
-					rowPath.createEl('div', { text: getFolderStructure(file.path), cls: 'dn-property-value' });
-
-					const frontmatterDiv = fmModal.contentEl.createEl('div', { cls: 'dn-properties-frontmatter-modal' });
-					frontmatterDiv.setAttribute('contenteditable', 'true');
-					frontmatterDiv.setAttribute('spellcheck', 'false');
-
-					const curProps = getPropsPerFile(file);
-					if (curProps) {
-						const prop = curProps.split(' \n');
-						for (let i = 0, len = prop.length; i < len; i++) {
-							frontmatterDiv.createEl('a', { text: prop[i], cls: 'dn-fproperties' }).onClickEvent((evt: MouseEvent) => {
-								if (evt.button === 2) {
-									evt.preventDefault();
-								} else {
-									fmModal.close();
-									this.INPUT_SEARCH.value = prop[i];
-									this.dnModalSearchVault(this.INPUT_SEARCH.value);
-								}
-							});
-							frontmatterDiv.createEl('br');
-						}
-					} else {
-						frontmatterDiv.createEl('span', { text: 'No frontmatter' });
-					}
-
-					fmModal.contentEl.createEl('br');
-
-					const divBottom = fmModal.contentEl.createEl('div', { cls: 'dn-div-bottom-properties' });
-
-					const btnPropsOpen = divBottom.createEl('button', { text: 'Open', cls: 'dn-btn-properties-open-file' });
-					btnPropsOpen.onClickEvent(() => {
-						fmModal.close();
-						this.dnOpenFile(file);
+					const fmModal = new DNFileFrontmatterModal(this.app, file, {
+						mainInputSearch: this.INPUT_SEARCH,
+						dnModalSearchVault: (val) => this.dnModalSearchVault(val),
+						dnOpenFile: (file: TFile) => this.dnOpenFile(file),
 					});
-
-					const btnCloseProps = divBottom.createEl('button', { text: 'Close', cls: 'dn-btn-properties-close' });
-					btnCloseProps.onClickEvent(() => {
-						fmModal.close();
-					});
-
-					fmModal.open();
-					frontmatterDiv.blur();
+					this.openSubModal(fmModal);
 				})
 		);
 
@@ -1750,102 +1704,15 @@ export class DNModal extends Modal {
 				.setTitle('File properties')
 				.setIcon('file-cog')
 				.onClick(() => {
-					const filePropsModal = new Modal(this.app);
-					filePropsModal.contentEl.setAttribute('class', 'dn-properties-modal');
-					filePropsModal.contentEl.createEl('div', { text: 'File properties', cls: 'setting-item setting-item-heading dn-modal-heading' });
-
-					const rowName = filePropsModal.contentEl.createEl('div', { cls: 'dn-property-row' });
-					rowName.createEl('div', { text: 'Name: ', cls: 'dn-property-name' });
-					rowName.createEl('div', { text: file.name, cls: 'dn-property-value' });
-
-					const rowExt = filePropsModal.contentEl.createEl('div', { cls: 'dn-property-row' });
-					rowExt.createEl('div', { text: 'Extension: ', cls: 'dn-property-name' });
-					const rowExtValue = rowExt.createEl('div', { cls: 'dn-property-value' });
-					rowExtValue.createEl('span', { text: file.extension, cls: 'nav-file-tag' });
-
-					const rowPath = filePropsModal.contentEl.createEl('div', { cls: 'dn-property-row' });
-					rowPath.createEl('div', { text: 'Path: ', cls: 'dn-property-name' });
-					rowPath.createEl('div', { text: getFolderStructure(file.path), cls: 'dn-property-value' });
-
-					filePropsModal.contentEl.createEl('br');
-
-					const rowSize = filePropsModal.contentEl.createEl('div', { cls: 'dn-property-row' });
-					rowSize.createEl('div', { text: 'Size: ', cls: 'dn-property-name' });
-					rowSize.createEl('div', { text: formatFileSize(file.stat.size) + ' bytes' + formatFileSizeKBMB(file.stat.size) });
-
-					filePropsModal.contentEl.createEl('br');
-
-					const rowDateCreated = filePropsModal.contentEl.createEl('div', { cls: 'dn-property-row' });
-					rowDateCreated.createEl('div', { text: 'Created: ', cls: 'dn-property-name' });
-					rowDateCreated.createEl('div', { text: moment(file.stat.ctime).format(this.date_format) });
-
-					const rowDateModified = filePropsModal.contentEl.createEl('div', { cls: 'dn-property-row' });
-					rowDateModified.createEl('div', { text: 'Modified: ', cls: 'dn-property-name' });
-					rowDateModified.createEl('div', { text: moment(file.stat.mtime).format(this.date_format) });
-
-					filePropsModal.contentEl.createEl('br');
-
-					const rowTags = filePropsModal.contentEl.createEl('div', { cls: 'dn-property-row' });
-					rowTags.createEl('div', { text: 'Tag(s): ', cls: 'dn-property-name' });
-					const propTags = rowTags.createEl('div');
-
-					const curTags = getTagsPerFile(file);
-
-					if (curTags !== '') {
-						const tags = curTags.split(' ');
-						for (let i = 0, len = tags.length; i < len; i++) {
-							propTags.createEl('a', { text: tags[i], href: tags[i], cls: 'tag' }).onClickEvent((evt: MouseEvent) => {
-								this.handleTagActions(evt, tags[i]);
-							});
-						}
-					} else {
-						propTags.createEl('span', { text: 'No tags' });
-					}
-
-					const rowFrontmatter = filePropsModal.contentEl.createEl('div', { cls: 'dn-property-row' });
-					rowFrontmatter.createEl('div', { text: 'Frontmatter: ', cls: 'dn-property-name' });
-					const rowFrontmatterValue = rowFrontmatter.createEl('div', { cls: 'dn-property-value' });
-
-					const frontmatterProps = rowFrontmatterValue.createEl('div', { cls: 'dn-properties-frontmatter' });
-					frontmatterProps.setAttribute('contenteditable', 'true');
-					frontmatterProps.setAttribute('spellcheck', 'false');
-					const curProps = getPropsPerFile(file);
-					if (curProps) {
-						const prop = curProps.split(' \n');
-						for (let i = 0, len = prop.length; i < len; i++) {
-							frontmatterProps.createEl('a', { text: prop[i], cls: 'dn-fproperties' }).onClickEvent((evt: MouseEvent) => {
-								if (evt.button === 2) {
-									evt.preventDefault();
-								} else {
-									filePropsModal.close();
-									this.INPUT_SEARCH.value = prop[i];
-									this.dnModalSearchVault(this.INPUT_SEARCH.value);
-								}
-
-							});
-							frontmatterProps.createEl('br');
-						}
-					} else {
-						frontmatterProps.createEl('span', { text: 'No frontmatter' });
-					}
-
-					filePropsModal.contentEl.createEl('br');
-
-					const divBottom = filePropsModal.contentEl.createEl('div', { cls: 'dn-div-bottom-properties' });
-
-					const btnPropsOpen = divBottom.createEl('button', { text: 'Open', cls: 'dn-btn-properties-open-file' });
-					btnPropsOpen.onClickEvent(() => {
-						filePropsModal.close();
-						this.dnOpenFile(file);
+					const filePropsModal = new DNFilePropertiesModal(this.app, file, {
+						handleTagActions: (evt, tag) => this.handleTagActions(evt, tag),
+						dnModalSearchVault: (val) => this.dnModalSearchVault(val),
+						dnOpenFile: (file) => this.dnOpenFile(file),
+						mainInputSearch: this.INPUT_SEARCH,
+						dateFormat: this.date_format
 					});
+					this.openSubModal(filePropsModal);
 
-					const btnCloseProps = divBottom.createEl('button', { text: 'Close', cls: 'dn-btn-properties-close' });
-					btnCloseProps.onClickEvent(() => {
-						filePropsModal.close();
-					});
-
-					filePropsModal.open();
-					frontmatterProps.blur();
 				})
 		);
 
@@ -1858,10 +1725,6 @@ export class DNModal extends Modal {
 		}
 
 		this.dnSelectTableRow(evt);
-		if (evt.button === 2) {
-			evt.preventDefault();
-			this.dnGenerateContextMenu(evt, file);
-		}
 	}
 
 	private dnHandleDblClick(evt: MouseEvent, file?: TFile) {
@@ -1877,7 +1740,6 @@ export class DNModal extends Modal {
 	private dnHandleIntersection = (entries: IntersectionObserverEntry[]) => {
 		entries.forEach(entry => {
 			if (!entry.isIntersecting) {
-				entry.target.removeEventListener('contextmenu', this.dnHandleClick);
 				entry.target.removeEventListener('click', this.dnHandleClick);
 				entry.target.removeEventListener('dblclick', this.dnHandleDblClick);
 			}
@@ -1893,89 +1755,35 @@ export class DNModal extends Modal {
 	}
 
 	dnShowPreviewFile(evt: MouseEvent, file: TFile) {
-		this._hoverDiv.empty();
-
-		this.modalEl.addEventListener('click', () => { this.dnHidePreview() });
-
-		const topBar = this._hoverDiv.createEl('div', { cls: 'dn-preview-top-bar' });
-		const btnClosePreview = topBar.createEl('div', { cls: 'modal-close-button' });
-
-		btnClosePreview.onClickEvent(() => {
-			this.dnHidePreview();
-		});
-
-		const previewTop = topBar.createEl('div', 'dn-preview-titlebar');
-
-		const divPreviewName = previewTop.createEl('div', { cls: 'dn-property-row' });
-		divPreviewName.createEl('div', { text: 'Name: ', cls: 'dn-property-name-sm' });
-		divPreviewName.createEl('div', { text: file.name, cls: 'dn-property-value' });
-
-		const divPreviewPath = previewTop.createEl('div', { cls: 'dn-property-row' });
-		divPreviewPath.createEl('div', { text: 'Path: ', cls: 'dn-property-name-sm' });
-		divPreviewPath.createEl('div', { text: getFolderStructure(file.path), cls: 'dn-property-value' });
-
-
-		const divButtons = topBar.createEl('div', { cls: 'dn-div-top-preview-btns' });
-
-		const btnPreviewOpenFile = divButtons.createEl('button', { text: 'Open', cls: 'dn-btn-properties-open-file' });
-		btnPreviewOpenFile.onClickEvent(() => {
-			this.dnHidePreview();
-			this.close();
-			this.dnOpenFile(file);
-		});
-
-		const btnPreviewOpenFileNewTab = divButtons.createEl('button', { text: 'Open in new tab', cls: 'dn-btn-properties-open-file' });
-		btnPreviewOpenFileNewTab.onClickEvent(() => {
-			this.dnHidePreview();
-			this.close();
-			this.app.workspace.getLeaf('tab').openFile(file);
-		});
-
-		const btnPreviewOpenFileNewWindow = divButtons.createEl('button', { text: 'Open in new window', cls: 'dn-btn-properties-open-file' });
-		btnPreviewOpenFileNewWindow.onClickEvent(() => {
-			this.dnHidePreview();
-			this.app.workspace.getLeaf('window').openFile(file);
-		});
-
-		this._hoverRender = this._hoverDiv.createEl('div', { cls: 'dn-pr-content' });
-
-		try {
-			MarkdownRenderer.render(
-				this.app,
-				'![[' + normalizePath(file.path) + ']]',
-				this._hoverRender,
-				normalizePath(file.path),
-				this._previewComponent
-			);
-		} catch (error) {
-			return;
+		if (this.activePreview) {
+			this.activePreview.close();
+			this.activePreview = null;
 		}
 
-		this._hoverDiv.style.display = 'block';
+		this.activePreview = new DNPreviewModal(this.app, file, {
+			dnOpenFile: (f: TFile) => this.dnOpenFile(f),
+		});
 
-		// Drag event listeners
-		previewTop.addEventListener('mousedown', (evt) => this.dnHoverDragOnMouseDown(evt));
-		this._hoverDiv.addEventListener('mousemove', (evt) => this.dnHoverDragOnMouseMove(evt));
-		this._hoverDiv.addEventListener('mouseup', (evt) => this.dnHoverDragOnMouseUp(evt));
+		// Open the preview modal
+		this.openSubModal(this.activePreview);
 
-		const screenWidth = window.innerWidth;
-		const screenHeight = window.innerHeight;
-		const divW = this._hoverDiv.offsetWidth;
-		const divH = this._hoverDiv.offsetHeight;
+		// Wrap the original onClose to ensure our reference stays synced
+		const originalOnClose = this.activePreview.onClose.bind(this.activePreview);
+		this.activePreview.onClose = () => {
+			originalOnClose();
+			this.activePreview = null;
+		};
 
-		if (this._hoverDivLeft === '') {
-			this._hoverDiv.style.left = ((screenWidth - divW) / 2).toString() + 'px';
-			this._hoverDiv.style.top = ((screenHeight - divH) / 2).toString() + 'px';
-		}
-
-		previewTop.removeEventListener('mousedown', (evt) => this.dnHoverDragOnMouseDown(evt));
-		this.modalEl.removeEventListener('click', (evt) => { this.dnHidePreview() });
+		this.modalEl.addEventListener('click', () => this.dnHidePreview(), { once: true });
 	}
 
 	private dnHidePreview() {
-		this._isDraggingPreview = false;
-		this._hoverDiv.style.display = 'none';
-		this._hoverDiv.empty();
+		if (this.activePreview) {
+			this.activePreview.close();
+			this.activePreview = null;
+		}
+
+		this.modalEl.removeEventListener('click', () => this.dnHidePreview());
 	}
 
 	private dnHandleNormalSearch(rExp: RegExp, file: TFile): boolean {
@@ -1989,6 +1797,51 @@ export class DNModal extends Modal {
 	private dnHandleSpecialSearch(search: string, file: TFile) {
 
 		const mtime = moment(file.stat.mtime);
+
+		// Generate the UI label -> date range using @date(range)
+		this.labelDateRangeFilter = this.generateDateRangeLabel(search);
+
+		// Date range
+		// - Starts with d( or date(
+		// - Contains EXACTLY one delimiter'..' 
+		// - Ends with )
+		const dateMatch = search.match(/^(?:d|date)\((.*)\)$/);
+
+
+		if (dateMatch) {
+			const content = dateMatch[1].trim();
+
+			// Check -> date range delimiter '..'
+			if (content.includes('..')) {
+				const parts = content.split('..');
+				if (parts.length !== 2) return false; // Strict delimiter check (only one delimiter)
+
+				let startStr = parts[0].trim();
+				let endStr = parts[1].trim();
+
+				// Handle open-ended syntax
+				if (startStr === "") startStr = "1970-01-01";
+				if (endStr === "") endStr = "@d";
+
+				// Parse date -> dnParseDateRange
+				const startDate = this.dnParseDateRange(startStr, false);
+				const endDate = this.dnParseDateRange(endStr, true);
+
+				if (!startDate || !endDate) return false;
+				return mtime.isBetween(startDate, endDate, 'day', '[]');
+			}
+
+			else {
+				const m = moment(content === "@d" || content === "d" ? moment() : content, ["YYYY-MM-DD", "YYYY-MM", "YYYY"], true);
+				if (!m.isValid()) return false;
+
+				if (content.length === 4) return mtime.isSame(m, 'year');
+				if (content.length === 7) return mtime.isSame(m, 'month');
+				return mtime.isSame(m, 'day');
+			}
+		}
+
+		this.labelDateRangeFilter = "";
 
 		switch (search) {
 			case 'd':
@@ -2103,12 +1956,98 @@ export class DNModal extends Modal {
 		}
 	}
 
+	private dnParseDateRange(part: string, isEnd: boolean): moment.Moment | null {
+		let m;
+
+		if (part === 'd' || part === '@d') {
+			m = moment();
+		} else {
+			m = moment(part, ["YYYY-MM-DD", "YYYY-MM", "YYYY"], true);
+		}
+
+		if (!m || !m.isValid()) return null;
+
+		if (isEnd) {
+			if (part.length === 4) return m.endOf('year');
+			if (part.length === 7) return m.endOf('month');
+			return m.endOf('day');
+		} else {
+			if (part.length === 4) return m.startOf('year');
+			if (part.length === 7) return m.startOf('month');
+			return m.startOf('day');
+		}
+	}
+
+	/**
+	 * Date range label
+	 * Input: "@d(2025-01..2025-03)" or "@d(2025-10)"
+	 * Output: "Jan 1, 2025 → Mar 31, 2025" or "October 2025"
+	 * Returns -> "" for non-matching syntax (like usual @d-7 syntax)
+	 */
+	private generateDateRangeLabel(search: string): string {
+
+		const dateMatch = search.match(/^(?:d|date)\((.*)\)$/);
+
+		if (!dateMatch) return "";
+
+		const content = dateMatch[1].trim();
+
+		// Check date range delimiter ..
+		if (content.includes('..')) {
+			const parts = content.split('..');
+			if (parts.length !== 2) return "";
+
+			const startStr = parts[0].trim();
+			const endStr = parts[1].trim();
+
+			// Resolve start date
+			let startLabel = "Beginning";
+			if (startStr !== "" && startStr !== "1970-01-01") {
+				const mStart = moment(startStr, ["YYYY-MM-DD", "YYYY-MM", "YYYY"], true);
+				if (mStart.isValid()) {
+					// Snap to start of period
+					startLabel = mStart.startOf('day').format("MMM D, YYYY");
+				}
+			}
+
+			// Resolve end date
+			let endLabel = "Today";
+			if (endStr !== "" && endStr !== "@d" && endStr !== "d") {
+				const mEnd = moment(endStr, ["YYYY-MM-DD", "YYYY-MM", "YYYY"], true);
+				if (mEnd.isValid()) {
+					// Snap to end of period based on input length
+					if (endStr.length === 4) mEnd.endOf('year');
+					else if (endStr.length === 7) mEnd.endOf('month');
+					else mEnd.endOf('day');
+
+					endLabel = mEnd.format("MMM D, YYYY");
+				}
+			}
+
+			return `${startLabel} → ${endLabel}`;
+		}
+
+		// Handle specific params (Year, Month, or Day)
+		const isToday = content === "@d" || content === "d";
+		const m = isToday ? moment() : moment(content, ["YYYY-MM-DD", "YYYY-MM", "YYYY"], true);
+
+		if (!m.isValid()) return "";
+
+		if (isToday) return m.format("MMM D, YYYY");
+
+		// Determine label style
+		if (content.length === 4) return `Year ${m.format("YYYY")}`;
+		if (content.length === 7) return m.format("MMMM YYYY");
+		return m.format("MMM D, YYYY");
+	}
+
 	dnOpenFileAlt(f: TFile, evt: MouseEvent) {
 		if (!evt || typeof evt !== 'object' || !(f instanceof TFile)) {
 			return;
 		}
 
 		try {
+
 			if ((evt.button === 0) && (evt.ctrlKey || evt.metaKey)) {
 				this.app.workspace.getLeaf('tab').openFile(f);
 			} else if (evt.button === 1) {
@@ -2116,9 +2055,6 @@ export class DNModal extends Modal {
 
 			} else if (evt.button === 0) {
 				this.dnOpenFile(f);
-			} else if (evt.button === 2 && !(evt.target instanceof HTMLTableCellElement)) {
-				evt.preventDefault();
-				this.dnGenerateContextMenu(evt, f);
 			}
 		} catch (er) {
 			return;
@@ -2130,38 +2066,8 @@ export class DNModal extends Modal {
 		this.close();
 	}
 
-	dnHoverDragOnMouseDown(evt: MouseEvent) {
-		evt.stopPropagation();
-		this._isDraggingPreview = true;
-		this.initialX = evt.screenX - this._hoverDiv.offsetLeft;
-		this.initialY = evt.screenY - this._hoverDiv.offsetTop;
-		this.previousX = evt.screenX;
-		this.previousY = evt.screenY;
-	}
 
-	dnHoverDragOnMouseMove(evt: MouseEvent) {
-		evt.stopPropagation();
-		if (this._isDraggingPreview) {
-			const newX = evt.screenX - this.initialX;
-			const newY = evt.screenY - this.initialY;
-
-			if (Math.abs(evt.screenX - this.previousX) > 5 || Math.abs(evt.screenY - this.previousY) > 5) {
-				this._hoverDiv.style.left = newX + 'px';
-				this._hoverDiv.style.top = newY + 'px';
-				this.previousX = evt.screenX;
-				this.previousY = evt.screenY;
-			}
-
-			this._hoverDivLeft = newX + 'px';
-			this._hoverDivTop = newY + 'px';
-		}
-	}
-
-	dnHoverDragOnMouseUp(evt: MouseEvent) {
-		evt.stopPropagation();
-		this._isDraggingPreview = false;
-	}
-
+	// TODO: show Preview modal
 	private handleTagActions(evt: MouseEvent, tag: string) {
 		if (evt.button === 2) {
 			evt.preventDefault();
@@ -2453,12 +2359,15 @@ export class DNModal extends Modal {
 					cls: 'dn-f-note'
 				});
 				linkPrimaryTag.setAttribute('data-href', note.path);
+				linkPrimaryTag.setAttribute('tabindex', '0');
 				linkPrimaryTag.onClickEvent((evt: MouseEvent) => {
 					if (this._leaf !== null && note !== null) {
 						this.dnOpenFileAlt(note, evt);
 					}
 				});
 				linkPrimaryTag.addEventListener('mouseover', (evt: MouseEvent) => this.dnHandleHoverPreview(evt, note));
+				linkPrimaryTag.addEventListener('contextmenu', (evt: MouseEvent) => this.dnGenerateContextMenu(evt, note));
+
 			}
 		}
 
@@ -2470,9 +2379,11 @@ export class DNModal extends Modal {
 
 			const secTagDiv = secondaryTagsDiv.createEl('div', { cls: 'dn-td-tag-group-card dn-td-secondary-tag-group' });
 
-			secTagDiv.createEl('h3', { text: secTag }).onClickEvent((evt: MouseEvent) => {
+			const secTagH3Link = secTagDiv.createEl('h3', { text: secTag });
+			secTagH3Link.onClickEvent((evt: MouseEvent) => {
 				this.handleTagActionsTagsDashboard(evt, secTag);
 			});
+			secTagH3Link.setAttribute('tabindex', '0');
 
 			const displayNotes = notesInGroup.slice(0, 5);
 
@@ -2484,12 +2395,14 @@ export class DNModal extends Modal {
 					cls: 'dn-f-note'
 				});
 				linkSecondaryTag.setAttribute('data-href', note.path);
+				linkSecondaryTag.setAttribute('tabindex', '0');
 				linkSecondaryTag.onClickEvent((evt: MouseEvent) => {
 					if (this._leaf !== null && note !== null) {
 						this.dnOpenFileAlt(note, evt);
 					}
 				});
 				linkSecondaryTag.addEventListener('mouseover', (evt: MouseEvent) => this.dnHandleHoverPreview(evt, note));
+				linkSecondaryTag.addEventListener('contextmenu', (evt: MouseEvent) => this.dnGenerateContextMenu(evt, note));
 				secTagDiv.createEl('br');
 			}
 
@@ -2510,6 +2423,7 @@ export class DNModal extends Modal {
 				});
 			}
 		}
+		this.TAGS_INPUT_SEARCH.focus();
 	}
 
 	private _tagsPrevPage() {
@@ -2615,10 +2529,7 @@ export class DNModal extends Modal {
 	}
 
 	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
-		this._previewComponent.unload();
-
+		super.onClose();
 
 		if (this.INPUT_SEARCH && this.INPUT_SEARCH.removeEventListener) {
 			this.INPUT_SEARCH.removeEventListener('input', debounce(() => this.dnModalSearchVault(this.INPUT_SEARCH.value), 300, true));
@@ -2632,21 +2543,13 @@ export class DNModal extends Modal {
 
 		this.TAGS_INPUT_SEARCH.removeEventListener('input', debounce(() => this.dnTDSearchTags(this.TAGS_INPUT_SEARCH.value), 300, true));
 
-
-		// Remove drag event listeners
-		this._hoverDiv.removeEventListener('mousemove', (evt) => this.dnHoverDragOnMouseMove(evt));
-		this._hoverDiv.removeEventListener('mouseup', (evt) => this.dnHoverDragOnMouseUp(evt));
-
-		this._hoverDiv.removeEventListener('click', (evt: MouseEvent) => {
-			evt.stopPropagation();
-			evt.stopImmediatePropagation();
-		});
-
 		if (this.intersectionObserver) {
 			this.intersectionObserver.disconnect();
 		}
 
 		this.dnSaveStateOnClose();
+
+		this.dnHidePreview();
 	}
 
 }

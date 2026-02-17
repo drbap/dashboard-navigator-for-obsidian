@@ -1,9 +1,10 @@
-import { App, debounce, Modal, Notice } from 'obsidian';
+import { App, debounce, Notice } from 'obsidian';
 import DNPlugin from 'src/main';
 import { DNSaveSearchItem } from './dnsavesearchmodal';
 import { DNConfirmModal } from './dnconfirmmodal';
+import { DNBaseModal } from './dnbasemodal';
 
-export class DNSavedSearchesModal extends Modal {
+export class DNSavedSearchesModal extends DNBaseModal {
 	plugin: DNPlugin;
 	private savedSearchContainer: HTMLElement;
 	private _INPUT_FILTER: HTMLInputElement;
@@ -15,9 +16,9 @@ export class DNSavedSearchesModal extends Modal {
 		this.plugin = plugin;
 	}
 
-	onOpen() {
+	render() {
+
 		const { contentEl } = this;
-		contentEl.empty();
 
 		contentEl.createEl('div', { text: 'Saved searches', cls: 'setting-item setting-item-heading dn-modal-heading' });
 
@@ -31,10 +32,12 @@ export class DNSavedSearchesModal extends Modal {
 
 		this.CLEAR_INPUT_FILTER = filterDiv.createEl('div', { cls: 'search-input-clear-button' });
 		this.CLEAR_INPUT_FILTER.setAttribute('aria-label', 'Clear search');
+		this.CLEAR_INPUT_FILTER.setAttribute('tabindex', '0');
 		this.CLEAR_INPUT_FILTER.addEventListener('click', () => {
 			this._INPUT_FILTER.value = '';
 			this.textToFilter = '';
 			this.renderSavedSearches();
+			this._INPUT_FILTER.focus();
 		});
 
 		this._INPUT_FILTER.value = this.textToFilter;
@@ -48,18 +51,12 @@ export class DNSavedSearchesModal extends Modal {
 
 		this.renderSavedSearches();
 
-		const divBtnClose = contentEl.createEl('div', { cls: 'dn-div-modal-bottom' });
-		const btnClose = divBtnClose.createEl('button', { text: 'Close', cls: 'dn-btn-properties-close' });
-		btnClose.onclick = () => this.close();
 	}
 
 
-	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
-	}
 
 	private renderSavedSearches() {
+
 		this.savedSearchContainer.empty();
 
 		if (this._INPUT_FILTER.value === '') {
@@ -83,17 +80,17 @@ export class DNSavedSearchesModal extends Modal {
 				item.description.toLowerCase().includes(this.textToFilter);
 		});
 
-		// Display a message if no searches are saved or no results match the filter
 		if (filteredSearches.length === 0) {
 			const message = (this.textToFilter === '') ? 'No saved searches.' : 'No searches match your filter.';
 			this.savedSearchContainer.createEl('p', { text: message, cls: 'dn-no-searches-message' });
-			return;
+		} else {
+			filteredSearches.forEach((item: DNSaveSearchItem) => {
+				this.renderSearchEntry(item);
+			});
 		}
 
-		// Iterate through each filtered search item and render its entry
-		filteredSearches.forEach((item: DNSaveSearchItem) => { // Removed index, no longer needed for deletion
-			this.renderSearchEntry(item); // Pass the item directly
-		});
+		if (this.nav) this.nav.refreshFocusableElements();
+
 	}
 
 	/**
@@ -102,9 +99,11 @@ export class DNSavedSearchesModal extends Modal {
 	 */
 	private renderSearchEntry(item: DNSaveSearchItem) {
 		const divSearchItem = this.savedSearchContainer.createEl('div', { cls: 'dn-saved-search-item' });
+		divSearchItem.setAttribute('tabindex', '0');
 
 		// Display the saved search query text (read-only)
 		divSearchItem.createEl('div', { text: item.query, cls: 'dn-saved-search-query' });
+
 
 		divSearchItem.createEl('div', { text: item.description, cls: 'dn-saved-search-description' });
 
@@ -112,6 +111,7 @@ export class DNSavedSearchesModal extends Modal {
 			if (this.plugin.DN_MODAL && this.plugin.DN_MODAL.INPUT_SEARCH) {
 				this.plugin.DN_MODAL.INPUT_SEARCH.value = item.query;
 				this.plugin.DN_MODAL.dnModalSearchVault(this.plugin.DN_MODAL.INPUT_SEARCH.value);
+				this.close();
 			} else {
 				new Notice('Search input not found.');
 			}
@@ -136,7 +136,8 @@ export class DNSavedSearchesModal extends Modal {
 			evt.stopPropagation();
 
 			const confirmModal = new DNConfirmModal(this.app, 'Delete search', 'Are you sure you want to delete this saved search?', 'Delete', 'mod-warning');
-			confirmModal.open();
+
+			this.openSubModal(confirmModal);
 
 			// User must confirm
 			const confirmed = await confirmModal.resultPromise;

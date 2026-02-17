@@ -1,12 +1,13 @@
-import { App, Modal, MarkdownRenderer, Component } from 'obsidian';
+import { App, MarkdownRenderer, Component } from 'obsidian';
+import { DNBaseModal } from './dnbasemodal';
 
-export class DNInfoModal extends Modal {
+export class DNInfoModal extends DNBaseModal {
 	private readonly _markdownContent = `
-### Dashboard navigator quick reference
+## Quick reference
 
 The **Dashboard navigator** search allows you to quickly access and filter specific files within your vault. Quickly find notes, images, canvases, audios, videos, PDFs, and more with simple commands.
 
-#### Basic commands
+### Basic commands
 
 - \`@notes\`: Lists all **notes**.
 - \`@images\`: Lists all **images**.
@@ -18,14 +19,14 @@ The **Dashboard navigator** search allows you to quickly access and filter speci
 - \`@bases\`: Lists all **.base** files.
 - \`@bookmarks\`: Lists all **bookmarked** files.
 
-#### Advanced filtering with search terms
+### Advanced filtering with search terms
 
 You can combine the basic commands with search terms to narrow down your results:
 
 * \`@notes #tag1\`: Lists **notes** with the tag \`#tag1\`.
 * \`@notes desired_word #tag2\`: Lists **notes** with \`desired_word\` and \`#tag2\`.
 
-#### Search filters shorthands
+### Search filters shorthands
 
 - \`@n\` = \`@notes\`
 - \`@i\` = \`@images\`
@@ -37,7 +38,7 @@ You can combine the basic commands with search terms to narrow down your results
 - \`@bb\` = \`@bases\`
 - \`@bm\` = \`@bookmarks\`
 
-#### Date filters and shorthands
+### Date filters and shorthands
 
 For quick filtering by date ranges, use the following date filters or the respective shorthands:
 
@@ -61,36 +62,91 @@ For quick filtering by date ranges, use the following date filters or the respec
 **Current year:**
 - \`@y\` or \`@year\`
 
-Example:
+**Example**:
 
 To filter for data from the current month and the previous month, you would use \`@m-1\`.
 
-#### Combining search terms, file types and date filters
+### Combining search terms, file types and date filters
 
 You can combine search terms, file types (one per search) and date filters for more precise results:
 
 - \`@notes #tag1 @month\`: Lists **notes** with the tag \`tag1\` created/modified this month (*Shorthand*: \`@n #tag1 @m\`).
+
 - \`@images @week\`: Lists **images** added this week (*Shorthand*: \`@i @w\`).
 
-#### Quoted search
+### Smart date range filtering
+
+Dashboard Navigator supports advanced calendar-based filtering using the \`@date(..)\` or \`@d(..)\` syntax. This feature allows you to "zoom" into specific years, months, or custom time windows.
+
+#### Specific periods
+
+Target a specific block of time without needing ranges:
+
+- **Yearly view**: \`@d(2025)\` — Filters all files modified in the year 2025.
+
+- **Monthly view**: \`@d(2025-10)\` — Filters files modified during October 2025.
+
+- **Daily view**: \`@d(2026-02-15)\` — Filters files modified on that specific day.
+
+#### Custom date ranges
+
+Use the \`..\` delimiter (\`double-dot\`) to define a **start** and **end** point. The parser is boundary-aware, expanding the dates to include the full period.
+
+- **Fixed range**: \`@d(2024..2025)\`(Includes everything from **Jan 1, 2024**, to **Dec 31, 2025**)
+
+- **Mixed precision**: \`@d(2025-01..2025-06-15)\` (From the **start of January** until the **end of June 15th**)
+
+
+#### Open-ended ranges
+
+Leave **one side of the delimiter empty** to create "infinite" boundaries:
+
+- **From date until today**: \`@d(2025-01-01..)\` (**Everything** from **Jan 1, 2025** until **today**)
+
+- **Archival view**: \`@d(..2023)\`(**Everything** modified **from the beginning** of time until the **final second of 2023**)
+
+#### Date range: Format and syntax
+
+- **Date format**: Use the ISO standard (YYYY-MM-DD) for specific dates.
+
+- **Strict syntax**: **Exactly one range delimiter** \`..\` is required for ranges. Inputs like \`@d(2024..2025..2026)\` are **ignored**.
+
+**Pro tip**: For relative offsets (like "Last 7 days"), use the standard shortcuts like \`@d-7\` or \`@w\` - no parentheses.
+
+#### Special date filter label
+
+When a **date range filter is active**, a clear indicator (label) appears in the Navigator view. This makes it easy to see exactly which time window is applied and quickly refine your search.
+
+#### Use Date Range Filter with Other Existing Filters
+
+- The date range filter works seamlessly with other **Dashboard Navigator filters**. You can combine it with \`@notes\` (to target only notes), \`@images\`, \`@bases\`, also add **Tags** and **Frontmatter** (multi-layered search). You can build simple to complex queries in order to easily find specific files in your vault. It allows for highly specific, multi-layered and incredibly fast searches.
+
+**Examples**:
+
+- Combine with **file type**: \`@notes @d(2024..)\` or \`@n @d(2024..)\` (**All notes modified** from **2024** to **now**).
+
+- Combine with **tags**: \`#work #wip @d(2025-10)\` (Notes with tags \`#work\` AND \`#wip\` modified during **Oct 2025**).
+
+
+### Quoted search
 
 - **Specific quoted search**: Search for specific sentences in frontmatter metadata or for specific filename using double or single quotes. For example, \`"this is the description of a note"\`.
 
-#### Additional tips
+### Additional tips
 
 * **Case sensitivity:** Search terms are **case-insensitive**.
 
 * **Multiple commands:** You can use **multiple commands in a single query**, separated by spaces.
 
-#### Excluding results
+### Excluding results
 
 To exclude specific content from your search results, you can use the \`!\` exclamation point followed by the text, tag or folder you want to exclude. This will remove any items that match the exclusion term.
 
-Example:
+**Example**:
 
 - \`@notes #work #pending !#urgent\`: This will list **all notes** tagged with \`#work\` and \`#pending\` except those tagged with \`#urgent\`.
 
-#### Combining exclusions with other filters
+### Combining exclusions with other filters
 
 You can combine exclusions with other filters, such as tags and date, to further refine your search:
 
@@ -100,7 +156,7 @@ You can combine exclusions with other filters, such as tags and date, to further
 
 By effectively using exclusions, you can tailor your searches to your specific needs and quickly find the information you're looking for.
 
-#### Frontmatter metadata search
+### Frontmatter metadata search
     
 To search for specific frontmatter metadata, use the following syntax:
 
@@ -108,17 +164,17 @@ To search for specific frontmatter metadata, use the following syntax:
 
 - Property match (all notes with this property): \`'name_of_the_property:'\`
 
-Example: \`'task:'\` or \`'created:'\`
+**Example**: \`'task:'\` or \`'created:'\`
 
 - Search for the value in one metadata property: \`'task:' value\` or \`'task:' 'This is a sentence to match'\`. The sentence to match can be in single or double quotes
 
-Example: \`'task:' 'create pdf'\`
+**Example**: \`'task:' 'create pdf'\`
 
 **2. Search by property and value:**
 
 - Exact match: \`'name_of_the_property: value'\`
 
-Example: \`'topic: javascript'\`
+**Example**: \`'topic: javascript'\`
 
 **Tips:**
 
@@ -126,13 +182,13 @@ Example: \`'topic: javascript'\`
 
 - You can use the context menu (navigator view or dashboard view to open the **Frontmatter** or **File properties** modal). Click on the desired frontmatter metadata to quickly search for an exact match within your notes.
 
-#### Bookmarks
+### Bookmarks
 
 New **bookmarks** command (Navigator view - search): \`@bookmarks\` or \`@bm\` as its shorthand. This command will **list all bookmarked files** in Navigator view, so you can sort them by file name, extension, folder, date, search for tags and frontmatter.
 
 - You can search for the file categories using the additional \`@bookmarks\`or \`@bm\` filter to identify which ones are bookmarked, e.g. \`@notes @bm\` (notes that are bookmarked) or \`@images @bm\`(images in your bookmarks).
 
-#### Tag actions
+### Tag actions
 
 You can quickly filter your search results by interacting with **tags** directly within the **Navigator view**, **File Properties modal**, or **Tags modal**. These actions let you include or exclude tags from your current search query.
 
@@ -140,15 +196,17 @@ You can quickly filter your search results by interacting with **tags** directly
 
 1. A \`Shift + left-click\` on a tag toggles between these states:
 
-* **Add tag:** This adds the tag to your search query. You'll **only see results that have this tag.** (e.g., \`#tag\`)
-* **Remove tag:** This removes the tag from your search query. The tag will **no longer filter your results**.
+- **Add tag:** This adds the tag to your search query. You'll **only see results that have this tag.** (e.g., \`#tag\`)
 
-**\`Ctrl + left-click\`: Toggle tag exclusion command**
+- **Remove tag:** This removes the tag from your search query. The tag will **no longer filter your results**.
+
+- \`Ctrl + left-click\`: Toggle tag exclusion command**
 
 2. A **Ctrl + left-click** on a tag toggles between these states, specifically managing an *exclusion command*:
 
-* **Add exclusion command:** This adds a command to your search query to **exclude** the tag. You'll **only see results that *do NOT* have this tag.** (e.g., \`!#tag\`)
-* **Remove exclusion command:** This removes the exclusion command for that tag from your search query. The tag will **no longer filter your results by exclusion**.
+- **Add exclusion command:** This adds a command to your search query to **exclude** the tag. You'll **only see results that *do NOT* have this tag.** (e.g., \`!#tag\`)
+
+- **Remove exclusion command:** This removes the exclusion command for that tag from your search query. The tag will **no longer filter your results by exclusion**.
 
 ### Sort files
 
@@ -216,17 +274,17 @@ You can hide the following columns:
 
 - You can also save the tags search using \`@tags\` with a description (saved searches window). When clicking on the saved search option it will open the saved query directly in **Tags** dashboard view.
 
-#### **Tags dashboard commands**
+#### Tags dashboard commands
 
 These commands work on the tags displayed in the **recent notes & tags** section, the **secondary tags** displayed in the main **Tags** dashboard, and within the tags list in the **tags sidebar**.
 
-  - \`Left-click\`: Change the selected secondary tag into a primary tag, making it the main focus of your view.
+- \`Left-click\`: Change the selected secondary tag into a primary tag, making it the main focus of your view.
 
-  - \`Shift + click\`: Add this tag to your current search using an AND condition. For example, if your search is \`#article\`, holding \`Shift\` and \`clicking\` on \`#status\` will change your search to \`#article #status\`(notes with tags **#article** AND **#status**).
+- \`Shift + click\`: Add this tag to your current search using an AND condition. For example, if your search is \`#article\`, holding \`Shift\` and \`clicking\` on \`#status\` will change your search to \`#article #status\`(notes with tags **#article** AND **#status**).
 
-  - \`Ctrl + click\`: Exclude this clicked secondary tag. This is useful for filtering out results that contain a specific tag.
+- \`Ctrl + click\`: Exclude this clicked secondary tag. This is useful for filtering out results that contain a specific tag.
 
-  - \`Ctrl + middle-click\`: Quickly clear your tag search and start fresh. This removes all tags from your search query, allowing you to reset your view with a single click.
+- \`Ctrl + middle-click\`: Quickly clear your tag search and start fresh. This removes all tags from your search query, allowing you to reset your view with a single click.
 
 ### Excluded file extensions
 
@@ -243,6 +301,7 @@ These commands work on the tags displayed in the **recent notes & tags** section
 ### Colored files
 
 - Select custom colors for files in the dashboard and navigator views. 
+
 - These colors will be reflected in the piechart graph, making it easier to identify and track different file types. To activate this feature, go to **plugin settings** and **toggle colored files**.
 
 ### Colored tags support
@@ -256,7 +315,7 @@ These commands work on the tags displayed in the **recent notes & tags** section
 		super(app);
 	}
 
-	onOpen() {
+	render() {
 		const { contentEl } = this;
 
 		const markdownContainer = contentEl.createEl('div', { cls: 'dn-info-modal' });
@@ -271,8 +330,5 @@ These commands work on the tags displayed in the **recent notes & tags** section
 		);
 	}
 
-	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
-	}
+
 }

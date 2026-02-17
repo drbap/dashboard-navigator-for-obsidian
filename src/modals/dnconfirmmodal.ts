@@ -1,11 +1,14 @@
-import { App, Modal } from 'obsidian';
+import { App } from 'obsidian';
+import { DNBaseModal } from './dnbasemodal';
 
-export class DNConfirmModal extends Modal {
+export class DNConfirmModal extends DNBaseModal {
 	private title: string;
 	private message: string;
 	private btnText: string;
 	private btnCls: string;
-	private resolve: (value: boolean | PromiseLike<boolean>) => void;
+
+	// Updated type to allow null for safe cleanup
+	private resolve: ((value: boolean) => void) | null = null;
 	private promise: Promise<boolean>;
 
 	constructor(app: App, title: string, message: string, btnText: string, btnCls = 'mod-cta') {
@@ -14,22 +17,22 @@ export class DNConfirmModal extends Modal {
 		this.message = message;
 		this.btnText = btnText;
 		this.btnCls = btnCls;
-		// Create a new promise and store its resolve function
-		this.promise = new Promise((resolve) => {
-			this.resolve = resolve;
+
+		// Create the promise and capture the resolve function
+		this.promise = new Promise((res) => {
+			this.resolve = res;
 		});
 	}
 
 	/**
-	 * Returns the promise that will resolve with the user's decision (true for confirm, false for cancel).
+	 * Public getter to await the user's decision
 	 */
 	public get resultPromise(): Promise<boolean> {
 		return this.promise;
 	}
 
-	onOpen() {
+	render() {
 		const { contentEl } = this;
-		contentEl.empty();
 
 		contentEl.createEl('div', { text: this.title, cls: 'setting-item setting-item-heading dn-modal-heading' });
 		contentEl.createEl('p', { text: this.message, cls: 'dn-confirm-message' });
@@ -39,24 +42,32 @@ export class DNConfirmModal extends Modal {
 		// Confirm button
 		const btnConfirm = btnContainer.createEl('button', { text: this.btnText, cls: this.btnCls });
 		btnConfirm.onclick = () => {
-			this.resolve(true);
+			if (this.resolve) {
+				this.resolve(true);
+				this.resolve = null; // Clear so onClose doesn't resolve(false)
+			}
 			this.close();
 		};
 
 		// Cancel button
 		const btnCancel = btnContainer.createEl('button', { text: 'Cancel', cls: 'mod-cancel' });
 		btnCancel.onclick = () => {
-			this.resolve(false); // Resolve the promise with false
-			this.close(); // Close the modal
+			if (this.resolve) {
+				this.resolve(false);
+				this.resolve = null;
+			}
+			this.close();
 		};
+
 	}
 
 	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
-		// If the modal is closed without a button click, resolve with false (cancel)
 		if (this.resolve) {
 			this.resolve(false);
+			this.resolve = null;
 		}
+
+		super.onClose();
+
 	}
 }

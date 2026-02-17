@@ -1,7 +1,8 @@
-import { App, Modal, Setting, SliderComponent, ToggleComponent } from 'obsidian';
+import { App, Setting, SliderComponent, ToggleComponent } from 'obsidian';
 import DNPlugin from 'src/main';
+import { DNBaseModal } from './dnbasemodal';
 
-export class DNQuickDisplayOptionsModal extends Modal {
+export class DNQuickDisplayOptionsModal extends DNBaseModal {
 	plugin: DNPlugin;
 	toggleHideExtColumn: ToggleComponent;
 	toggleHidePathColumn: ToggleComponent;
@@ -19,143 +20,55 @@ export class DNQuickDisplayOptionsModal extends Modal {
 		this.plugin = plugin;
 	}
 
-
-	onOpen() {
+	render() {
 		const { contentEl } = this;
 		contentEl.empty();
 
-		contentEl.createEl('div', { text: 'Navigator view: Quick display options', cls: 'setting-item setting-item-heading dn-modal-heading' });
+		// Ensure the ID matches if your navigation class expects it
+		// contentEl.id = 'dn-container';
 
-		contentEl.createEl('div', { text: 'Hidden columns', cls: 'setting-item setting-item-heading' });
+		const headingHiddenColumnsGroup = contentEl.createEl('div', { cls: 'setting-group' });
+		const headingHiddenColumns1 = headingHiddenColumnsGroup.createEl('div', { cls: 'setting-item setting-item-heading' });
+		headingHiddenColumns1.createEl('div', { text: 'Hidden columns', cls: 'setting-item-name' });
+		const headingHiddenColumnsGroupItems = headingHiddenColumnsGroup.createEl('div', { cls: 'setting-items' });
 
-		// Navigator: Hide column - ext
-		new Setting(contentEl)
-			.setName('Hide: Ext')
-			.addToggle((toggle) => {
-				this.toggleHideExtColumn = toggle;
-				toggle
-					.setValue(this.plugin.settings.hide_ext)
-					.onChange(async (val) => {
-						this.plugin.settings.hide_ext = val;
-						this.plugin.dnUpdateHideColumn("ext", val);
-						await this.plugin.saveSettings();
-						await this.plugin.DN_MODAL.dnRedrawResultsTable();
-					});
-			})
+		// Helper function to create toggles
+		const createHideToggle = (name: string, settingKey: keyof typeof this.plugin.settings, columnKey: string) => {
+			new Setting(headingHiddenColumnsGroupItems)
+				.setName(`Hide: ${name}`)
+				.addToggle((toggle) => {
+					toggle
+						.setValue(this.plugin.settings[settingKey] as boolean)
+						.onChange(async (val) => {
+							(this.plugin.settings[settingKey] as boolean) = val;
+							this.plugin.dnUpdateHideColumn(columnKey, val);
+							await this.plugin.saveSettings();
+							await this.plugin.DN_MODAL.dnRedrawResultsTable();
+						});
+				});
+		};
 
-		// Navigator: Hide column - path
-		new Setting(contentEl)
-			.setName('Hide: Path')
-			.addToggle((toggle) => {
-				this.toggleHidePathColumn = toggle;
-				toggle
-					.setValue(this.plugin.settings.hide_path)
-					.onChange(async (val) => {
-						this.plugin.settings.hide_path = val;
-						this.plugin.dnUpdateHideColumn("path", val);
-						await this.plugin.saveSettings();
-						await this.plugin.DN_MODAL.dnRedrawResultsTable();
-					});
-			});
+		// Create all toggles
+		createHideToggle('Ext', 'hide_ext', 'ext');
+		createHideToggle('Path', 'hide_path', 'path');
+		createHideToggle('Size', 'hide_size', 'size');
+		createHideToggle('Date', 'hide_date', 'date');
+		createHideToggle('Tags', 'hide_tags', 'tags');
+		createHideToggle('Frontmatter', 'hide_frontmatter', 'frontmatter');
+		createHideToggle('BL (backlinks)', 'hide_backlinks', 'backlinks');
+		createHideToggle('OL (outgoing links)', 'hide_outgoing', 'outgoing');
 
-		// Navigator: Hide column - size
-		new Setting(contentEl)
-			.setName('Hide: Size')
-			.addToggle((toggle) => {
-				this.toggleHideSizeColumn = toggle;
-				toggle
-					.setValue(this.plugin.settings.hide_size)
-					.onChange(async (val) => {
-						this.plugin.settings.hide_size = val;
-						this.plugin.dnUpdateHideColumn("size", val);
-						await this.plugin.saveSettings();
-						await this.plugin.DN_MODAL.dnRedrawResultsTable();
-					});
-			});
-
-		// Navigator: Hide column - date
-		new Setting(contentEl)
-			.setName('Hide: Date')
-			.addToggle((toggle) => {
-				this.toggleHideDateColumn = toggle;
-				toggle
-					.setValue(this.plugin.settings.hide_date)
-					.onChange(async (val) => {
-						this.plugin.settings.hide_date = val;
-						this.plugin.dnUpdateHideColumn("date", val);
-						await this.plugin.saveSettings();
-						await this.plugin.DN_MODAL.dnRedrawResultsTable();
-					});
-			});
-
-		// Navigator: Hide column - tags
-		new Setting(contentEl)
-			.setName('Hide: Tags')
-			.addToggle((toggle) => {
-				this.toggleHideTagsColumn = toggle;
-				toggle
-					.setValue(this.plugin.settings.hide_tags)
-					.onChange(async (val) => {
-						this.plugin.settings.hide_tags = val;
-						this.plugin.dnUpdateHideColumn("tags", val);
-						await this.plugin.saveSettings();
-						await this.plugin.DN_MODAL.dnRedrawResultsTable();
-					});
-			});
-
-		// Navigator: Hide column - frontmatter
-		new Setting(contentEl)
-			.setName('Hide: Frontmatter')
-			.addToggle((toggle) => {
-				this.toggleHideFrontmatterColumn = toggle;
-				toggle
-					.setValue(this.plugin.settings.hide_frontmatter)
-					.onChange(async (val) => {
-						this.plugin.settings.hide_frontmatter = val;
-						this.plugin.dnUpdateHideColumn("frontmatter", val);
-						await this.plugin.saveSettings();
-						await this.plugin.DN_MODAL.dnRedrawResultsTable();
-					})
-			});
-
-		// Navigator: Hide column - backlinks
-		new Setting(contentEl)
-			.setName('Hide: BL (backlinks)')
-			.addToggle((toggle) => {
-				this.toggleHideBLColumn = toggle;
-				toggle
-					.setValue(this.plugin.settings.hide_backlinks)
-					.onChange(async (val) => {
-						this.plugin.settings.hide_backlinks = val;
-						this.plugin.dnUpdateHideColumn("backlinks", val);
-						await this.plugin.saveSettings();
-						await this.plugin.DN_MODAL.dnRedrawResultsTable();
-					});
-			});
-
-		// Navigator: Hide column - outgoing links
-		new Setting(contentEl)
-			.setName('Hide: OL (outgoing links)')
-			.addToggle((toggle) => {
-				this.toggleHideOLColumn = toggle;
-				toggle
-					.setValue(this.plugin.settings.hide_outgoing)
-					.onChange(async (val) => {
-						this.plugin.settings.hide_outgoing = val;
-						this.plugin.dnUpdateHideColumn("outgoing", val);
-						await this.plugin.saveSettings();
-						await this.plugin.DN_MODAL.dnRedrawResultsTable();
-					});
-			});
-		// Description
-		contentEl.createEl('div', { text: 'Activate toggles to hide columns. Deactivate to show.', cls: 'dn-table-column-description' });
+		headingHiddenColumnsGroupItems.createEl('div', { text: 'Activate toggles to hide columns. Deactivate to show.', cls: 'dn-table-column-description' });
 
 		contentEl.createEl('br');
 
-		// Image thumbnails
-		contentEl.createEl('div', { text: 'Image thumbnails', cls: 'setting-item setting-item-heading' });
+		// Image thumbnails section
+		const headingImageThumbnailsGroup = contentEl.createEl('div', { cls: 'setting-group' });
+		const headingImageThumbnails1 = headingImageThumbnailsGroup.createEl('div', { cls: 'setting-item setting-item-heading' });
+		headingImageThumbnails1.createEl('div', { text: 'Image thumbnails', cls: 'setting-item-name' });
+		const headingImageThumbnailsGroupItems = headingImageThumbnailsGroup.createEl('div', { cls: 'setting-items' });
 
-		new Setting(contentEl)
+		new Setting(headingImageThumbnailsGroupItems)
 			.setName('Show image thumbnails')
 			.setDesc('Activate to show image thumbnails. Deactivate to show image icons.')
 			.addToggle((toggle) => {
@@ -170,33 +83,22 @@ export class DNQuickDisplayOptionsModal extends Modal {
 					});
 			});
 
-		// Thumbnail size
-		new Setting(contentEl)
+		new Setting(headingImageThumbnailsGroupItems)
 			.setName('Image thumbnails size')
 			.setDesc('Adjust image thumbnails size in pixels.')
 			.addSlider((sli) => {
 				this.sliderImageThumbnail = sli;
-				let slider_val: number;
-				if (this.plugin.settings.thumbnail_size) {
-					slider_val = this.plugin.settings.thumbnail_size;
-				} else {
-					slider_val = 82;
-				}
+				const slider_val = this.plugin.settings.thumbnail_size || 82;
 				sli.setDynamicTooltip();
 				sli.setLimits(50, 500, 1);
 				sli.setValue(slider_val);
 				sli.onChange((val: number) => {
-
 					this.plugin.settings.thumbnail_size = val;
 					this.plugin.dnSetThumbnailSize(val);
 					this.plugin.saveSettings();
-				})
+				});
 			});
 
 	}
 
-	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
-	}
 }

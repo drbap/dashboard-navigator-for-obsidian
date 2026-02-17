@@ -56,8 +56,13 @@ export class DNSettingTab extends PluginSettingTab {
                     })
             });
 
+        const headingPreferencesGroup = containerEl.createEl('div', { cls: 'setting-group' });
+        headingPreferencesGroup.createEl('div', { cls: 'setting-item setting-item-heading' });
+        const headingPreferencesGroupItems = headingPreferencesGroup.createEl('div', { cls: 'setting-items' });
+
+
         // Default DN view: Dashboard, Navigator or Tags
-        new Setting(containerEl)
+        new Setting(headingPreferencesGroupItems)
             .setName('Default modal view')
             .setDesc('Select the initial view for this plugin\'s modal when it opens using its primary ribbon icon.')
             .addDropdown(sel => {
@@ -86,7 +91,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // Date format
-        new Setting(containerEl)
+        new Setting(headingPreferencesGroupItems)
             .setName('Date format')
             .setDesc('Select date format.')
             .addDropdown(sel => {
@@ -118,7 +123,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // Font size
-        new Setting(containerEl)
+        new Setting(headingPreferencesGroupItems)
             .setName('Font size')
             .setDesc('Select font size in pixels for results and links.')
             .addSlider((sli) => {
@@ -151,7 +156,7 @@ export class DNSettingTab extends PluginSettingTab {
 
 
         // Recent files by type
-        new Setting(containerEl)
+        new Setting(headingPreferencesGroupItems)
             .setName('Recent files')
             .setDesc('Dashboard: Number of recent files per category.')
             .addDropdown(sel => {
@@ -181,7 +186,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // Bookmarks
-        new Setting(containerEl)
+        new Setting(headingPreferencesGroupItems)
             .setName('Bookmarks')
             .setDesc('Dashboard: Number of bookmarks to display.')
             .addDropdown(sel => {
@@ -210,7 +215,7 @@ export class DNSettingTab extends PluginSettingTab {
                 });
             });
 
-        new Setting(containerEl)
+        new Setting(headingPreferencesGroupItems)
             .setName('Show pie chart panel')
             .setDesc('Dashboard: Displays a pie chart of file types and a count of all files and folders.')
             .addToggle((toggle) => {
@@ -234,7 +239,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // Navigator results layout
-        new Setting(containerEl)
+        new Setting(headingPreferencesGroupItems)
             .setName('Search results layout')
             .setDesc('Navigator: Select search results layout.')
             .addDropdown(sel => {
@@ -266,7 +271,7 @@ export class DNSettingTab extends PluginSettingTab {
 
 
         // Results/files per page
-        new Setting(containerEl)
+        new Setting(headingPreferencesGroupItems)
             .setName('Files per page')
             .setDesc('Navigator: Number of results per page.')
             .addDropdown(sel => {
@@ -297,7 +302,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // Remember last search
-        new Setting(containerEl)
+        new Setting(headingPreferencesGroupItems)
             .setName('Remember last search')
             .setDesc('Keeps the search query in the main input field. Turn this off for a fresh, empty search every time.')
             .addToggle((toggle) => {
@@ -320,13 +325,13 @@ export class DNSettingTab extends PluginSettingTab {
                 });
             });
 
-
-        const headingColumns1 = containerEl.createEl('div', { cls: 'setting-item setting-item-heading' });
-        const headingColumns2 = headingColumns1.createEl('div', { cls: 'setting-item setting-item-info' });
-        headingColumns2.createEl('div', { text: 'Hidden columns', cls: 'setting-item-name' });
+        const headingColumnsGroup = containerEl.createEl('div', { cls: 'setting-group' });
+        const headingColumns1 = headingColumnsGroup.createEl('div', { cls: 'setting-item setting-item-heading' });
+        headingColumns1.createEl('div', { text: 'Hidden columns', cls: 'setting-item-name' });
+        const headingColumnsGroupItems = headingColumnsGroup.createEl('div', { cls: 'setting-items' });
 
         // Navigator: Hide column - ext
-        new Setting(containerEl)
+        new Setting(headingColumnsGroupItems)
             .setName('Hide: Ext')
             .setDesc('Navigator: Hide file extension column.')
             .addToggle((toggle) => {
@@ -350,7 +355,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // Navigator: Hide column - path
-        new Setting(containerEl)
+        new Setting(headingColumnsGroupItems)
             .setName('Hide: Path')
             .setDesc('Navigator: Hide path column.')
             .addToggle((toggle) => {
@@ -374,7 +379,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // Navigator: Hide column - size
-        new Setting(containerEl)
+        new Setting(headingColumnsGroupItems)
             .setName('Hide: Size')
             .setDesc('Navigator: Hide size column.')
             .addToggle((toggle) => {
@@ -398,7 +403,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // Navigator: Hide column - date
-        new Setting(containerEl)
+        new Setting(headingColumnsGroupItems)
             .setName('Hide: Date')
             .setDesc('Navigator: Hide date column.')
             .addToggle((toggle) => {
@@ -422,7 +427,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // Navigator: Hide column - tags
-        new Setting(containerEl)
+        new Setting(headingColumnsGroupItems)
             .setName('Hide: Tags')
             .setDesc('Navigator: Hide tags column.')
             .addToggle((toggle) => {
@@ -446,7 +451,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // Navigator: Hide column - frontmatter
-        new Setting(containerEl)
+        new Setting(headingColumnsGroupItems)
             .setName('Hide: Frontmatter')
             .setDesc('Navigator: Hide frontmatter properties column.')
             .addToggle((toggle) => {
@@ -470,7 +475,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // Navigator: Hide column - backlinks
-        new Setting(containerEl)
+        new Setting(headingColumnsGroupItems)
             .setName('Hide: BL (Backlinks)')
             .setDesc('Navigator: Hide backlinks column.')
             .addToggle((toggle) => {
@@ -494,7 +499,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // Navigator: Hide column - outgoing links
-        new Setting(containerEl)
+        new Setting(headingColumnsGroupItems)
             .setName('Hide: OL (Outgoing links)')
             .setDesc('Navigator: Hide outgoing links column.')
             .addToggle((toggle) => {
@@ -518,11 +523,13 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // Image thumbnails
-        const headingImageThumbnails1 = containerEl.createEl('div', { cls: 'setting-item setting-item-heading' });
-        const headingImageThumbnails2 = headingImageThumbnails1.createEl('div', { cls: 'setting-item setting-item-info' });
-        headingImageThumbnails2.createEl('div', { text: 'Image thumbnails', cls: 'setting-item-name' });
+        const headingImageThumbnailsGroup = containerEl.createEl('div', { cls: 'setting-group' });
+        const headingImageThumbnails1 = headingImageThumbnailsGroup.createEl('div', { cls: 'setting-item setting-item-heading' });
+        headingImageThumbnails1.createEl('div', { text: 'Image thumbnails', cls: 'setting-item-name' });
+        const headingImageThumbnailsGroupItems = headingImageThumbnailsGroup.createEl('div', { cls: 'setting-items' });
 
-        new Setting(containerEl)
+
+        new Setting(headingImageThumbnailsGroupItems)
             .setName('Show image thumbnails')
             .setDesc('Navigator: Activate to show image thumbnails. Deactivate to show image icons.')
             .addToggle((toggle) => {
@@ -547,7 +554,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // Thumbnail size
-        new Setting(containerEl)
+        new Setting(headingImageThumbnailsGroupItems)
             .setName('Image thumbnails size')
             .setDesc('Navigator: Adjust image thumbnails size')
             .addSlider((sliderThumbnail) => {
@@ -579,12 +586,13 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
 
-        const headingExcludedFilesFolders1 = containerEl.createEl('div', { cls: 'setting-item setting-item-heading' });
-        const headingExcludedFilesFolders2 = headingExcludedFilesFolders1.createEl('div', { cls: 'setting-item setting-item-info' });
-        headingExcludedFilesFolders2.createEl('div', { text: 'Excluded files and folders', cls: 'setting-item-name' });
-
         // Excluded file extensions
-        new Setting(containerEl)
+        const headingExcludedFilesFoldersGroup = containerEl.createEl('div', { cls: 'setting-group' });
+        const headingExcludedFilesFolders1 = headingExcludedFilesFoldersGroup.createEl('div', { cls: 'setting-item setting-item-heading' });
+        headingExcludedFilesFolders1.createEl('div', { text: 'Excluded files and folders', cls: 'setting-item-name' });
+        const headingExcludedFilesFoldersGroupItems = headingExcludedFilesFoldersGroup.createEl('div', { cls: 'setting-items' });
+
+        new Setting(headingExcludedFilesFoldersGroupItems)
             .setName('Excluded file extensions')
             .setDesc('File extensions to exclude, separated by commas.')
             .addText((text) => {
@@ -609,7 +617,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // Excluded folders
-        new Setting(containerEl)
+        new Setting(headingExcludedFilesFoldersGroupItems)
             .setName('Excluded folders')
             .setDesc('List of folder paths to exclude, separated by commas.')
             .addText((text) => {
@@ -633,11 +641,13 @@ export class DNSettingTab extends PluginSettingTab {
                 });
             });
 
-        const headingFileColors1 = containerEl.createEl('div', { cls: 'setting-item setting-item-heading' });
-        const headingFileColors2 = headingFileColors1.createEl('div', { cls: 'setting-item setting-item-info' });
-        headingFileColors2.createEl('div', { text: 'File colors', cls: 'setting-item-name' });
+        const headingFileColorsGroup = containerEl.createEl('div', { cls: 'setting-group' });
+        const headingFileColors1 = headingFileColorsGroup.createEl('div', { cls: 'setting-item setting-item-heading' });
+        headingFileColors1.createEl('div', { text: 'File colors', cls: 'setting-item-name' });
+        const headingFileColorsGroupItems = headingFileColorsGroup.createEl('div', { cls: 'setting-items' });
+
         // Toggle colored files
-        new Setting(containerEl)
+        new Setting(headingFileColorsGroupItems)
             .setName('Toggle colored files')
             .setDesc('Turn on/off colored files.')
             .addToggle((toggle) => {
@@ -663,7 +673,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // 1 Color -> Notes
-        new Setting(containerEl)
+        new Setting(headingFileColorsGroupItems)
             .setName('Color: Notes')
             .setDesc('Color of notes.')
             .addColorPicker((color) => {
@@ -689,7 +699,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // 2 Color -> Canvases
-        new Setting(containerEl)
+        new Setting(headingFileColorsGroupItems)
             .setName('Color: Canvases')
             .setDesc('Color of canvases.')
             .addColorPicker((color) => {
@@ -717,7 +727,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // 3 Color -> Images
-        new Setting(containerEl)
+        new Setting(headingFileColorsGroupItems)
             .setName('Color: Images')
             .setDesc('Color of images.')
             .addColorPicker((color) => {
@@ -745,7 +755,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // 4 Color -> Videos
-        new Setting(containerEl)
+        new Setting(headingFileColorsGroupItems)
             .setName('Color: Videos')
             .setDesc('Color of videos.')
             .addColorPicker((color) => {
@@ -773,7 +783,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // 5 Color -> Audios
-        new Setting(containerEl)
+        new Setting(headingFileColorsGroupItems)
             .setName('Color: Audio files')
             .setDesc('Color of audio files.')
             .addColorPicker((color) => {
@@ -801,7 +811,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // 6 Color -> PDF
-        new Setting(containerEl)
+        new Setting(headingFileColorsGroupItems)
             .setName('Color: PDF')
             .setDesc('Color of PDF files.')
             .addColorPicker((color) => {
@@ -829,7 +839,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // 7 Color -> Base files
-        new Setting(containerEl)
+        new Setting(headingFileColorsGroupItems)
             .setName('Color: Bases')
             .setDesc('Color of .base files.')
             .addColorPicker((color) => {
@@ -857,7 +867,7 @@ export class DNSettingTab extends PluginSettingTab {
             });
 
         // 8 Color -> Other files
-        new Setting(containerEl)
+        new Setting(headingFileColorsGroupItems)
             .setName('Color: Other files')
             .setDesc('Color of other files.')
             .addColorPicker((color) => {

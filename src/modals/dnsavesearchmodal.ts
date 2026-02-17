@@ -1,6 +1,7 @@
-import { App, debounce, Modal, Notice } from 'obsidian';
+import { App, debounce, Notice } from 'obsidian';
 import DNPlugin from 'src/main';
 import { sanitizeInput } from 'src/utils/helper';
+import { DNBaseModal } from './dnbasemodal';
 
 export interface DNSaveSearchItem {
 	id: number;
@@ -8,7 +9,7 @@ export interface DNSaveSearchItem {
 	description: string;
 }
 
-export class DNSaveSearchModal extends Modal {
+export class DNSaveSearchModal extends DNBaseModal {
 	plugin: DNPlugin;
 
 	constructor(app: App, plugin: DNPlugin) {
@@ -16,7 +17,9 @@ export class DNSaveSearchModal extends Modal {
 		this.plugin = plugin;
 	}
 
-	onOpen() {
+
+	render() {
+
 		const { contentEl } = this;
 
 		contentEl.createEl('div', { text: 'Save search', cls: 'setting-item setting-item-heading dn-modal-heading' });
@@ -48,6 +51,7 @@ export class DNSaveSearchModal extends Modal {
 		// Create buttons
 		const btnSaveSearch = divBottom.createEl('button', { text: 'Save', cls: 'mod-cta' });
 		const btnCancel = divBottom.createEl('button', { text: 'Cancel' });
+
 
 		// Add event listeners
 		currentSearchInput.addEventListener('input', debounce(() => {
@@ -96,10 +100,9 @@ export class DNSaveSearchModal extends Modal {
 		btnCancel.onclick = () => {
 			this.close();
 		};
+
+
+		this.nav.refreshFocusableElements();
 	}
 
-	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
-	}
 }
