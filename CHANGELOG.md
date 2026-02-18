@@ -43,7 +43,7 @@ Leave **one side of the delimiter empty** to create "infinite" boundaries:
 
 **Pro Tip**: For relative offsets (like "Last 7 days"), continue using the standard shortcuts like `@d-7` or `@w` - no parentheses.
 
-#### **More Examples of Smart Date Filter**:
+#### **More Examples of Smart Date Filter**
 
 **Syntax**:
 `@date(filter)` or `@d(filter)`
@@ -56,9 +56,9 @@ Leave **one side of the delimiter empty** to create "infinite" boundaries:
 
 - **Full Range**: `@d(2024..2025)`(Everything from **Jan 2024** to **Dec 2025**).
 
-- **Archival Cleanup**: `@d(..2023)` (Every old file modified before 2024).
+- **Archival Cleanup**: `@d(..2023)` (Every old file modified **before 2024**).
 
-- **Until Today**: `@d(2025-06..)` (Files from June 2025 until now).
+- **Until Today**: `@d(2025-06..)` (Files from **June 2025** until **now**).
 
 **Special Date Filter Label:** When a **smart date range is active**, a clear indicator (label) appears in the Navigator view. This makes it easy to see exactly which time window is applied and quickly refine your search.
 
