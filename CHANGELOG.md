@@ -24,7 +24,7 @@ Use the `..` delimiter (`double-dot`) to define a **start** and **end** point. T
 
 - **Fixed Range**: `@d(2024..2025)`(Includes everything from **Jan 1st, 2024**, to **Dec 31st, 2025**)
 
-- **Mixed Precision**: `@d(2025-01..2025-06-15)` (From the **start of January** until the **end of June 15th**)
+- **Mixed Precision**: `@d(2025-01..2025-06-15)` (From the **start of January**, 2025 until the **end of June 15th**, 2025)
 
 
 #### **Open-Ended Ranges**
