@@ -1,6 +1,11 @@
 
 # Dashboard Navigator plugin for Obsidian
 
+> [!Note]
+> **This repository is officially archived**. After some years after its initial release and 58,000+ downloads, I have decided to reallocate my free time to other projects.
+>
+> The plugin remains **fully functional** and has been tested for **Obsidian version 1.12.x**. Thanks to the users who found this tool useful.
+
 ![Dashboard Navigator for Obsidian](images/dashboard_navigator_plugin_intro.png)
 
 **Dashboard Navigator** was designed to help you manage and quickly navigate your knowledge base. You can get instant overview of key vault stats, categorized recent files, total number of files per category (notes, images, audios, videos and more), tags dashboard and powerful search to easily locate your vault files (navigator).
